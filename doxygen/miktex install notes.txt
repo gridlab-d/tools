@@ -1,0 +1,8 @@
+On Windows systems, after you install Miktex 2.6, you must do the following for Doxygen formulas to work:
+
+1. In folder %INSTALLDIR%/miktex/bin
+	C> copy mgs.exe gswin32c.exe
+
+2. Copy folder %INSTALLDIR%/ghostcript/base/*.* to C:\gs\gs8.60\lib
+
+DPC 10/07
