@@ -1,6 +1,7 @@
 import os, sys, time, shutil
 import email, smtplib
 
+os.putenv("PATH","%PATH%;..\\..\\..\\VS2005\\Win32\\Release")
 	
 def email_error():
 	return 0
