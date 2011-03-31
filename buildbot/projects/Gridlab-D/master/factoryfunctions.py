@@ -1,3 +1,10 @@
+from buildbot.process import factory
+from buildbot.steps.source import SVN
+from buildbot.steps.shell import Configure, Compile, ShellCommand
+from buildbot.steps.python_twisted import Trial
+from buildbot.steps.transfer import FileUpload
+from localbb.steps.transfer import FileUploadOutput
+
 #==================================== Build Factory Functions ====================================
 def gen_win32_nightly_factory(svnURL):
 	win32_nightly2_factory = factory.BuildFactory()
