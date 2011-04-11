@@ -13,6 +13,10 @@ update = 2
 build = 4
 autotest=8
 
+def notify (event_dict):
+	if(event_dict['kind'] == pysvn.node_kind.file):
+		print "A\t",event_dict['path']
+
 
 def ssl_trust_prompt(td):
 	"""docstring for ssl_trust_prompt"""
@@ -69,12 +73,16 @@ def doMerge(path,endrev,options):
 	
 	while(line != ''):
 		line = line.rstrip()
-		if(options.verbose):
-			print line
+		if(options.verbose>1):
+			if(not line.startswith('C')):
+				print line
 		
 		if(line.startswith('C')): # Conflict detected
 			conflicts = True
 			conflict_list.append(line)
+			if(options.verbose):
+				print line
+
 		line = p.stdout.readline()
 	if(conflicts):
 		retcode = -1
@@ -92,6 +100,8 @@ def main(options):
 	"""docstring for main"""
 	client = Client()
 	client.callback_ssl_server_trust_prompt = ssl_trust_prompt
+	if(options.verbose>1):
+		client.callback_notify = notify
 	retcode = 0
 	# check out branch from subversion
 	if(test_skip(options.branch_flags, update)):
@@ -127,13 +137,15 @@ def main(options):
 		print "Skipping trunk update"
 	
 	# Determine the revision number of the head of the branch
-	if(options.verbose):
-		print "Getting last revision number of branch"
-	messages = client.log(branchUrl,revision_end=Revision(pysvn.opt_revision_kind.number,startrev))
-	endrev = messages[0].revision.number
+	if(options.endrev == 'HEAD'):
+		if(options.verbose):
+			print "Getting last revision number of branch"
+		messages = client.log(branchUrl,revision_end=Revision(pysvn.opt_revision_kind.number,startrev))
+		endrev = messages[0].revision.number
+		options.endrev = str(endrev)
 	
 	if(options.verbose):
-		print "Revisions to merge",str(startrev)+":"+str(endrev)
+		print "Revisions to merge",options.startrev+":"+options.endrev
 	
 	# Merge changes from branch to trunk
 	if(not options.skip_merge):
@@ -172,6 +184,8 @@ def main(options):
 		return retcode
 	
 	# TODO: If successful, commit.
+	if(not options.skip_commit):
+		pass
 	
 	# Write out new lastrev.py file
 	fp = open("lastrev.py",'w')
@@ -203,7 +217,9 @@ if __name__ == '__main__':
 	                  help='Skips trunk actions. CSV consisting of update, build, autotest')
 	parser.add_option("--skip-merge", action='store_true', dest='skip_merge',
 	                  default=False, help="Option to skip merge step")
-	parser.add_option("-v",action='store_true', dest='verbose',default=False,
+	parser.add_option("--skip-commit",action='store_true',dest='skip_commit',
+					  default=False,help='Skip the commit step')
+	parser.add_option("-v",action='count', dest='verbose',default=0,
 	                  help='Verbose output')
 	
 	parser.add_option('--trunk-url',action='store',type='string',dest='trunkUrl',
@@ -214,7 +230,6 @@ if __name__ == '__main__':
 					  default=workingDir,help='Location of the working directory')
 
 	# TODO: Add options to specify the start/end revisions
-	
 	(options,args) = parser.parse_args()
 	
 	retcode = main(options)
