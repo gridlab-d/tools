@@ -29,7 +29,7 @@ def gen_win32_nightly_factory(svnURL):
 			   haltOnFailure=False,
 			   description=['clean autotest'],
 			   descriptionDone=['clean_autotest'],
-			   command=['bash', 'for i in `find . -type d -name autotest`; do for j in `find $i -name \*.dll`; do rm $j; done; done'])
+			   command=['bash', 'clean_autotest.sh'])
 	win32_nightly2_factory.addStep(Compile, workdir=r'build\\VS2005',
 			   description=['32-bit compile'],
 			   descriptionDone=['32-bit compile'],
@@ -173,7 +173,7 @@ def gen_x64_nightly_factory(svnURL):
 			   haltOnFailure=False,
 			   description=['clean autotest'],
 			   descriptionDone=['clean_autotest'],
-			   command=['bash', 'for i in `find . -type d -name autotest`; do for j in `find $i -name \*.dll`; do rm $j; done; done'])
+			   command=['bash', 'clean_autotest.sh'])
 	x64_nightly_factory.addStep(Compile, workdir=r'build\\VS2005',
 			   description=['64-bit compile'],
 			   descriptionDone=['64-bit compile'],
@@ -230,7 +230,7 @@ def gen_rh_nightly_factory (svnURL):
 			   haltOnFailure=False,
 			   description=['clean autotest'],
 			   descriptionDone=['clean_autotest'],
-			   command=['bash', 'for i in `find . -type d -name autotest`; do for j in `find $i -name \*.dll`; do rm $j; done; done'])
+			   command=['bash', 'clean_autotest.sh'])
 	linux_rh_nightly_factory.addStep(ShellCommand, workdir=r'build', name='autoreconf',
 			   description=['autoreconf'], descriptionDone=['autoreconf'],
 			   command=['autoreconf', '-is'])
