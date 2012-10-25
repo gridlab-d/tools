@@ -89,20 +89,7 @@ def gen_win32_nightly_factory(svnURL,gridlab_ver): # I hate this hack, it means 
 			   workdir=r'build\\VS2005\\Win32\\Release',
 			   slavesrc='gridlabd-win32_'+ gridlab_ver +'-nightly.exe',
 			   masterdest='gridlabd-win32_'+ gridlab_ver +'-nightly.exe'))
-	win32_nightly2_factory.addStep(ShellCommand,
-			   workdir=r'build',
-			   name='doxygen',
-			   haltOnFailure=True,
-			   description=['Build Current Documentation'],
-			   descriptionDone=['doxygen'],
-			   command=['doxygen.exe', 'doxygen\\gridlabd.conf'])
-	win32_nightly2_factory.addStep(ShellCommand,
-			   workdir=r'build',
-			   name='copy_docs',
-			   haltOnFailure=False,
-			   description=['Copy nightly build documentation'],
-			   descriptionDone=['copy_docs'],
-			   command=['rsync_wrapper.bat','../documents/html/*','web.sourceforge.net','htdocs/doxygen'])
+
 	
 
 	return win32_nightly2_factory
@@ -219,7 +206,7 @@ def gen_x64_nightly_factory(svnURL, gridlab_ver): # I hate this hack, it means o
 			   masterdest='gridlabd-x64_'+gridlab_ver+'-nightly.exe'))
 	return x64_nightly_factory
 
-def gen_rh_nightly_factory (svnURL,gridlab_ver):
+def gen_rh_nightly_factory (svnURL,gridlab_ver,do_documentation = False):
 	linux_rh_nightly_factory = factory.BuildFactory()
 	linux_rh_nightly_factory.addStep(SVN, workdir=r'build',svnurl=svnURL,username='buildbot',password="V3hUTh2d")
 	linux_rh_nightly_factory.addStep(ShellCommand,
@@ -234,20 +221,35 @@ def gen_rh_nightly_factory (svnURL,gridlab_ver):
 			   command=['autoreconf', '-is'])
 	linux_rh_nightly_factory.addStep(Configure, workdir=r'build', command=['./configure','--prefix=/tmp/gridlabd','--exec-prefix=/tmp/gridlabd'])
 
-	linux_rh_nightly_factory.addStep(ShellCommand,
-			   workdir=r'build',
-			   name='generate_troubleshooting',
-			   haltOnFailure=False,
-			   description=['generate troubleshooting'],
-			   descriptionDone=['generate_troubleshooting'],
-			   command=['bash', 'generate_troubleshooting.sh'])
-	linux_rh_nightly_factory.addStep(ShellCommand,
-			   workdir=r'build',
-			   name='copy_troubleshooting',
-			   haltOnFailure=False,
-			   description=['Copy troubleshooting documentation'],
-			   descriptionDone=['copy_troubleshooting'],
-			   command=['bash','rsync_wrapper.sh','../documents/troubleshooting/*','web.sourceforge.net','htdocs/troubleshooting/'+gridlab_ver])
+	if do_documentation:
+		linux_rh_nightly_factory.addStep(ShellCommand,
+				   workdir=r'build',
+				   name='generate_troubleshooting',
+				   haltOnFailure=False,
+				   description=['generate troubleshooting'],
+				   descriptionDone=['generate_troubleshooting'],
+				   command=['bash', 'generate_troubleshooting.sh'])
+		linux_rh_nightly_factory.addStep(ShellCommand,
+				   workdir=r'build',
+				   name='copy_troubleshooting',
+				   haltOnFailure=False,
+				   description=['Copy troubleshooting documentation'],
+				   descriptionDone=['copy_troubleshooting'],
+				   command=['bash','rsync_wrapper.sh','../documents/troubleshooting/','web.sourceforge.net','htdocs/troubleshooting/'+gridlab_ver])
+		linux_rh_nightly_factory.addStep(ShellCommand,
+				   workdir=r'build',
+				   name='doxygen',
+				   haltOnFailure=True,
+				   description=['Build Current Documentation'],
+				   descriptionDone=['doxygen'],
+				   command=['doxygen.exe', 'doxygen\\gridlabd.conf'])
+		linux_rh_nightly_factory.addStep(ShellCommand,
+				   workdir=r'build',
+				   name='copy_docs',
+				   haltOnFailure=False,
+				   description=['Copy nightly build documentation'],
+				   descriptionDone=['copy_docs'],
+				   command=['rsync_wrapper.bat','../documents/html/*','web.sourceforge.net','htdocs/doxygen/'+gridlab_ver])
 
 	linux_rh_nightly_factory.addStep(Compile, workdir=r'build', command=['make', 'over'])
 	linux_rh_nightly_factory.addStep(ShellCommand, name='make_install',
@@ -284,3 +286,11 @@ def gen_rh_full_factory (svnURL):
 	linux_rh_full_factory.addStep(Compile, workdir=r'build', command=['make', 'over'])
 
 	return linux_rh_full_factory
+
+def gen_backup_hostedapps():
+	backup_factory = factory.BuildFactory()
+
+	# Run script via ssh out of /home/project-web/gridlab-d
+
+	# rsync to download backup file
+
