@@ -1,0 +1,203 @@
+%define src_dir ../@PACKAGE@-@VERSION@
+%define build_subdir @PACKAGE@-@VERSION@-build
+%define build_subdir_mt @PACKAGE@-@VERSION@-build-mt
+%define build_subdir_qt @PACKAGE@-@VERSION@-build_qt
+%define build_subdir_qt_mt @PACKAGE@-@VERSION@-build_qt-mt
+
+
+Summary: An ODBC class library that emulates the JDBC interface
+Name: @PACKAGE@
+Version: @VERSION@
+Release: 1
+License: LGPL
+Group: Development/Libraries
+Source: %{name}-%{version}.tar.bz2
+URL: http://libodbcxx.sourceforge.net
+Distribution: RedHat Linux
+Vendor: Manush Dodunekov
+Packager: Manush Dodunekov
+Requires: unixODBC
+BuildRoot: %{_tmppath}/%{name}-root
+BuildPreReq: unixODBC-devel
+BuildPreReq: qt-devel >= 2.2
+
+%description
+This C++ library provides an interface based on Java's (tm) JDBC
+interface. It includes additional support for QT integration.
+
+If you want to develop programs that will use the odbc++ library,
+you will also need to install the libodbc++-devel package.
+
+If you want to run or develop QT programs that will use the odbc++
+library, you should also install the libodbc++-qt package.
+
+%package devel
+Summary: Development files for programs which use the odbc++ library.
+Group: Development/Libraries
+requires: libodbc++ = %{PACKAGE_VERSION}
+requires: unixODBC-devel
+
+%description devel
+This C++ library provides an interface based on the Java (tm)) JDBC
+interface. It includes additional support for QT integration.
+
+If you want to develop programs that will use the odbc++ library,
+you'll need this package, as well as the libodbc++ package and the 
+unixODBC and unixODBC-devel packages.
+
+%package qt
+Summary: Libraries needed for using libodbc++ with QT support
+Group: System Environment/Libraries
+Requires: qt >= 2.0
+
+%description qt
+This C++ library provides an interface based on the Java (tm)) JDBC
+interface. This package includes additional support for QT integration.
+
+%prep
+%setup -q
+
+%build
+for d in %{build_subdir} %{build_subdir_mt} %{build_subdir_qt} %{build_subdir_qt_mt}; do
+	rm -rf $RPM_BUILD_DIR/$d
+	mkdir $RPM_BUILD_DIR/$d
+done
+
+{
+	# first, build singlethreaded non-qt
+	pushd $RPM_BUILD_DIR/%{build_subdir}
+
+	CXXFLAGS="$RPM_OPT_FLAGS -ggdb" %{src_dir}/configure \
+		--prefix=/usr \
+		--libdir=%{_libdir} \
+		--with-odbc=/usr \
+		--with-gnu-ld \
+		--without-tests \
+		--with-docdir=$RPM_DOC_DIR
+	make all
+	popd
+}
+
+{
+	# build multithreaded non-qt
+	pushd $RPM_BUILD_DIR/%{build_subdir_mt}
+
+	CXXFLAGS="$RPM_OPT_FLAGS -ggdb" %{src_dir}/configure \
+		--prefix=/usr \
+		--libdir=%{_libdir} \
+		--with-odbc=/usr \
+		--with-gnu-ld \
+		--without-tests \
+		--enable-threads
+	make all
+	popd
+}
+
+{
+	# first, build singlethreaded qt
+	pushd $RPM_BUILD_DIR/%{build_subdir_qt}
+
+	CXXFLAGS="$RPM_OPT_FLAGS -ggdb" %{src_dir}/configure \
+		--prefix=/usr \
+		--libdir=%{_libdir} \
+		--with-qt=$QTDIR \
+		--with-odbc=/usr \
+		--with-gnu-ld \
+		--without-tests \
+		--with-docdir=$RPM_DOC_DIR
+	make all
+	popd
+}
+
+{
+	# build multithreaded non-qt
+	pushd $RPM_BUILD_DIR/%{build_subdir_qt_mt}
+
+	CXXFLAGS="$RPM_OPT_FLAGS -ggdb" %{src_dir}/configure \
+		--prefix=/usr \
+		--libdir=%{_libdir} \
+		--with-qt=$QTDIR \
+		--with-odbc=/usr \
+		--with-gnu-ld \
+		--without-tests \
+		--enable-threads
+	make all
+	popd
+}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+{
+	# from here, we install the whole kit and the single-threaded library
+	(cd $RPM_BUILD_DIR/%{build_subdir} && make DESTDIR=$RPM_BUILD_ROOT install)
+
+	# we should now be in the source directory
+	# generate the file lists for the docs
+	echo "%docdir $RPM_DOC_DIR" > instdocs-files
+
+	# If the %doc directive is used below, it blows away our docdir.
+	# Therefore we copy those by hand
+	for f in AUTHORS BUGS COPYING ChangeLog NEWS \
+		THANKS TODO README README.jdbc README.threads; do
+		cp "$f" "${RPM_BUILD_ROOT}${RPM_DOC_DIR}/%{name}-%{version}/$f"
+		echo "%attr(0644,root,root) $RPM_DOC_DIR/%{name}-%{version}/$f" >> instdocs-files
+	done
+	
+	(cd $RPM_BUILD_ROOT && \
+		find .$RPM_DOC_DIR/%{name}-%{version}/INSTALL -type f) | \
+	sed -e 's/^\.//' -e 's/^\(.*\)$/%attr(0644,root,root) \1/' >> instdocs-files
+
+	echo "%docdir $RPM_DOC_DIR" > progref-files
+	(cd $RPM_BUILD_ROOT && \
+		find .$RPM_DOC_DIR/%{name}-%{version}/progref -type f) | \
+	sed -e 's/^\.//' -e 's/^\(.*\)$/%attr(0644,root,root) \1/' >> progref-files
+}
+
+{
+	# now go ahead and install the libraries from the rest of the builds
+	for d in %{build_subdir_mt} %{build_subdir_qt} %{build_subdir_qt_mt}; do
+		(cd $RPM_BUILD_DIR/$d/src && make DESTDIR=$RPM_BUILD_ROOT install)
+	done
+}
+
+%clean
+rm -rf %RPM_BUILD_ROOT
+
+%post
+ldconfig -n /usr/lib
+
+%postun
+ldconfig -n /usr/lib
+
+%files -f instdocs-files
+%defattr(-,root,root)
+%attr(0644,root,root) %{_libdir}/pkgconfig/libodbc++.pc
+%attr(0755,root,root) %{_libdir}/libodbc++.so*
+%attr(0755,root,root) %{_libdir}/libodbc++.la
+%attr(0755,root,root) %{_libdir}/libodbc++-mt.so*
+%attr(0755,root,root) %{_libdir}/libodbc++-mt.la
+
+%files devel -f progref-files
+%defattr(-,root,root)
+%attr(0644,root,root) %{_includedir}/odbc++/*.h
+
+%files qt
+%defattr(-,root,root)
+%attr(0755,root,root) %{_libdir}/libodbc++_qt.so*
+%attr(0755,root,root) %{_libdir}/libodbc++_qt.la
+%attr(0755,root,root) %{_libdir}/libodbc++_qt-mt.so*
+%attr(0755,root,root) %{_libdir}/libodbc++_qt-mt.la
+
+%changelog
+* Wed Oct 31 2001 Manush Dodunekov <manush@stendahls.net>
+- Err, rebuilt the build.
+* Tue Dec 13 2000 Manush Dodunekov <manush@stendahls.net>
+- libodbc++-0.2.2pre5
+- Hopefully made docs work right
+* Tue Nov 27 2000 Manush Dodunekov <manush@stendahls.net>
+- Added spec file to sources, redid the build procedure
+* Mon Apr 17 2000 Murray Todd Williams <murray@codingapes.com>
+- libodbc++-0.2.2pre2
+- moved install to $RPM_BUILD_ROOT (/var/tmp/libodbc++-root)
+- removed /usr/bin/isql from file list (don't know why it was there.
+  Seems to be a unixODBC program.  Weird.

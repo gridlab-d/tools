@@ -1,0 +1,15 @@
+These test different parts of the library
+
+* mysql:      To be run against a mysql server using myodbc 2.50.23 or later. 
+	      Tests prepared statements and almost all datatypes.
+
+* streams:    To be run against an oracle database. Tests scrollable ResultSets
+	      with the updateXXXStream methods.
+
+* scroll:     To be run against whatever database that has some scrolling
+	      capabilities in the driver. Tests PreparedStatement and
+	      backward-iteration of a ResultSet.
+
+* dmtest:     Lists datasources and drivers.
+
+* dbmetadata: Shows some information about a datasource.

@@ -1,0 +1,20 @@
+Notes on using libodbc++ in multithreaded applications.
+
+The following classes are reentrant (ie. safe to be called from several
+threads at the same time):
+
+* DriverManager
+* Connection
+
+Libodbc++ only protects it's internal data and makes no attempts 
+to serialize access to the driver manager.
+So, if your driver manager isn't thread safe (which iodbc currently 
+isn't), you're on your own.
+
+Also, make sure the c++ compiler you are using supports thread-safe
+exceptions. With egcs, this is acheived with the --enable-threads
+configure option to egcs.
+
+
+Last updated:
+1999-04-23

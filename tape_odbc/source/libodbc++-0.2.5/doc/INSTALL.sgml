@@ -1,0 +1,298 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" >
+
+<book lang="en">
+  <bookinfo>
+    <title>Libodbc++ Installation</title>
+    <authorgroup>
+      <author>
+        <firstname>Manush</firstname>
+        <surname>Dodunekov</surname>
+      </author>
+      <author>
+        <firstname>Kerry</firstname>
+        <surname>Lothrop</surname>
+        <othername role="mi">W.</othername>
+      </author>
+    </authorgroup>
+    <date>2005-09-09</date>
+    <releaseinfo>Version 0.2.4pre2</releaseinfo>
+    <abstract>
+      <para>This tries to explain the installation procedure for libodbc++</para>
+    </abstract>
+    <keywordset>
+      <keyword>libodbc++</keyword>
+      <keyword>ODBC</keyword>
+    </keywordset>
+  </bookinfo>
+
+  <chapter id="software-requirements">
+    <title>Software requirements</title>
+
+    <sect1 id="c-compiler">
+      <title>C++ compiler</title>
+
+      <para>To compile libodbc++, you'll need a c++ compiler that supports
+        exceptions, templates and namespaces and
+        has a reasonable standard c++ library. On free unices,
+        your best choice is <application>GCC</application> 2.95.2 or later, which can be
+        obtained from <ulink url="http://gcc.gnu.org/">the GCC homepage</ulink>.
+        If you already have <application>egcs</application> 1.1.2 or later, it will do.</para>
+
+      <para>On win32, success has been reported with MSVC 5.0 to 7.1, with
+        and without QT.</para>
+    </sect1>
+
+    <sect1 id="odbc-driver-manager">
+      <title>ODBC Driver Manager</title>
+
+      <para>The <acronym>ODBC</acronym> Driver Manager is the software layer between
+        applications and <acronym>ODBC</acronym> drivers. You must have one installed
+        in order to use this library.
+        The free choices on UNIX are:
+        <itemizedlist>
+          <listitem><para><ulink url="http://www.iodbc.org/">iODBC</ulink>.
+              Version 2.50.3 or later is recommended.</para>
+          </listitem>
+          <listitem>
+            <para><ulink url="http://www.unixodbc.org/">unixODBC</ulink>.
+              Version 1.8.4 or later is recommended.</para>
+          </listitem>
+        </itemizedlist>
+        Among the commercial driver managers, <application>libodbc++</application> has been reported to work fine
+        with the <ulink url="http://www.merant.com/">Merant</ulink> driver manager.</para>
+    </sect1>
+
+    <sect1 id="drivers">
+      <title>Drivers</title>
+
+      <para>To actually use libodbc++, you will need
+        one or more <acronym>ODBC</acronym> drivers. Examples of free database engines
+        with <acronym>ODBC</acronym> drivers are:
+        <itemizedlist>
+          <listitem>
+            <para><ulink url="http://www.mysql.com/">MySQL</ulink></para>
+          </listitem>
+          <listitem>
+            <para><ulink url="http://www.postgresql.org/">PostgreSQL</ulink></para>
+          </listitem>
+        </itemizedlist>
+        <warning><para><application>MyODBC</application> version 2.50.28 contains a bug that prevents
+            it from working (at all).
+            <ulink url="ftp://ftp.easysoft.com/pub/beta/unixODBC/MyODBC-2.50.28.patch">This</ulink>
+            patch solves the problem.
+          </para>
+        </warning>
+      </para>
+
+      <para>Several vendors provide commercial drivers for unix:
+        <itemizedlist>
+          <listitem>
+            <para><ulink url="http://www.openlinksw.com/">Openlink Software</ulink>.</para>
+          </listitem>
+          <listitem>
+            <para><ulink url="http://www.merant.com/">Merant</ulink></para>
+          </listitem>
+        </itemizedlist>
+      </para>
+
+    </sect1>
+
+    <sect1 id="qt">
+      <title>QT</title>
+
+      <para><application>Libodbc++</application> can be built with support for
+        <ulink url="http://www.trolltech.com/">the QT library</ulink> version 2.0 or later,
+        both on UNIX and win32.</para>
+    </sect1>
+  </chapter>
+
+  <chapter id="installation">
+    <title>Installation</title>
+
+    <sect1 id="unix">
+      <title>UNIX</title>
+
+      <para>The following information applies for installing <application>libodbc++</application> on unices.</para>
+
+      <sect2 id="configuration">
+        <title>Configuration</title>
+
+        <para>First, you need to configure <application>libodbc++</application> for your system.
+          Go into the source directory and do:
+
+          <screen><prompt>$ </prompt><userinput><command>./configure</command></userinput></screen>
+
+          or, if <application>iODBC</application> isn't installed in it's default location
+          <filename class="directory">/usr/local</filename>, do:
+          <screen><prompt>$ </prompt><userinput><command>./configure</command> --with-iodbc=<replaceable>DIR</replaceable></userinput></screen>
+
+          This will make <command>./configure</command> look for <application>iODBC</application> in
+          <filename class="directory"><replaceable>DIR</replaceable>/include</filename> and
+          <filename class="directory"><replaceable>DIR</replaceable>/lib</filename>.</para>
+
+        <para>If you aren't using <application>iODBC</application>, try
+
+          <screen><prompt>$ </prompt><userinput><command>./configure</command> --with-odbc=<replaceable>DIR</replaceable></userinput></screen>
+          This works the same as above, except it looks for standard <acronym>ODBC</acronym> headers and libraries
+          instead of the <application>iODBC</application>-specific ones. This should be used with for example
+          <application>unixODBC</application> and <application>Merant driver manager</application>.</para>
+
+        <para>If you wish to install <application>libodbc++</application> in a location other than
+          <filename class="directory">/usr/local</filename>, add
+          <userinput>--prefix=<replaceable>PREFIX</replaceable></userinput> to the <command>./configure</command> arguments.</para>
+
+        <para>If the c++ compiler you wish to use to compile this package isn't the system
+          default one, you will need to set the environment variable <envar>CXX</envar> to
+          the name of it's executable. For example, if you have an old <application>gcc</application> or
+          <application>egcs</application> as a system default compiler, but installed a newer
+          <application>gcc</application> in <filename class="directory">/usr/local/gcc</filename>, do like this:
+          <screen><prompt>$ </prompt><userinput><envar>CXX=/usr/local/egcs/bin/c++</envar> <command>./configure</command> --with-iodbc</userinput></screen>
+        </para>
+
+        <para>If you wish to enable support for multithreaded programs, add
+          <userinput>--enable-threads</userinput> to the <command>./configure</command> arguments.
+          On UNIX, this requires pthreads and will probably not yet work on anything else
+          than linux and solaris. The library built will have suffix <filename>'-mt'</filename> appended
+          to it's name if threads are enabled.</para>
+
+        <para>If you wish to enable support for <application>QT</application>,
+          use the <userinput>--with-qt</userinput>
+          argument. You can optionally specify where your QT lives by using
+          <userinput>--with-qt=<replaceable>QTDIR</replaceable></userinput>. The
+          <userinput>--with-qt-includes=<replaceable>DIR</replaceable></userinput>,
+          <userinput>--with-qt-libs=<replaceable>DIR</replaceable></userinput> and
+          <userinput>--with-qt-moc=<replaceable>PATH</replaceable></userinput> options might be handy if you have
+          a strange <application>QT</application> installation. This will compile a second version of the library
+          named <filename>libodbc++_qt</filename> in the subdirectory <filename class="directory">qt</filename>.
+          Note that you must define <varname>ODBCXX_QT</varname> when compiling a program
+          that links with <filename>libodbc++_qt</filename>.</para>
+
+        <para>If you wish to enable support for Unicode, add <userinput>--with-unicode</userinput>
+          to the <command>./configure</command> arguments. Currently, Unicode support is not supported
+          in combination with QT.</para>
+
+        <para>The two "demo" programs that come with <application>libodbc++</application> aren't
+          built by default. To enable them, use <userinput>--with-isqlxx</userinput> and/or
+          <userinput>--with-qtsqlxx</userinput> to build <application>isql++</application>
+          respectively <application>qtsql++</application>.</para>
+
+        <para>By default, a number of test programs are built with the library. If you do not wish
+          to build them, use <userinput>--without-tests</userinput>.</para>
+
+        <para>You can control the <acronym>ODBC</acronym> version <application>libodbc++</application> uses by specifying:
+          <userinput>--with-odbc-version=<replaceable>ODBCVER</replaceable></userinput>,
+          where <replaceable>ODBCVER</replaceable> should be a
+          four-digit hexadecimal value representing the <acronym>ODBC</acronym> version. For example:
+          <screen><prompt>$ </prompt><userinput><command>./configure</command> --with-odbc-version=0x0250</userinput></screen>
+          would make <application>libodbc++</application> use <acronym>ODBC</acronym> version 2.50.</para>
+      </sect2>
+
+      <sect2 id="compilation">
+        <title>Compilation</title>
+        <para>Just type:
+          <screen><prompt>$ </prompt><userinput>make</userinput></screen>
+        </para>
+
+        <para>If it all goes well, you can try a couple of the test programs in
+          <filename>tests/</filename>. You'll need to configure some datasources before
+          running most of the tests. For simply reality-checking your current ODBC
+          setup, you can try running <filename>tests/dmtest</filename>, which lists
+          all available datasources and drivers.</para>
+      </sect2>
+
+      <sect2 id="installing-libodbc">
+        <title>Installing libodbc++</title>
+
+        <para>If you have write privileges in <literal remap="tt">PREFIX</literal>, just do:
+          <screen><prompt>$ </prompt><userinput>make install</userinput></screen>
+          Otherwise, you'll have to use:
+          <screen><prompt>$ </prompt><userinput>su root -c 'make install'</userinput></screen></para>
+      </sect2>
+    </sect1>
+
+    <sect1 id="win32">
+      <title>Win32</title>
+
+      <sect2 id="msvc">
+        <title>MSVC</title>
+        <para>A makefile for MSVC is provided in the win32 directory of the source distribution. Use
+          <screen><userinput><command>nmake /f Makefile.w32 CFG=<replaceable>config</replaceable></command></userinput></screen>
+          where <replaceable>config</replaceable> is one of:
+          <itemizedlist>
+            <listitem><para><literal remap="tt">debug-lib</literal> - Static library with debugging information. Builds
+                <filename>odbc++sd.lib</filename> in the <filename>debug-lib</filename> subdirectory.</para>
+            </listitem>
+            <listitem><para><literal remap="tt">debug-dll</literal> - Shared library with debugging information. Builds
+                <filename>odbc++d.lib</filename> and <filename>odbc++d.dll</filename> in the <filename>debug-dll</filename>
+                subdirectory.</para>
+            </listitem>
+            <listitem><para><literal remap="tt">prod-lib</literal> - Production static library. Builds <filename>odbc++s.lib</filename>
+                in the <filename>prod-lib</filename> subdirectory.</para>
+            </listitem>
+            <listitem><para><literal remap="tt">prod-dll</literal> - Production shared library. Builds <filename>odbc++.lib</filename>
+                and <filename>odbc++.dll</filename> in the <filename>prod-dll</filename> subdirectory.</para>
+            </listitem>
+            <listitem><para><literal remap="tt">unicode-debug-lib</literal> - Static library with Unicode and debugging
+                information. Builds <filename>odbc++wsd.lib</filename> in the <filename>unicode-debug-lib</filename>
+                subdirectory.</para>
+            </listitem>
+            <listitem><para><literal remap="tt">unicode-debug-dll</literal> - Shared library with Unicode and debugging
+                information. Builds <filename>odbc++wd.lib</filename> and <filename>odbc++wd.dll</filename> in the
+                <filename>unicode-debug-dll</filename> subdirectory.</para>
+           </listitem>
+            <listitem><para><literal remap="tt">unicode-prod-lib</literal> - Production static library with Unicode.
+                Builds <filename>odbc++ws.lib</filename> in the <filename>unicode-prod-lib</filename> subdirectory.</para>
+            </listitem>
+            <listitem><para><literal remap="tt">unicode-prod-dll</literal> - Production shared library with Unicode.
+                Builds <filename>odbc++w.lib</filename> and <filename>odbc++w.dll</filename> in the
+                <filename>unicode-prod-dll</filename> subdirectory.</para>
+            </listitem>
+            <listitem><para><literal remap="tt">qt-debug-lib</literal> - Static library with QT and debugging information.
+                Builds <filename>odbc++qtsd.lib</filename> in the <filename>qt-debug-lib</filename> subdirectory.</para>
+            </listitem>
+            <listitem><para><literal remap="tt">qt-debug-dll</literal> - Shared library with QT and debugging information.
+                Builds <filename>odbc++qtd.lib</filename> and <filename>odbc++qtd.dll</filename> in the
+                <filename>qt-debug-dll</filename> subdirectory.</para>
+            </listitem>
+            <listitem><para><literal remap="tt">qt-prod-lib</literal> - Production static library with QT. Builds
+                <filename>odbc++qts.lib</filename> in the <filename>qt-prod-lib</filename> subdirectory.</para>
+            </listitem>
+            <listitem><para><literal remap="tt">qt-prod-dll</literal> - Production shared library with QT. Builds
+                <filename>odbc++qt.lib</filename> and <filename>odbc++qt.dll</filename> in the
+                <filename>qt-prod-dll</filename> subdirectory.</para>
+            </listitem>
+          </itemizedlist></para>
+
+        <para>When building with QT, make sure you have your environment set up right. <literal remap="tt">QTDIR</literal>
+          must point to a directory that contains the <literal remap="tt">include</literal> and
+          <literal remap="tt">lib</literal> subdirectories for QT. The makefile will assume version 202 (2.0.2) of QT.
+          To override that, pass <literal remap="QT">QT_VERSION=nnn</literal> to <literal remap="tt">nmake</literal>, for
+          example:
+          <screen><userinput>nmake /f makefile.w32 CFG=qt-debug-dll QT_VERSION=201</userinput></screen>
+          will build <application>libodbc++</application> against QT version 2.0.1.</para>
+
+        <para>The library is always built with multithreading support on win32.</para>
+      </sect2>
+
+    </sect1>
+  </chapter>
+</book>
+<!--
+Local Variables:
+mode: sgml
+sgml-omittag:nil
+sgml-shorttag:t
+sgml-general-insert-case:lower
+sgml-namecase-general:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:2
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->

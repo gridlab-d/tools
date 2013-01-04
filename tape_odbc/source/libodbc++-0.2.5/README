@@ -1,0 +1,9 @@
+README for libodbc++                                (2005-09-29)
+
+For installation instructions, check doc/INSTALL/index.html.
+
+For programming examples, check the tests/ directory.
+
+There's an almost complete class reference residing in
+doc/progref/. If you don't find it enough, you can always
+check the JDBC2.0 documentation.

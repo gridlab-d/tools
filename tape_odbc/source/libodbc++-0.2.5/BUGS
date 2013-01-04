@@ -1,0 +1,6 @@
+* Sporadic movements inside a ResultSet will not work correctly if
+  the following apply:
+	* the fetch size > 1
+	* the driver can't report the current row number
+
+

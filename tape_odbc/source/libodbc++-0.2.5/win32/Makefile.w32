@@ -1,0 +1,254 @@
+#  This file is part of libodbc++.
+#  
+#  Copyright (C) 1999-2000 Manush Dodunekov <manush@stendahls.net>
+#   
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Library General Public
+#  License as published by the Free Software Foundation; either
+#  version 2 of the License, or (at your option) any later version.
+#   
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Library General Public License for more details.
+#  
+#  You should have received a copy of the GNU Library General Public License
+#  along with this library; see the file COPYING.  If not, write to
+#  the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+#  Boston, MA 02111-1307, USA.
+
+# Gee - an nmake makefile with actual cmd.exe scripting in action.
+
+!IF "$(CFG)" == ""
+!MESSAGE Usage: nmake /f makefile.w32 CFG=<config>
+!MESSAGE where <config> is one of:
+!MESSAGE   debug-dll    - Debug DLL
+!MESSAGE   debug-lib    - Debug LIB
+!MESSAGE   prod-dll     - Production DLL
+!MESSAGE   prod-lib     - Production LIB
+!MESSAGE   unicode-debug-dll - Debug DLL with Unicode
+!MESSAGE   unicode-debug-lib - Debug LIB with Unicode
+!MESSAGE   unicode-prod-dll  - Production DLL with Unicode
+!MESSAGE   unicode-prod-lib  - Production LIB with Unicode
+!MESSAGE   qt-debug-dll - Debug DLL with QT
+!MESSAGE   qt-debug-lib - Debug LIB with QT
+!MESSAGE   qt-prod-dll  - Production DLL with QT
+!MESSAGE   qt-prod-lib  - Production LIB with QT
+!ENDIF
+
+!IF "$(CFG)" != "debug-dll" && "$(CFG)" != "prod-dll" && \
+    "$(CFG)" != "debug-lib" && "$(CFG)" != "prod-lib" && \
+    "$(CFG)" != "unicode-debug-dll" && "$(CFG)" != "unicode-prod-dll" && \
+    "$(CFG)" != "unicode-debug-lib" && "$(CFG)" != "unicode-prod-lib" && \
+    "$(CFG)" != "qt-debug-dll" && "$(CFG)" != "qt-prod-dll" && \
+    "$(CFG)" != "qt-debug-lib" && "$(CFG)" != "qt-prod-lib"
+!ERROR Invalid configuration "$(CFG)"
+!ENDIF
+
+# utilities
+CXX=cl
+LD=link
+AR=lib
+
+# dirs
+SRCDIR=..\src
+INCDIR=..\include
+OBJDIR=.\$(CFG)
+
+!IF "$(QT_VERSION)" == ""
+QT_VERSION=202
+!ENDIF
+
+# utility flags
+QT_CXXFLAGS=
+QT_LDFLAGS=
+DEBUG_CXXFLAGS=
+DEBUG_LDFLAGS=
+DLL_CXXFLAGS=
+DLL_LDFLAGS=
+PROD_CXXFLAGS=
+PROD_LDFLAGS=
+UNICODE_CXXFLAGS=
+UNICODE_LDFLAGS=
+
+# naming variables
+TARGET_BASE=odbc++
+TARGET_D=
+TARGET_S=
+TARGET_QT=
+TARGET_W=
+TARGET_EXT=
+
+DLL=no
+PROD=no
+QT=no
+UNICODE=no
+
+!IF "$(CFG)" == "debug-dll" || "$(CFG)" == "prod-dll" || \
+    "$(CFG)" == "unicode-debug-dll" || "$(CFG)" == "unicode-prod-dll" || \
+    "$(CFG)" == "qt-debug-dll" || "$(CFG)" == "qt-prod-dll"
+
+DLL=yes
+
+!ENDIF
+
+!IF "$(CFG)" == "prod-dll" || "$(CFG)" == "prod-lib" || \
+    "$(CFG)" == "unicode-prod-dll" || "$(CFG)" == "unicode-prod-lib" || \
+    "$(CFG)" == "qt-prod-dll" || "$(CFG)" == "qt-prod-lib"
+
+PROD=yes
+
+!ENDIF
+
+!IF "$(CFG)" == "qt-debug-lib" || "$(CFG)" == "qt-prod-lib" || \
+    "$(CFG)" == "qt-debug-dll" || "$(CFG)" == "qt-prod-dll"
+
+QT=yes
+
+!ENDIF
+
+!IF "$(CFG)" == "unicode-debug-lib" || "$(CFG)" == "unicode-prod-lib" || \
+    "$(CFG)" == "unicode-debug-dll" || "$(CFG)" == "unicode-prod-dll"
+
+UNICODE=yes
+
+!ENDIF
+
+
+!IF "$(DLL)" == "yes"
+# we are building a DLL
+
+TARGET_EXT=dll
+
+!IF "$(PROD)" != "yes"
+DLL_LDFLAGS=/DEBUG
+DLL_CXXFLAGS=/DODBCXX_DLL /MDd
+!ELSE
+DLL_LDFLAGS=/DEBUG /OPT:REF
+DLL_CXXFLAGS=/DODBCXX_DLL /MD
+!ENDIF
+
+!ELSE
+
+# we are building a static library
+TARGET_EXT=lib
+TARGET_S=s
+
+!ENDIF
+
+
+!IF "$(PROD)" == "yes"
+# we are optimizing
+PROD_CXXFLAGS=/O2
+
+!ELSE
+
+# we are building a debug version
+TARGET_D=d
+
+DEBUG_CXXFLAGS=/Zi /DODBCXX_DEBUG
+
+!ENDIF
+
+
+!IF "$(QT)" == "yes"
+
+QT_CXXFLAGS=/DODBCXX_QT /I$(QTDIR)\include
+
+!IF "$(DLL)" == "yes"
+QT_CXXFLAGS=$(QT_CXXFLAGS) /DQT_DLL
+!ENDIF
+
+QT_LDFLAGS=$(QTDIR)\lib\qt$(QT_VERSION).lib
+TARGET_QT=qt
+
+!ENDIF
+
+!IF "$(UNICODE)" == "yes"
+UNICODE_CXXFLAGS=/DODBCXX_UNICODE
+TARGET_UNICODE=w
+!ENDIF
+
+
+TARGET_NAME=$(TARGET_BASE)$(TARGET_QT)$(TARGET_UNICODE)$(TARGET_S)$(TARGET_D).$(TARGET_EXT)
+
+!IF "$(DLL)" == "yes"
+ILIB_NAME=$(TARGET_BASE)$(TARGET_QT)$(TARGET_UNICODE)$(TARGET_S)$(TARGET_D).lib
+!ENDIF
+
+
+# /GR enable RTTI
+# /GX enable EH
+# /Fo<file> object file name
+# /Dname define macro
+# /Idir search dir for includes
+# /Zi generate debug info
+# /c compile only 
+# /nologo ditch copyright message
+# /TP everything is c++
+
+CXXFLAGS=/nologo /GR /GX /W3 /DWIN32 /DIN_ODBCXX /I$(INCDIR) /Fd"$(PDB)" \
+$(QT_CXXFLAGS) $(UNICODE_CXXFLAGS) $(DEBUG_CXXFLAGS) $(DLL_CXXFLAGS) $(PROD_CXXFLAGS)
+
+LDFLAGS=kernel32.lib user32.lib odbc32.lib odbccp32.lib \
+$(QT_LDFLAGS) $(UNICODE_LDFLAGS) $(DEBUG_LDFLAGS) $(DLL_LDFLAGS) $(PROD_LDFLAGS) \
+/NOLOGO /SUBSYSTEM:WINDOWS /DLL /implib:"$(ILIB)" /pdb:"$(PDB)" /incremental:no
+
+
+ARFLAGS=/NOLOGO /SUBSYSTEM:WINDOWS
+
+
+TARGET=$(OBJDIR)\$(TARGET_NAME)
+ILIB=$(OBJDIR)\$(ILIB_NAME)
+PDB=$(OBJDIR)\$(TARGET_NAME).pdb
+
+OBJS= \
+$(OBJDIR)\threads.obj \
+$(OBJDIR)\datetime.obj \
+$(OBJDIR)\drivermanager.obj \
+$(OBJDIR)\connection.obj \
+$(OBJDIR)\driverinfo.obj \
+$(OBJDIR)\databasemetadata.obj \
+$(OBJDIR)\statement.obj \
+$(OBJDIR)\preparedstatement.obj \
+$(OBJDIR)\callablestatement.obj \
+$(OBJDIR)\resultset.obj \
+$(OBJDIR)\resultsetmetadata.obj \
+$(OBJDIR)\errorhandler.obj \
+$(OBJDIR)\datahandler.obj \
+$(OBJDIR)\datastream.obj
+
+
+all: $(TARGET)
+
+
+$(TARGET): $(OBJS)
+!IF "$(DLL)" == "yes"
+	$(LD) $(LDFLAGS) /OUT:"$(TARGET)" $**
+!ELSE
+	$(AR) $(ARFLAGS) /OUT:"$(TARGET)" $**
+!ENDIF
+
+$(OBJS): $(OBJDIR) 
+
+
+# Makefile.w32
+
+$(OBJDIR):
+	@if not exist "$(OBJDIR)/" mkdir $(OBJDIR)
+
+.PHONY: clean
+
+clean:
+	-@erase $(OBJS)
+	-@erase $(TARGET)
+	-@erase $(PDB)
+!IF "$(DLL)" == "yes"
+	-@erase $(ILIB)
+!ENDIF
+	@if exist "$(OBJDIR)/" rmdir $(OBJDIR)
+
+.SUFFIXES: .cpp .obj
+
+{$(SRCDIR)\}.cpp{$(OBJDIR)\}.obj:
+	$(CXX) $(CXXFLAGS) /Fo"$@" /c /TP $<

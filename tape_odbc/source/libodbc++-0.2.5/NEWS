@@ -1,0 +1,188 @@
+* News in version 0.2.4pre3
+
+	* Fixed Linux build for non-Unicode
+	* Included missing files in distribution
+
+* News in version 0.2.4pre2
+
+	* Fixed Linux build for Unicode
+	* Made tests work with Unicode
+
+* News in version 0.2.4pre1
+
+	* Added Unicode functionality through compile switch
+
+* News in version 0.2.3
+
+	* Fixed compilation with Borland C++ Builder
+
+* News in version 0.2.3pre4
+
+	* Fix time_t support in MSVC++ builds
+
+* News in version 0.2.3pre3
+
+	* initial pkg-config support added
+
+	* --with-isqlxx now works
+
+	* Qt build fixes
+
+	* Support for fetching mulitple warning messages
+
+* News in version 0.2.3pre2
+
+	* Building of tests on gcc 2.95.3 should work again
+
+	* Qt support updated
+
+	* Fix warnings on GCC 3.2
+
+* News in version 0.2.3pre1
+
+	* Uses newer autotools
+	
+	* Optimize by default
+
+	* Fix isql++ build with gcc 3.2
+
+	* Automatically detect system unixODBC if installed
+
+	* Disable maintainer mode by default.
+
+	* Added close() method to statements
+
+	* Added registerInParameter() to CallableStatement
+
+	* Built/tested on Redhat Linux 8 and 9 with unixODBC
+
+* News in version 0.2.2:
+
+	* Compiles with gcc 3.0.
+
+	* Fixed a bug where multiple results could not be handled properly.
+
+	* Redid parts of the unix build procedure. A spec file for building RPMS
+	is now part of the distribution. Thread safe versions of the library are
+	now called NAME-mt, in order to coexist with non thread safe versions.
+
+	* Fixed bug where calls to Statement::getUpdateCount() would throw
+	an exception instead of returning 0.
+
+	* Fixed bug where error descriptions for Connection and Statement would
+	get messed up.
+
+	* Fixed memory leak with streams (ResultSet::getXXXStream()).
+
+	* Fixed several bugs with odbc::Bytes that made it totally unusable.
+
+	* Fixed bug with padding of CHARs.
+
+	* Fixed bug when setting a parameter to NULL with different SQL type
+	than the non-NULL value used by a previous execute of a PreparedStatement.
+
+	* Support for getting and setting LONGVARCHAR fields as strings.
+
+	* Support for getting and setting LONGVARBINARY fields as bytes.
+
+	* Fixed bug when using getString() on a DATE/TIME/TIMESTAMP with
+	an ODBC3 driver manager and an ODBC2 driver.
+
+	* Fixed bug when driver didn't support CONCUR_LOCK but just 
+	CONCUR_VALUES and/or CONCUR_ROWVER.
+
+* News in version 0.2.1:
+
+	* Experimental support for QT.
+
+	* ResultSet now properly uses SQLBulkOperations for inserts with ODBC3.
+
+	* DatabaseMetaData is complete.
+
+	* Lots of documentation updates, especially for DatabaseMetaData.
+
+	* Reimplemented data handling.
+
+	* Hopefully fixed the win32 build.
+
+	* A bunch of bugs fixed
+	
+* News in version 0.2.0:
+	
+	* Fixed CallableStatement (it wasn't handling in-out and out
+	parameters right).
+
+	* Documentation updates.
+
+* News in version 0.2beta2:
+	
+	* Rewritten parameter handling in PreparedStatement which allows
+	the library to function with a wider range of drivers, including
+	MS Access.
+
+	* A few more DatabaseMetaData methods.
+
+	* A couple of bugfixes.
+
+* News in version 0.2beta1:
+
+	* Better support for working with ODBC2 drivers under an 
+	ODBC3 driver manager.
+	
+	* win32 port updated, the library can now be built as a DLL. See
+	the install docs for more info.
+
+	* Major header reorganization - #include <odbc++/classname.h>
+
+	* ResultSet fixes to be able to function with scroll incapable drivers.
+
+* News in version 0.2alpha2:
+
+	* More ODBC3 stuff, a bunch of fixes and bugfixes.
+
+	* Scrollable ResultSets are now tested and work with:
+
+	     * Oracle ODBC driver / NT - tried with 
+	       both ODBC 3.51 and ODBC 2.5 versions of
+	       libodbc++.
+
+	     * Mimer ODBC for Linux (ODBC 2.50, 
+	       no updates on ResultSets supported)
+
+	     * Openlink ODBC driver / Linux
+
+* News in version 0.2alpha1:
+
+	* Lots of ODBC3-compliance fixes. This makes the code look ugly,
+	but allows the lib to be compiled against any driver manager 
+	that supports ODBC2.x and up.
+
+	* Experimental Win32 port. 
+
+	* Another bunch of DatabaseMetaData methods implemented. Very little left 
+	there.
+
+	* Date, Time and Timestamp finally implemented. 
+
+	* NULLs should now be correctly detected for LONGVARCHAR and LONGVARBINARY.
+
+	* Better thread support. Well, in theory - the DM also needs to be
+	thread safe which can't be said for iODBC right now.
+
+* News in version 0.1.1:
+
+	* A sample SQL interactor based on libodbc++ is included.
+
+	* Lots of bugfixes - scrollable ResultSets now work
+
+	* A couple of linux/glibc-specific dependencies removed.
+
+	* Lots of DatabaseMetaData implemented
+
+	* BINARY/VARBINARY now supported (getBytes()/updateBytes()/setBytes())
+
+	* other stuff I can't remember right now
+
+* News in version 0.1.0:
+
+	* First public release

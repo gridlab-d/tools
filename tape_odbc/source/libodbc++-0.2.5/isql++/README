@@ -1,0 +1,45 @@
+README for isql++					(1999-03-31)
+
+This is a simple and usable SQL interactor, meant to be an example of how
+libodbc++ can be used.
+
+Everything must be terminated with a ';' before it is sent to the datasource.
+To send statements containing several ';' (for example a "create procedure"), 
+enclose the whole thing in double quotes, like this:
+
+SQL> "create procedure test(a in number)
+  +> begin
+  +> ...
+  +> end;";
+
+
+Several commands are recognized:
+
+	* commit [whatever]
+		Commits a transaction. 
+	* rollback [whatever]
+		Rolls back the current transaction.
+
+	* set NAME VALUE
+	* show NAME
+	
+		Set or show the value of variable NAME. For now, the following are
+		supported:
+		* autocommit (on/off)
+		* catalog (string)
+		* maxrows (0=unlimited, >0 = maximum number of rows to return for
+		  a result set
+
+	* describe IDENTIFIER
+
+		Give a description of IDENTIFIER, where IDENTIFIER is datasource
+		specific. For example, in Mysql it is databasename.tablename, in 
+		Oracle it is schemaname.tablename@databasename and so on.
+		
+		Note: this doesn't work right yet - drivers are immature.
+
+		This also tries to show primary/foreign key information
+		if IDENTIFIER is a table. Procedures are recognized, but
+		not yet fully described.
+
+Have fun.

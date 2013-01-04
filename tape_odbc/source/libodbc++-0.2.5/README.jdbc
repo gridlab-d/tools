@@ -1,0 +1,38 @@
+README.jdbc							(1999-05-29)
+
+This library aims for JDBC2.0 'compliance'. However, some differences
+between Java and c++, as well as ODBC limitations (and lazy developers) 
+cause incompatibilities. 
+
+The following cannot be implemented because of limitations in ODBC:
+
+   * The Struct, Ref, Blob, Clob and Array classes.
+   * The getXXXStream() methods in CallableStatement.
+
+Language differences cause:
+
+   * SQLException/SQLWarning are not chained as in JDBC. The
+     getWarnings() method in Connection/Statement/ResultSet
+     returns a WarnigList*, which inherits from a vector<SQLWarning*>.
+
+   * The {get,set,update}BigDecimal() methods are missing, as
+     c++ doesn't have such a type. 
+
+   * The close() method in Connection,Statement,ResultSet,
+     PreparedStatement and CallableStatement is missing.
+     To do what the close() does in JDBC, simply delete the 
+     object.
+
+
+Note on DatabaseMetaData methods that return a ResultSet:
+
+   * Whether the column names (and number of columns in the ResultSet)
+     match those defined in JDBC2.0 depends on your ODBC driver 
+     version. If the driver is ODBC3.x, you come very close to JDBC2.0.
+     Otherwise, ODBC2 column names are returned.
+
+
+Missing Java-specific DatabaseMetaData methods:
+
+   * getUDTs()
+   * getURL()

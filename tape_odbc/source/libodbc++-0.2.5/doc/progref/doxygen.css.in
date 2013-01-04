@@ -1,0 +1,7 @@
+A {
+	text-decoration: none;
+}
+
+A.footer {
+	font-family: sans-serif;
+}

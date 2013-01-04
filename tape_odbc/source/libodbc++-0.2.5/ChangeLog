@@ -1,0 +1,2302 @@
+2009-04-26 Mark Kromis <greybird@mac.com>
+    * libodbc.spec.in: Updates to allow building via rpm
+    * src/resultset.cpp: Qt update for QIODevice end marker
+    * configure.ac: pre-release bump
+
+2009-03-07 Mark Kromis <greybird@mac.com>
+    * include/odbc++/config-win32.h: Changes for new pre-processor macro, sets if macro is defined by Windows.h.
+    * include/odbc++/preparedstatement.h: missing method definition added with pre-processor defines
+    * include/odbc++/resultset.h: missing method definition, added with pre-processor support
+    * win32/vc9/libodbc++.sln: added mssql unit-test project
+
+2009-03-05  Bob Ham  <rah@bash.sh>
+
+	* m4/ac_check_odbc.m4: Define a new preprocessor macro for the
+	presence of struct _GUID
+	* include/odbc++/types.h: Define a new preprocessor macro for the
+	presence of struct _GUID
+	* src/datahandler.h: Define a new preprocessor macro for the
+	presence of struct _GUID
+	* src/datahandler.cpp: Define a new preprocessor macro for the
+	presence of struct _GUID
+	* src/preparedstatement.cpp: Define a new preprocessor macro for
+	the presence of struct _GUID
+	* src/resultset.cpp: Define a new preprocessor macro for the
+	presence of struct _GUID
+
+2009-02-05 Mark Kromis <greybird@mac.com>
+    * src/preparedstatement.cpp - added setGuid
+    * src/resultset.cpp - added getGuid
+
+2009-01-23 Vadim Zeitlin
+    * configure.ac - tweaked of instead of disabling QT usage. Patch ID# 1847840
+
+2009-01-21 Mark Kromis <greybird@mac.com>
+    * test/mysql.cpp - added release of auto_ptr before new assignment.
+
+2009-01-08 Mark Kromis <greybird@mac.com>
+    * include/odbc++/drivermanager.h : put ErrorHandler into an auto_ptr
+    * src/drivermanager.cpp : modified ErrorHandler for auto_ptr, modified
+        shutdown for better reporting of thrown error, and can be called
+        multiple times. DMAccessMutex is auto_ptr for multiple calls.
+    * tests/mysql.cpp : modified test to release connection before shutdown.
+    * win32/vc9/libodbc++/libodbc++.vcproj : removed mysql from library.
+        Should be in separate project only.
+
+2009-01-07  Bob Ham  <rah@bash.sh>
+
+	* libodbc++.pc.in: Make use of library soname from ODBCPP_LIBRARY
+	* configure.ac: Add ODBCPP_LIBRARY with library soname, for use in
+	pkgconfig 
+
+	* src/resultset.cpp: Fixed taking references of temporaries
+	
+	* src/datahandler.h: Fixed check of ODBC version for usage of
+	struct _GUID which, according to
+	http://support.microsoft.com/kb/197916 is not recognised in ODBC
+	3.51 and below
+	* src/datahandler.cpp: Fixed check of ODBC version for usage of
+	struct _GUID which, according to
+	http://support.microsoft.com/kb/197916 is not recognised in ODBC
+	3.51 and below
+	
+	* include/odbc++/types.h: Fixed type of DATASTATUS_TYPE; I'm not
+	sure this macro need exist as DATASTATUS_TYPE is likely to always
+	be SQLLEN
+	
+	* include/odbc++/setup.h: Fixed #ifdef logic for #defines of
+	ODBCXX_DELETE_POINTER and ODBCXX_DELETE_ARRPOINTER; these aren't
+	dependant on either win32 or debugging
+
+2009-01-07 Mark Kromis <greybird@mac.com>
+	* include/odbc++/setup.h : Tweaked setup.h for include in non lib
+
+2009-01-06 JR Andreassen <janrune@io.com>
+	* THANKS : Added JR Anderson
+	* include/odbc++/connection.h : SQLException enhancement
+	* include/odbc++/drivermanger.h : Added Driver completion addion
+	* include/odbc++/errorhandler.h : SQLException enhancement
+	* include/odbc++/resultsetmetadata.h : Added metadata column names
+	* include/odbc++/setup.h : added new/delete macros
+	* include/odbc++/threads.h : modified destructors for inheritance
+	* include/odbc++/types.h : new/delete, and SQLExecption enhancement
+	* src/callablestatement.cpp : Enhanced error message
+	* src/connection.cpp : new/delete enhancement
+	* src/databasemetadata.cpp : new/delete, &  SQLException enhancement
+	* src/datahandler.cpp :  new/delete, &  SQLException enhancement, stream tweak
+	* src/datahandler.h : new/delete enhancement, stream tweak
+	* src/datastream.cpp : SQLExcpetion enhancement, stream tweak
+	* src/datastream.h : new / delete, & stream enhancement
+	* src/datetime.cpp : SQLException enhancement 
+	* src/driverinfo.cpp : new / delete enhancement
+	* src/drivermanager.cpp : new / delete enhancement, setDriverCompletion
+	* src/dtconv.h : new / delete enhancement, null checks
+	* src/errorhandler.cpp : new / delete enhancement
+	* src/preparedstatement.cpp : new / delete enhancement, stream tweaks
+	* src/resultset.cpp : SQLExcption enhancement
+	* src/resultmetadata.cpp : new / delete enhancement, remap_datatype, use_index_metadata_colnames
+	* src/statement.cpp : new / delete enhacement
+	* src/threads.cpp : SQLException enhancement, new/delete methods, getFileNamePtr
+
+2009-01-05 Mark Kromis <greybird@mac.com>
+	* added Visual Studio files
+	* new file:   win32/vc9/libodbc++.sln
+	* new file:   win32/vc9/libodbc++/ReadMe.txt
+	* new file:   win32/vc9/libodbc++/libodbc++.vcproj
+	* new file:   win32/vc9/libodbc++/stdafx.cpp
+	* new file:   win32/vc9/libodbc++/stdafx.h
+	* new file:   win32/vc9/libodbc++/targetver.h
+	* new file:   win32/vc9/mysql/ReadMe.txt
+	* new file:   win32/vc9/mysql/mysql.vcproj
+	* new file:   win32/vc9/mysql/stdafx.cpp
+	* new file:   win32/vc9/mysql/stdafx.h
+	* new file:   win32/vc9/mysql/targetver.h
+
+
+2009-01-04 Mark Kromis <greybird@mac.com>
+	* include/odbc++/config-win32.h: modified for windows compile, due to guid update.
+	* include/odbc++/setup.h: modified ODBCXX_SSTREAM to always be available.
+
+	* include/odbc++/types.h: Added Guid support.
+	* src/datahandler.cpp: Added Guid support.
+
+	* src/datahandler.h: Added Guid support.
+
+
+
+2008-07-10  Bob Ham  <rah@bash.sh>
+
+
+
+	* m4/ac_check_odbc.m4 (odbc_includes_dir): Fix warning about
+
+	preprocessor working but compilation not
+
+
+
+	* src/datastream.cpp (DataStreamBuf::DataStreamBuf): Fixes for
+
+	type errors and warnings
+
+	* tests/oracle.cpp (testTable): Fixes for type errors and warnings
+
+	* src/drivermanager.cpp (DriverManager::shutdown): Fixes for type
+
+ 	errors and warnings
+
+	* src/datastream.h: Fixes for type errors and warnings
+
+	* src/statement.cpp (Statement::getUpdateCount): Fixes for type
+
+	errors and warnings
+
+	* src/preparedstatement.cpp (PreparedStatement::_setupParams):
+
+	Fixes for type errors and warnings
+
+	* src/datastream.cpp (DataStreamBuf::underflow): Fixes for type
+
+	errors and warnings
+
+	* src/datahandler.h: Fixes for type errors and warnings
+
+	* src/datahandler.cpp (DataHandler::DataHandler): Fixes for type
+
+	errors and warnings
+
+	* include/odbc++/types.h: Fixes for type errors and warnings
+
+	
+
+	* src/preparedstatement.cpp (PreparedStatement::execute)
+
+	(PreparedStatement::_bindParams): Change from passing integer in a
+
+	pointer to storing integer and passing pointer to it
+
+	* include/odbc++/preparedstatement.h: Change from passing integer
+
+	in a pointer to storing integer and passing pointer to it
+
+	* src/resultset.cpp (ResultSet::_handleStreams): Change from
+
+	passing integer in a pointer to storing integer and passing
+
+	pointer to it
+
+	
+
+	* doc/Makefile.am: Ensure installation works without generated
+
+	documentation files
+
+
+
+2006-02-09  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* include/odbc++/resultset.h: Modifications by JR Andreassen
+
+	* include/odbc++/types.h: Modifications by JR Andreassen
+
+	* src/datetime.cpp: Modifications by JR Andreassen
+
+	* src/driverinfo.h: Modifications by JR Andreassen
+
+	* src/driverinfo.cpp: Modifications by JR Andreassen
+
+	* src/resultset.cpp: Modifications by JR Andreassen
+
+
+
+2006-01-25  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* include/odbc++/types.h: Added ODBCXX_EXPORT to SQL exception classes.
+
+
+
+2006-01-13  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* include/odbc++/connection.h: Replaced _getNumericOption with
+
+	_getUIntegerOption and _setNumericOption with _setIntegerOption
+
+	and _setUIntegerOption
+
+	* src/connection.cpp: Replaced _getNumericOption with
+
+	_getUIntegerOption and _setNumericOption with _setIntegerOption
+
+	and _setUIntegerOption, changed call in setAutoCommit to
+
+	_setIntegerOption
+
+	* include/odbc++/statement.h: Replaced _getNumericOption with
+
+	_getUIntegerOption and _setNumericOption with _setUIntegerOption
+
+	* src/statement.cpp: Replaced _getNumericOption with
+
+	_getUIntegerOption and _setNumericOption with _setUIntegerOption
+
+	* src/drivermanager.cpp: Replaced _setNumericOption with
+
+	_setUIntegerOption
+
+	* src/resultset.cpp: Replaced _getNumericOption with
+
+	_getUIntegerOption and _setNumericOption with _setUIntegerOption
+
+
+
+2005-10-07  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* include/odbc++/callablestatement.h: Simplified documentation
+
+	* include/odbc++/connection.h: Simplified documentation
+
+	* include/odbc++/preparedstatement.h: Simplified documentation
+
+	* include/odbc++/statement.h: Simplified documentation
+
+
+
+2005-09-27  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* src/datahandler.cpp: Use different defines if ODBCXX_HAVE_SQLUCODE_H
+
+	is not defined
+
+	* src/datastream.cpp: Use different defines if ODBCXX_HAVE_SQLUCODE_H
+
+	is not defined
+
+	* src/resultset.cpp: Use different defines if ODBCXX_HAVE_SQLUCODE_H
+
+	is not defined
+
+
+
+2005-09-26  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* src/datahandler.cpp: Fixed a typo resulting in a compilation error
+
+	* include/odbc++/setup.h: Included std namespace for cout/cerr
+
+
+
+2005-09-23  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* src/dtconv.h: Fixed the 64bit version of strtol for Unicode build
+
+	* src/thread.cpp: Fixed Unicode build
+
+
+
+2005-09-07  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* tests/streams.cpp: Made test work with wide strings
+
+	* tests/dbmetadata.cpp: Made test work with wide strings
+
+	* tests/scroll.cpp: Made test work with wide strings
+
+	* tests/oracle.cpp: Made test work with wide strings
+
+	* tests/dmtest.cpp: Made test work with wide strings
+
+	* tests/mysql.cpp: Made test work with wide strings
+
+
+
+2005-09-05  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* src/resultset.cpp: Added string length to ResultSet::updateString
+
+
+
+2005-08-29  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* src/datahandler.cpp: Applied patch 1091957
+
+
+
+2005-08-26  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* include/odbc++/drivermanager.h: Fixed bug 895033
+
+
+
+	* include/odbc++/types.h: Fixed bug 1273540
+
+
+
+	* src/datetime.cpp: Fixed bug 1108240
+
+
+
+	* src/datetime.cpp: Fixed call to swprintf
+
+
+
+	* src/dtconv.h: Fixed call to swprintf
+
+
+
+2005-08-24  Kerry W. Lothrop <kerry@lothrop.de>
+
+
+
+	* NEWS: update for 0.2.4pre1 release
+
+
+
+	* Added Unicode functionality through compiler switch
+
+
+
+2003-12-16  Alex Hornby <alex@anvil.com>
+
+
+
+	* src/datastream.h: correct return type of showmanyc
+
+
+
+2003-12-16  Alex Hornby <alex@anvil.com>
+
+
+
+	* src/drivermanager.cpp: don't rely on static
+
+	constructor/destructor for mutex.
+
+
+
+2003-12-05  Alex Hornby <alex@anvil.com>
+
+
+
+	* acinclude.m4: update pthread test to work on hpux 11.11
+
+
+
+2003-12-02  Alex Hornby <alex@anvil.com>
+
+
+
+	* m4/ac_check_odbc.m4: allow user to deselect unixODBC even when
+
+	it has been installed on the system (e.g. as an RPM).
+
+
+
+2003-06-17  Alex Hornby <alex@anvil.com>
+
+
+
+	* NEWS: update for 0.2.3 release
+
+	
+
+	* configure.ac: update for 0.2.3 release
+
+
+
+2003-06-17  Alex Hornby <alex@anvil.com>
+
+
+
+	* src/resultset.cpp: Add tests for stricmp defines. Should fix
+
+	build with BCB.
+
+
+
+2003-06-11  Alex Hornby <alex@anvil.com>
+
+
+
+	* NEWS: update for 0.2.3pre4 release
+
+
+
+	* configure.ac: update for 0.2.3pre4 release
+
+
+
+2003-05-16  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* include/odbc++/types.h: Use ::time_t in std if
+
+	ODBCXX_NO_STD_TIME_T is defined.
+
+
+
+	* include/odbc++/config-win32.h: #define ODBCXX_NO_STD_TIME_T
+
+	for MSVC versions below 7.0
+
+
+
+2003-05-08 Alex Hornby <alex@anvil.com>
+
+
+
+	* NEWS: update for 0.2.3pre3 release
+
+
+
+	* include/odbc++/preparedstatement.h: fix doxygen warning.
+
+	
+
+	* src/datahandler.cpp: do not include config.h on windows.
+
+	
+
+	* include/odbc++/types.h: Use ODBCXX_HAVE_SQLUCODE_H instead of
+
+	HAVE_SQLUCODE_H. Thanks to Alexander J. Oss <alex.oss@films.com>
+
+	for suggesting the change.
+
+	
+
+	* tests/dbmetadata.cpp: Fix for Qt build. Thanks to Markku Kolkka
+
+	<markku.kolkka@koti.soon.fi> for the patch.
+
+
+
+	* tests/mysql.cpp: ditto
+
+
+
+	* THANKS: add Markku Kolkka
+
+	
+
+2003-04-30 Alex Hornby <alex@anvil.com>
+
+
+
+	* libodbc++.pc.in: Add initial support for pkg-config
+
+
+
+	* configure.ac: ditto
+
+
+
+	* Makefile.am: ditto
+
+
+
+2003-05-01  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/errorhandler.cpp: Attempt to fetch all warnings
+
+	instead of only the first one.
+
+
+
+	* include/odbc++/types.h: Added DriverMessage::fetchMessage()
+
+
+
+2003-04-30 Alex Hornby <alex@anvil.com>
+
+
+
+	* configure.ac: honor --with-isqlxx
+
+	
+
+2003-04-28  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* libodbc++.spec.in: Ditch explicit Requires: for
+
+	qt and unixODBC; let rpm take care of that
+
+
+
+2003-04-24  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* configure.ac: Remove commented old checks, fix
+
+	conditional builds of isql++, qtsql++ and tests
+
+
+
+	* tests/Makefile.am: Minor build fix
+
+
+
+	* isql++/Makefile.am: Minor build fix
+
+
+
+	* qtsql++/Makefile.am: Fix typo, minor build fix
+
+
+
+	* qtsql++/mainwindow.cpp: GCC 3 compilation fix
+
+
+
+2003-04-23 Alex Hornby <alex@anvil.com>
+
+
+
+	* NEWS: Announce 0.2.3pre2
+
+	
+
+	* configure.ac: Update version number
+
+
+
+	* doc/progref/Makefile.am: distribute footer
+
+
+
+2003-04-20  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* include/odbc/setup.h: Add a macro wrapper for string
+
+	streams
+
+
+
+	* src/datahandler.cpp: Don't include strstream
+
+
+
+	* src/dtconv.h: Fix sstream vs strstream compilation
+
+	warnings
+
+
+
+	* src/datastream.cpp: Fix for compilation with qt>=3.0
+
+
+
+	* src/datastream.h: Fix for compilation with qt>=3.0
+
+
+
+2003-04-17  Alex Hornby <alex@anvil.com>
+
+
+
+	* tests/dbmetadata.cpp: include memory header
+
+
+
+2003-04-17  Alex Hornby <alex@anvil.com>
+
+
+
+	* NEWS: Update for release of 0.2.3pre1
+
+	
+
+	* doc/progref/Makefile.am: Test for doc file presence before
+
+	install. Was breaking on *.png target.
+
+
+
+	* src/databasemetadata.cpp: fix spelling of driver
+
+	
+
+2003-04-10  Alex Hornby <alex@anvil.com>
+
+
+
+	* configure.ac: remind users of --with-odbc option if ODBC is
+
+	not found.
+
+
+
+	* include/odbc++/setup.h: Check for __WIN32__ define from
+
+	borland. Thanks to Alexander J. Oss <alex.oss@films.com> for the
+
+	patch.
+
+
+
+	* include/odbc++/types.h: reference time_t as std::time_t to fix
+
+	builds on windows with BCB.
+
+
+
+2003-04-08  Alex Hornby <alex@hornby.org.uk>
+
+
+
+	* configure.ac: check for sqlucode.h for unicode types
+
+	
+
+	* src/datahandler.cpp: add simple support for wide character types
+
+	based on patch from Peter Feltham <pfeltham@idgp.org.au>
+
+
+
+	* include/odbc++/types.h: add wide character types to type enum
+
+
+
+	* tests/dbmetadata.cpp: add test of getTables() function
+
+
+
+2003-04-06  Alex Hornby <alex@hornby.org.uk>
+
+
+
+	* configure.ac: Use automake conditionals to control optional
+
+	elements instead of modifying SUBDIRS. This should allow the use
+
+	of the make dist targets.
+
+
+
+	* Makefile.am: ditto
+
+	
+
+2003-04-06  Alex Hornby <alex@hornby.org.uk>
+
+
+
+	* m4/ac_check_odbc.m4: Separate out unixODBC check and
+
+	automatically find system installs of unixODBC
+
+
+
+	* configure.ac: Set tarname for make dist and turn off maintainer
+
+	mode by default.
+
+	
+
+2003-03-28  Alex Hornby <alex@anvil.com>
+
+
+
+	* autogen.sh: Make this a bit more informative
+
+	
+
+	* configure.ac: Added for autoconf 2.53+. Let configure work out
+
+	the default CXXFLAGS. People will be getting optimization for the
+
+	first time.
+
+	
+
+	* configure.in: Remove as part of update to autoconf 2.53+
+
+
+
+	* m4/ac_c_long_long.m4: Work around unixODBC long long
+
+	problem
+
+	
+
+	* src/datahandler.cpp: Work around unixODBC long long
+
+	problem by including config.h
+
+
+
+	* isql++/isql++.h: Get it building with GCC 3.2
+
+
+
+	* isql++/isql++.cpp: Get it building with GCC 3.2
+
+
+
+2003-03-28  Alex Hornby <alex@anvil.com>
+
+
+
+	* src/connection.cpp: Fix memory error in string handling
+
+
+
+2003-03-28  Alex Hornby <alex@anvil.com>
+
+
+
+	* autogen.sh: Add script for bootstrapping from CVS
+
+
+
+2003-03-28  Alex Hornby <alex@anvil.com>
+
+
+
+	* include/odbc++/callablestatement.h: Add registerInParamter()
+
+	method to callable statment
+
+
+
+	* src/callablestatement.cpp: Add registerInParamter() method to
+
+	callable statment
+
+
+
+2003-03-20  Alex Hornby <alex@anvil.com>
+
+
+
+	* include/odbc++/statement.h: Add close() method
+
+
+
+	* src/statement.cpp: Add close() method
+
+
+
+2002-10-22  Alexander J. Oss <alex.oss@films.com>
+
+
+
+	* src/connection.cpp (nativeSQL): check for error after second
+
+	call to SQLNativeSql().
+
+
+
+2002-06-10  Alex Hornby <alex@anvil.co.uk>
+
+
+
+	* include/odbc++/types.h: Use delete[] in Bytes::Rep
+
+
+
+2001-12-11  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* libodbc++.spec.in: Minor doc typo fixed
+
+
+
+2001-11-06  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* libodbc++.spec.in: Minor fix to the filelist
+
+
+
+2001-11-02  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/statement.cpp: getUpdateCount(): Return -1 if the last execute
+
+	returns SQL_NO_DATA. getMoreResults(): store return value in lastExecute_.
+
+
+
+
+
+2001-10-31  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* libodbc++.spec.in: Hack even more. Now it works as I want it to.
+
+
+
+	* include/odbc++/setup.h: Check for gcc 3.x.
+
+
+
+	* configure.in: Commented out checks for c++ EH, STL and namespaces.
+
+	Made AM_PROG_LIBTOOL run in C-mode (don't ask).
+
+
+
+2001-07-27  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/errorhandler.cpp: Fix _checkErrorODBCx methods to actually
+
+	use the driver supplied SQLSTATE and vendor code in thrown exceptions.
+
+
+
+2001-07-27  Alex Hornby  <alex@anvil.co.uk>
+
+
+
+	* src/datahandler.h: Default TIMESTAMP precision to 19.
+
+
+
+2000-11-28  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* include/odbc++/errorhandler.h: Move the mutex to 
+
+	the privata data.
+
+
+
+	* include/odbc++/connection.h: Move the mutex to 
+
+	the private data.
+
+
+
+	* doc/INSTALL.sgml: Add docs for new configure switches
+
+
+
+	* configure.in: Add switches to enable and disable building of
+
+	tests and qtsql++.
+
+
+
+2000-11-27  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* all: All resulting libraries will have '-mt' appended to their
+
+	names if --enable-threads is used.
+
+
+
+	* libodbc++.spec.in: Added to main distro
+
+
+
+2000-11-09  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/dtconv.h (streamToString): Fix bug when reading from a 
+
+	QIODevice.
+
+
+
+2000-10-03  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* win32/Makefile.w32: Fix linking with multithreaded
+
+	runtime (patch from Craig L. Ching).
+
+
+
+2000-09-10  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* include/odbc++/statement.h: added lastExecute_
+
+
+
+	* src/statement.cpp: Store SQLExecDirect return value in
+
+	lastExecute_
+
+
+
+	* src/preparedstatement.cpp: Store SQLExecute return value
+
+	in lastExecute_
+
+
+
+2000-09-04  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* tests/mysql.cpp: don't include ../src/dtconv.h
+
+
+
+2000-08-31  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* include/odbc++/types.h: Added throw() to some methods of 
+
+	SQLException and SQLWarning to make MipsPro compilers happier.
+
+
+
+2000-08-09  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* acinclude.m4: use std::set instead of set.
+
+
+
+2000-07-13  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/datahandler.h: Include istream or iostream.
+
+
+
+2000-07-11  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* qtsql++/connectwindow.cpp (ConnectWindow): Some cleanup.
+
+
+
+2000-06-28  Anatoly <amc_60@yahoo.com>
+
+
+
+	* isql++/isql++.cpp: Fix crash when column width got negative.
+
+
+
+2000-06-26  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/statement.cpp (_getStringOption): Use tmp for second call.
+
+
+
+	* src/connection.cpp (_getStringOption): Same here
+
+
+
+2000-06-11  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* include/odbc++/drivermanager.h: Disallow instantiation of 
+
+	DriverManager.
+
+
+
+	* src/drivermanager.cpp (shutdown): Properly call SQLFreeHandle() 
+
+	for ODBC3.
+
+
+
+2000-06-07  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/datahandler.h: Call resetStream() in destructor.
+
+
+
+2000-05-31  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/preparedstatement.cpp: Set ColumnSize argument to SQL_*_LEN
+
+	for date/time types.
+
+
+
+2000-03-25  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* doc/INSTALL.sgml: Convert to DocBook 3.1
+
+
+
+	* configure.in: look for db2html
+
+
+
+2000-03-21  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* include/odbc++/config-win32.h: First attempt at merging in
+
+	mingw32 support.
+
+
+
+2000-02-27  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/resultset.cpp (_doFetch): A fix for badly behaving drivers
+
+
+
+2000-02-26  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/datahandler.cpp: nameOfSQLType() and nameOfCType() are no longer
+
+	inline.
+
+
+
+	* src/statement.cpp (getMoreResults): Return false if
+
+	driver doesn't support SQLMoreResults.
+
+
+
+2000-02-06  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/databasemetadata.cpp: Some ODBC3 fixes
+
+
+
+2000-01-25  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/resultset.cc (insertRow): Fix stupid error.
+
+
+
+	* win32/Makefile.w32: Add qt targets, fix naming of resulting
+
+	lib/dll.
+
+
+
+	* doc/INSTALL.sgml: Update for 0.2.2.
+
+
+
+2000-01-23  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* Makefile.am: For .zip (win32) distro, recode all text files to
+
+	CR/LF newlines.
+
+
+
+	* acinclude.m4: Remove AC_CHECK_DOXYGEN
+
+
+
+	* configure.in: Add check for recode, emit warnings for unavailable
+
+	utilities when --enable-maintainer-mode is used
+
+
+
+2000-01-22  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* win32/tests/Makefile.w32: Use .cpp instead of .cc
+
+
+
+	* win32/Makefile.w32: Use .cpp instead of .cc
+
+
+
+	* Makefile.am (dist-hook): Rename *.cc to *.cpp in the win32 (zip)
+
+	distribution.
+
+
+
+	* isql++/isql++.cc: Don't include readline headers, use own
+
+	prototypes for the few needed things. Fix a couple of syntax
+
+	problems.
+
+
+
+	* doc/progref/Doxyfile: Update to doxygen 1.0, make sure
+
+	headers show up as odbc++/header.h in docs.
+
+
+
+2000-01-17  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/datetime.cc (parse): allow timestamps with length 19.
+
+
+
+2000-01-12  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* configure.in: Add support for detecting QT's moc.
+
+
+
+1999-12-14  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* src/preparedstatement.cc (_bindParams): Fixed the buggy fix for
+
+	buggy Access drivers.
+
+
+
+	* include/odbc++/types.h: Make ~CleanVector clean the vector 
+
+	faster.
+
+
+
+1999-12-09  Manush Dodunekov  <manush@stendahls.net>
+
+
+
+	* include/odbc++/databasemetadata.h (SQL_NOT_DEFERRABLE): Define to 7 if
+
+	undefined.
+
+
+
+	* configure.in: Don't build isql++ unless --with-isqlxx was given as a
+
+	configure argument.
+
+
+
+	* src/preparedstatement.cc (_bindParams): Another fix for buggy Access
+
+	driver.
+
+
+
+1999-10-30  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/connection.cc (rollback): Fix to actually rollback instead of commit.
+
+
+
+1999-10-19  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/preparedstatement.cc (_setupParams): Use the default precision
+
+	if driver reports 0.
+
+
+
+	* include/odbc++/types.h (Bytes::Rep::Rep): Initialize refCount_, work
+
+	with buf_ instead of b (duh!).
+
+
+
+	* src/datahandler.cc (setString): Fix a stupid bug with padding of CHARs
+
+
+
+	* src/datahandler.h (afterUpdate): Don't call setNull(), call resetStream()
+
+	instead.
+
+
+
+1999-10-09  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/statement.cc (_applyResultSetType): Rewrite.
+
+
+
+	* src/driverinfo.cc: Store the scroll options here for faster access.
+
+
+
+	* src/databasemetadata.cc (supportsResultSetConcurrency): Fix so
+
+	it also checks for OPT_VALUES.
+
+
+
+1999-10-08  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/datahandler.cc (getString): Fix time/date type constants
+
+	to work with ODBC3.
+
+
+
+1999-10-07  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/preparedstatement.cc (_checkParam): Rewrite. Don't trust
+
+	SQLDescribeParam so much, set DataHandler according to setXXX()
+
+	method called.
+
+
+
+1999-10-05  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/resultset.cc: Support getString() and updateString() on 
+
+	LONGVARCHAR. Support getBytes() and updateBytes() on LONGVARBINARY.
+
+
+
+	* src/dtconv.h: add streamToBytes() and streamToString()
+
+
+
+	* src/dtconv.h: move string/bytes <-> stream conversions here (from 
+
+	datahandler.cc).
+
+
+
+	* src/datahandler.cc (getString): Check for SQL_NTS vs string length.
+
+
+
+1999-09-30  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* all: Interface change: odbc::Bytes is now returned by value.
+
+
+
+	* src/resultset.cc (_handleStreams): Check result from SQLPutData.
+
+
+
+	* src/preparedstatement.cc (execute): Fix for SQLPutData bug in
+
+	some MS drivers. Check result from SQLPutData.
+
+
+
+	* win32/tests/Makefile.w32 (all): Add odbc32.lib
+
+
+
+	* tests/dbmetadata.cc: add qt mode
+
+
+
+	* tests/dmtest.cc: add qt mode
+
+
+
+	* tests/scroll.cc: add qt mode
+
+
+
+	* tests/mysql.cc: add qt mode
+
+
+
+	* qt/tests/Makefile.am: Compile some of the tests in qt-mode.
+
+
+
+	* all: Replace odbc::Bytes with ODBCXX_BYTES. Map to 
+
+	QByteArray in QT mode.
+
+
+
+	* include/odbc++/setup.h: new macro ODBCXX_BYTES.
+
+
+
+1999-09-27  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/preparedstatement.cc (execute): Always call SQLPutData.
+
+
+
+	* src/resultset.cc (_handleStreams): Always call SQLPutData.
+
+
+
+	* include/odbc++/setup.h: Macro ODBCXX_STREAM to be used instead
+
+	of std::istream.
+
+
+
+	* all: Use QIODevice instead of std::istream if ODBCXX_QT is defined.
+
+
+
+1999-09-04  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* qtsql++: A QT-based simple interactor added
+
+
+
+1999-09-03  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* include/odbc++/setup.h: Setup macros for use of QString when
+
+	ODBCXX_QT is defined.
+
+
+
+	* qt/Makefile.am: Add
+
+
+
+	* configure.in: set up --with-qt argument
+
+
+
+	* all: Replace all use of std::string with ODBCXX_STRING. All
+
+	std::string::c_str() become ODBCXX_STRING_CSTR, data() become
+
+	ODBCXX_STRING_DATA and so on. std::string-specific stuff
+
+	conditionally replaced with QString-specific methods.
+
+
+
+	* include/odbc++/setup.h: Add macros ODBCXX_STRING*
+
+
+
+1999-07-19  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* include/odbc++/types.h: Fix for missing SQL_NOT_DEFERRABLE macro
+
+
+
+1999-06-17  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* isql++/isql++.cc (Isql): Changed &memberFunc to &Isql::memberFunc
+
+
+
+1999-06-15  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/dtconv.h: Whoops, add "%" before PRId64
+
+
+
+1999-06-14  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/datahandler.cc: Use use3_ to determine whether
+
+	to use SQL_C_SBIGINT c-type when DM is odbc3.
+
+
+
+1999-06-11  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* isql++/isql++.cc: Describe indices for a table.
+
+	Describe procedure columns. Added command "show types" to
+
+	show available datatypes.
+
+
+
+	* tests/dbmetadata.cc: Report more about transaction support
+
+
+
+	* include/odbc++/databasemetadata.h: Documentation updates
+
+
+
+1999-06-10  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/oracle.cc: Minor updates.
+
+
+
+	* src/statement.cc: Implemented setEscapeProcessing() and 
+
+	getEscapeProcessing().
+
+
+
+1999-06-08  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/resultset.cc (afterLast): Don't do anything if we already are
+
+	there. Same for beforeFirst().
+
+
+
+	* include/odbc++/databasemetadata.h: Added last missing
+
+	constants (versionColumnXXX).
+
+
+
+	* src/databasemetadata.cc: At last, we are complete.
+
+
+
+	* src/databasemetadata.cc: Changed a couple of ODBC3 specific
+
+	methods to simply return false with ODBC2 (supportsANSI92XXX).
+
+
+
+1999-06-07  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* include/odbc++/databasemetadata.h: Catalog methods documented.
+
+
+
+	* src/datahandler.cc: Rewritten to decide on cType_ instead
+
+	of sqlType_. Better could-not-convert reporting.
+
+
+
+1999-06-06  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/databasemetadata.cc: Implemented some missing methods.
+
+
+
+1999-06-05  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/databasemetadata.cc (supportsResultSetType): Use cached
+
+	SQL_SCROLL_OPTIONS mask from DriverInfo.
+
+
+
+	* src/statement.cc (_applyResultSetType): Set the cursor
+
+	type to a type we know the datasource supports, throw an
+
+	exception otherwise.
+
+
+
+	* src/resultset.cc: SQLBulkOperations is now used for inserts
+
+	when ODBCVER>=0x0300 and driver is ODBC3.
+
+
+
+1999-06-04  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/config-win32.h: #define ODBCINT64 __int64 if using
+
+	a borland compiler.
+
+
+
+	* src/datetime.cc: Fall back to sprintf if snprintf isn't around.
+
+
+
+	* src/dtconv.h: use as many _*to* methods on win32 as
+
+	possible.
+
+
+
+	* Removed all occurances of long double.
+
+
+
+1999-06-03  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* include/odbc++/setup.h: #define ODBCVER if ODBCXX_ODBCVER was
+
+	defined.
+
+
+
+	* src/datahandler.cc: Types::BIGINT is now fetched into
+
+	a 64bit integer if using ODBC3.
+
+
+
+	* src/dtconv.h: Fixed odbc::Long <-> string conversions
+
+	for win32.
+
+
+
+1999-06-02  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/preparedstatement.cc: Bind parameters before
+
+	execute, and unbind only when needed. This fixes
+
+	CallableStatement and out parameters.
+
+
+
+	* src/callablestatement.cc: Initialize PreparedStatement
+
+	with SQL_PARAM_INPUT_OUTPUT as default direction.
+
+
+
+	* src/preparedstatement.cc: Use SQL_PARAM_INPUT as 
+
+	default direction.
+
+
+
+	* src/callablestatement.cc: Implemented getString().
+
+
+
+	* doc/progref/Makefile.am: Whoops, Doxyfile wasn't mentioned
+
+	as EXTRA_DIST.
+
+
+
+	* src/databasemetadata.cc (nullPlusNonNullIsNull): Whoops, fixed typo.
+
+
+
+1999-06-01  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* acinclude.m4: Remove -ldl when looking for odbc libraries.
+
+
+
+	* src/callablestatement.cc (registerOutParameter): Fixed to work
+
+	with new parameter handling code.
+
+	(CHECK_COL): Removed horrible bug.
+
+
+
+1999-05-31  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/databasemetadata.cc: Implemented supportsSchemasIn*() and 
+
+	supportsCatalogsIn*().
+
+
+
+	* include/odbc++/setup.h (ODBCXX_EXPORT): define to __declspec(dllimport)
+
+	for win32 when IN_ODBCXX is undefined.
+
+
+
+	* isql++/isql++.cc (describeCmd): Ignore errors for
+
+	getPrimaryKeys and getImportedKeys.
+
+
+
+	* src/statement.cc: Pass NULL instead of empty string for catalog
+
+	and schema in catalog functions.
+
+
+
+	* include/odbc++/preparedstatement.h: setType() removed.
+
+
+
+	* src/preparedstatement.cc: Rewrote the parameter
+
+	handling code in order to work with good, dumb and
+
+	braindead drivers.
+
+	
+
+	* src/rowset.cc: Removed
+
+	
+
+	* src/datahandler.h: Inlined all Rowset methods.
+
+
+
+	* src/driverinfo.cc: Obtain a list of supported functions.
+
+
+
+	* src/preparedstatement.cc: Do not call SQLDescribeParam unless
+
+	the driver supports it. Default all parameters to VARCHAR instead.
+
+
+
+	* src/resultset.cc (isFirst): Call this->_applyPosition().
+
+	(isLast): Same here.
+
+
+
+	* src/databasemetadata.cc: Cleaned up a bit.
+
+
+
+1999-05-30  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* doc/progref/Makefile.am: Fixed install-data-local to work with
+
+	DESTDIR.
+
+
+
+	* src/statement.h: Removed ResultSetList since we can only have one 
+
+	active ResultSet on a Statement anyway. Current ResultSet is now
+
+	stored in currentResultSet_.
+
+	include/odbc++/resultset.h no longer includes <set>.
+
+
+
+	* src/connection.cc: StatementList moved into struct PD. 
+
+	include/odbc++/connection.h no longer includes <set>.
+
+
+
+	* src/driverinfo.h: New class DriverInfo, to hold driver-specific
+
+	information
+
+
+
+	* almost all classes: Implement this->_getDriverInfo() to be used
+
+	to determine driver-specific stuff at runtime
+
+
+
+	* include/odbc++/types.h: New macro ODBC3_DC - works the same
+
+	as ODBC3_C but looks at the ODBC version the current driver
+
+	supports.
+
+
+
+	* src/resultsetmetadata.cc: Use ODBC3_DC where needed.
+
+	
+
+
+
+1999-05-29  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* include/odbc++/setup.h: Macro ODBC3_C moved to include/odbc++/types.h.
+
+	No point in defining it before we know our ODBCVER (bug).
+
+
+
+	* win32/Makefile.w32: Civilized. DLL can be build on win32.
+
+
+
+1999-05-26  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/statement.cc (~Statement): removed bug where a Statement
+
+	could be deleted twice if owned by a ResultSet.
+
+
+
+	* src/resultset.cc: Use the lowest 'fetch-my-results' call
+
+	possible, for example SQLFetch with ODBC2 and FetchSize=1.
+
+	Don't ask driver for row number if cursor is forward-only, 
+
+	keep track of it instead.
+
+
+
+1999-05-25  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* Major cleanup. odbc::Byte, odbc::Int and odbc::Short are gone,
+
+	odbc++.h is split into classname.h in include/odbc++/.
+
+	
+
+
+
+1999-05-12  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/drivermanager.cc (_checkInit): Use SQL_OV_ODBC3
+
+
+
+	* src/datahandler.cc: ODBC3-ized a bit; Using SQL_TYPE_* 
+
+	and SQL_C_TYPE_* for datetime stuff if ODBC3 is around and so on.
+
+
+
+1999-05-10  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/resultset.cc: Simplified move-around routines
+
+
+
+1999-05-09  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/datahandler.cc: Use correct ODBC date/time escape
+
+	format, when for example using setDate on a CHAR/VARCHAR handler.
+
+
+
+1999-05-03  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/odbc++.h: Changed default rowset size to 1
+
+
+
+	* tests/oracle.cc: A more extensive scrolling test.
+
+
+
+	* tests/dbmetadata.cc: Actually show some useful information.
+
+
+
+	* src/connection.cc: Fixups for SQL_TXN_VERSIONING in ODBC2
+
+	
+
+	* src/databasemetadata.cc: Fixups for SQL_TXN_VERSIONING in ODBC2
+
+
+
+	* src/scroll.cc: New simple test to test simple scrolling, 
+
+	but not inserts/updates on ResultSets - for simpler database engines.
+
+	
+
+	* tests/connect.cc: Gone. Obsolete.
+
+	
+
+	* tests/select.cc: Gone. Obsolete.
+
+	
+
+	* tests/prepared.cc: Gone. Obsolete. Stupid.
+
+
+
+	* src/resultset.cc (updateRow): Save the number of rows in the rowset
+
+	before doing an update.
+
+	(afterLast): Now even works.
+
+
+
+	* src/datahandler.cc (setDate): It's now possible to set a Timestamp
+
+	to a Date (which sets the remaining timestamp fields to 0).
+
+
+
+	* src/resultset.cc (_resetRowset): Fixed +/-1 bug causing strings to be
+
+	truncated.
+
+
+
+	* src/statement.cc (_beforeExecute): Revert to SQLFreeStmt(SQL_CLOSE)
+
+	instead of SQLCloseCursor even with ODBC3.
+
+
+
+	* src/resultset.cc (_doFetch): Added check for drivers that return
+
+	number of last row of the rowset with a forward-only cursor.
+
+
+
+1999-05-02  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/resultset.cc (ResultSet): Fixed typo that sent invalid pointer
+
+	to SQL_ATTR_ROWS_FETCHED_PTR (ODBC3 only).
+
+	(_applyFetchSize): Check if the driver changed the rowset size
+
+	after we set it.
+
+
+
+	* isql++/isql++.cc: Added variables trace and tracefile.
+
+
+
+	* configure.in: Added --with-odbc-version for use with for example
+
+	unixODBC which claims 0x0351 but does no ODBC3<->ODBC2 translation
+
+
+
+	* src/resultsetmetadata.cc: ODBC3-fied
+
+
+
+1999-04-29  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/resultset.cc: First attempts at using ODBC3 stuff.
+
+
+
+	* src/connection.cc: Actuall connect code moved to _connect() 
+
+	here and removed from drivermanager.cc.
+
+
+
+	* src/connection.cc: Added ODBC3 #ifdefs to behave correctly with an
+
+	ODBC3 driver manager
+
+
+
+	* src/drivermanager.cc: Ditto.
+
+
+
+	* src/statement.cc: Ditto.
+
+
+
+	* src/drivermanager.cc: Lock while fetching datasources and drivers.
+
+
+
+
+
+1999-04-28  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* configure.in: removed obsolete checks for SQL* types.
+
+
+
+	* src/datahandler.cc: Implemented all handling of data here,
+
+	threw src/dh_*.cc and src/dhimpl.h away.
+
+
+
+1999-04-26  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* Prepared for win32 port, too much to list here.
+
+
+
+	* Cleaned up most datahandlers.
+
+
+
+1999-04-25  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* tests/mysql.cc: Check handlers TIME, DATE and TIMESTAMP too.
+
+
+
+	* src/preparedstatement.cc (CHECK_COL): Fixed typo that caused
+
+	parameter indexes not to be checked.
+
+
+
+	* src/datetime.cc: Implemented parse(const string& str) 
+
+	method of Date,Time and Timestamp.
+
+
+
+1999-04-24  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/databasemetadata.cc: A whole bunch of methods implemented.
+
+
+
+	* src/odbc++thr.h, src/threads.cc: For now, a simple mutex wrapper to 
+
+	use when ODBCXX_ENABLE_THREADS is defined.
+
+	
+
+	* src/datetime.cc: Implemented Timestamp, Date and Time types.
+
+	
+
+	* src/dh_date.cc: Implemented a data handler for the above types.
+
+
+
+1999-04-23  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/preparedstatement.cc: Removed Statement::executeQuery
+
+	overrides.
+
+
+
+1999-04-17  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/datastream.cc (underflow): Update the dataStatus_ so the
+
+	ResultSet can report NULLs right.
+
+	(DataStreamBuf): Call this->underflow() when constructed.
+
+
+
+1999-03-31  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* all: cleaned up some warnings
+
+
+
+1999-03-31  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/dh_longvar.cc (getString): actually return the result =)
+
+
+
+	* src/databasemetadata.cc (supportsResultSetType): Whoops. Bug fixed.
+
+
+
+1999-03-31  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/dtconv.h: Added #ifdefs for glibc-specific printf modifiers.
+
+
+
+	* src/odbc++types.h: Altered the Int/Long datatype detection a bit,
+
+	should probably work on most platforms.
+
+
+
+	* src/odbc++.h: Fixed typo if ODBCVER was >= 0x0300
+
+
+
+1999-03-30  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* configure.in: do not depend on GNU sed and bash in the
+
+	configuration.
+
+	
+
+1999-03-29  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/dh_binary.cc: DH_Binary partially implemented, now 
+
+	BINARY and VARBINARY columns have a handler.
+
+
+
+	* src/databasemetadata.cc (getTables): Delete statement if 
+
+	SQLTables fails. Same in all others that return a ResultSet.
+
+
+
+	* isql++/isql++.cc (splitIdentifier): Check how datasource handles
+
+	identifier cases, and act accordingly.
+
+	
+
+	* src/databasemetadata.cc (storesLowerCaseIdentifiers): Implemented,
+
+	as well as all it's friends.
+
+
+
+	* src/dh_string.cc (getInt): Whoops. A return statement was missing.
+
+
+
+	* src/resultset.cc (moveToInsertRow): Do not call SQLSetPos here, since
+
+	only SQL_ADD is allowed outside the rowset.
+
+	* src/resultset.cc (getXXX/updateXXX): Allow calling while on the 
+
+	insert row, except for getXXXStream.
+
+
+
+1999-03-28  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/dh_string.cc (setString): Pad outgoing fixed length CHARs with spaces
+
+
+
+1999-03-21  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/statement.cc (_beforeExecute): call clearWarnings()
+
+
+
+	* src/drivermanager.cc (getDrivers): implemented
+
+
+
+1999-03-16  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/databasemetadata.cc (getIndexInfo): implemented
+
+	(getCatalogTerm): implemented
+
+
+
+1999-03-15  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/dh_double.cc: (DH_Double): Handler for REAL,FLOAT,DOUBLE
+
+	* src/odbc++.h: namespace ODBC -> namespace odbc
+
+
+
+1999-03-14  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/preparedstatement.cc (PreparedStatement): Implemented
+
+	* src/callablestatement.cc (CallableStatement): Implemented
+
+	
+
+1999-02-06  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* all: More DatabaseMetaData stuff. The ResultSet constructor
+
+	now has a bool for whether it should take care of the executing 
+
+	statement.
+
+
+
+1999-02-02  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* all: Lots of updates, now closer to JDBC behavior.
+
+	A small part of the DatabaseMetaData is now implemented with
+
+	a corresponding test in tests/.
+
+
+
+1999-01-23  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/odbc++.h: replaced all 'static const int ...' with enums
+
+
+
+1999-01-20  Manush Dodunekov  <manush@litecom.net>
+
+
+
+	* src/odbc++.h: Removed Clob and Blob classes, to be implemented
+
+	later on.
+
+
+
