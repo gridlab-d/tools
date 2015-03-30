@@ -1,0 +1,3993 @@
+# NOTE:  These scripts are being provided to the open source "as is".  These are scripts developed
+#        for certain project applications, and are not designed to be "all encompassing" -- users
+#        are expected to make modifications to these scripts to fit their needs and their database
+#        requirements.  While some help may be available from the GridLAB-D support team, this is 
+#        not a fully supported feature.
+
+#!/usr/bin/perl
+
+# Name: 	SynerGee_to_GridLabD.pl
+#
+# Description: 	Convert SynerGee Access database to .glm format for GridLabD for a specified feeder.
+# Modified By: 	Janelle Hammerstrom
+# 		11/2011
+# Remarks: This script is a modified version of a script that was used to convert a Cyme Access database to a .glm format. 
+#
+# To use:	- Reset variable $dsnDev to work with your system.
+#			- Usage: perl SynerGee_to_GridLabD.pl <db filename> <feeder_name>
+#			- Note that <feeder_name> is only necessary if the database has info for more than one feeder
+#			- Also note that to use a database with more than one feeder, additions need to be made such that each query filters for that feeder only (5/1/12)
+
+#=====================================================================
+# Origninal Name: Cyme_to_GridLabD.pl
+#
+# Original Description: Convert Cyme Access database to .glm format for GridLABD for a user specified feeder
+#
+# Original Author: Yousu Chen
+# PNNL operated by Battelle
+# 7/9/2009
+
+# Original log:
+# 1. initial start 
+# 7/9/2009
+
+# 1. Found following Device ID:
+
+# 1 cable
+# 2/3 overhead line
+# 4 regulator
+# 10 recloser
+# 12 sectionalizer
+# 13 switch
+# 14 fuse
+# 17 capacitor
+# 20 spot load
+# 21 distributed load
+
+# 2. Found following load value type:
+#LoadValueType = 0 : KW, KVAR
+#LoadValueType = 1 : KVA, PF
+#LoadValueType = 2 : KW, PF
+
+# 3. converged w/o fuse/sw/reg/cap
+# 8/9/2009
+
+# 1. combined three-phase loads
+# 8/10/2009
+
+# 1. Found following capacitor control mode:
+# 0: Manual
+# 1: Time
+# 2: kVAR
+# 3: Current
+# 4: Power Factor
+# 5: Reactive Current
+# 6: Temperature
+# 7: Voltage
+# 8/11/2009
+
+# 1. added capacitor object
+# 2. added switch object
+# 8/12/2009
+
+# 1. added fuse object
+# 8/13/2009
+
+# 1. added sectionalizer object
+# 2. added regulator object 
+# 8/17/2009
+
+# 1. updated underground cable
+# 2. using cyme cable object
+# 8/19/2009
+
+# 1. Added Transformer no load loss and full load loss, the numbers come from *** Excel Sheet:
+#    "*** 2009 Transformers.xls".
+# 2. Removed xfmr resistance/reactance.
+# 3. set default_fl = 0.015, default_nl = 0.003
+# 8/21/2009
+
+# 1. Added underground cable hash table based on *** data and Kersting's book
+# 8/30/2009
+
+# 1. minor changes on printHeader to add solution method
+# 2. add one more argument for printUGSecs1 and printUGSecs2 subroutines.
+# 3. add solution method option
+# 9/15/2009
+
+# 1. added *** underground cable information from "*** cable data.xls".
+# 9/22/2009
+
+# 1. added post-fix for devices number for type number 4-17, since identical device number are used in Cyme for different device types.
+# the type numbers are:
+# 	 4 regulator
+#	10 recloser
+# 	12 sectionalizer
+#	13 switch
+# 	14 fuse
+# 	17 capacitor
+# 2. read CYMOVERHEADLINE table for F1408
+# 3. read CYMEEQOVERHEADLINE table for lineID information in CYMOVERHEADLINE table!
+# 4. changed the OH condutor name "DEFAULT" to "DEFAULT_OH",in order to avoid duplicate name for UG DEFAULT. 
+# 5. adjusted the capacitor remote_sense link for current mode
+# 10/01/2009
+
+# 1. changed reading cable information from equipment database CYMEQCABLE to network database CYMUNDERGROUND, where the cables are actually used.
+# 10/06/2009
+
+# 1. added "SPACERCABLE" spacing type.
+# 2. removed the zero loads with phase=0 in F4532 feeder
+# 10/07/2009
+
+# 1. changed the no-load-loss (NL) anf full-loand-loss (FL) from actual values to percentages. The numbers are from *** Excel Sheet "*** 2009 Transformers.xls".
+# The equations are:
+#     impedance: FL + $RXRatio*FL j
+#     shunt_imdedance: 1/NL + 1/NL * $RXRatio j 
+# FL and NL is in percentage, for exam FL = 1% => FL = 0.01
+# 2. added $RXRatio parameter, the current setting is $RXRatio = 4.5
+# 10/08/2009
+
+# 1. added var control capacitor
+# 2. added printOHSecs1 and printOHSecs2 subroutines, and cleaned code a little bit
+# 10/12/2009
+
+# 1. added wye_wye transformer for non-residential load
+# 2. removed unique ID
+# 10/18/2009
+
+# 1. set status to OPEN for all devices.(removed ActualStatus)
+# 2. connected single phase commercial loads with a center tapped transformer and tag them as commercial.
+# 3. added no-load-loss and full-load-loss for 30KVA, 45KVA rating transformer.
+#	no-load-loss "45.0", 0.00267; full-load-loss "45.0", 0.01451,
+# 10/19/2009
+
+# 1. changed configuration/conductor names to be feeder specific.
+# 2. reduced the length of configuration names by using the first letter of spacing configuration
+# 3. added the number of customers for each split-phase load
+# 10/20/2009
+
+# 1. added feedname to the SPCT transformer name to make it feeder specific.
+# 2. cleaned code.
+# 10/21/2009
+
+# 1. added serial reactance
+# 10/23/2009
+
+# 1. changed the order of objects (put configuration before actural objects)
+# 11/02/2009
+
+# 1. added normal distribution for triplex cable length (175+/-75 ft)
+# 11/04/2009
+
+# 1. removed wye_wye xfmr for commercial/industrial load 
+# 2. added overhead_line_configuration and underground_line_configuration for non_residential load. Length = 25 ft.
+# 11/05/2009
+
+# 1. changed reading CYMOVERHEADLINE table for all feedes, instead of F1408 only.
+
+# 1. changed object names to bigin with a letter, instead of a number
+# 03/31/2010
+
+use Win32::ODBC;
+use Math::Trig;
+use POSIX;
+use strict;
+#use List::MoreUtils qw(uniq);
+use Spreadsheet::ParseExcel; 	# Reads .xls files only
+use Spreadsheet::XLSX; 			# Perl extention for reading MS Excel 2007-2010 files (.xlsx)
+use Math::Random qw(random_normal);
+
+# Check usage
+if ( $#ARGV > 1 ) {
+    printUsage();
+}
+my $sm_flag = 1;  #0 = FBS, 1=NR
+my $sm;
+if ($sm_flag eq 0 ){
+	$sm = "FBS";
+} else {	
+	$sm = "NR";
+}	
+# constants/ flags
+my $pi = atan(1.0) * 4;
+my $poletop     	= "POLETOP";
+my $padmount    	= "PADMOUNT";
+my $single      	= "SINGLE_PHASE_CENTER_TAPPED";  #transformer type
+my $three       	= "WYE_WYE"; 
+my $iwarning    	= 1;  	# flag to turn on warning messages
+my $logfile			= 1; 	# flag to print warning messages to a file
+my $closeallfuse 	= 0; 	# flag to close all fuses instead of using database records (0 = use database records)
+my $closeallswitch 	= 0; 	# flag to close all switches instead of using database records (0 = use database records)
+my $volt_dump		= 1;	# flag to include volt-dump object (1 = include voltdump) (only records info for nodes from the database)
+my $use_raw_z_matrix= 0; 	# flag to use raw z-matrix values in line configurations instead of conductor data 
+my $res_secondary   = 1;	# flag to include transformers and triplex lines to residential loads (0 means print all loads like commercial loads)
+
+# flags for recorders
+my $rec_swing_power = 0; # flag includes recorder measuring power through the swing node.
+
+# The following transformer impedance is based on 10KVA rating, 
+# the impedance will changed based on KVA rating.
+my $R_pu_single = 0.015;
+my $R_pu_three  = 0.01;
+my $X_pu_single = 0.01;
+my $X_pu_three  = 0.05;
+my $mean_replacement_time = 2;
+my $length      = 1;
+my $meter2ft    = 3.2808399;
+my $inches2cm	= 2.54;
+my $miles2km	= 1.609344;
+my $flag_current = 0;
+my $flag_kvar = 0;
+my $flag_pf = 0;
+my $flag_reactive = 0;
+my $flag_temp = 0;
+my $flag_time = 0;
+my $flag_voltage = 0;
+my $ic = 0; # counter
+my $RXRatio = 4.5;  #R/X ratio for transformer
+my $mean = 45; # mean length for triplex cable
+my $sdev = 15;  # standard deviation for triplex cable
+my $xfmr_length = 25; # length used to connect non_residential loads
+my $resKWcutoff = 5; #kw -- value at which loads of less kw are considered residential, and greater are considered commercial. (if loads in database aren't already classified)
+my $triplex_length;
+
+# DEFINE HASH TABLES
+# 1. phase
+#my %convertPhase = (1, "AN", 2, "BN", 3, "CN", 4, "ABN", 5, "ACN", 6,"BCN", 7,"ABCN"); # for CYME
+my %convertPhase = ("A  N", "AN", " B N", "BN", "  CN", "CN", "AB N", "ABN", "A CN", "ACN", " BCN", "BCN", "ABCN", "ABCN");# for SynerGee (InstSection.SectionPhases) 
+#my %RegconvertPhase = (1, "A", 2, "B", 3, "C", 4, "AB", 5, "AC", 6,"BC", 7,"ABC"); # for CYME
+my %RegconvertPhase = ("A", "A", " B", "B", "  C", "C", "AB", "AB", "A C", "AC", " BC", "BC", "ABC", "ABC");# for SynerGee (InstFuses.ConnectedPhases)
+
+# 2. xfmr no load loss
+#my %NL = ("10.0", 0.0038, "15.0", 0.0032, "25.0", 0.00244, "30.0", 0.00253, "37.5", 0.00267, "45.0", 0.00267, "50.0", 0.00268, "75.0", 0.00229); # for CYME
+#my %NL = ("10", 0.0038, "15", 0.0032, "25", 0.00244, "30", 0.00253, "38", 0.00267, "45", 0.00267, "50", 0.00268, "75", 0.00229); 
+my %NL_spot = ();
+my %NL_pole = ("25", 0.00172, "38", 0.001703, "50", 0.001580, "75", 0.001907, "100", 0.002090, "167", 0.001413); # polemount 
+my %NL_pad 	= ("10", 0.00160, "25", 0.001120, "38", 0.001027, "50", 0.000960, "75", 0.001907, "167", 0.000557); #padmount
+
+# 3. xfmr full load loss
+#my %FL = ("10.0", 0.0261, "15.0", 0.0216, "25.0", 0.01924, "30.0", 0.01773, "37.5", 0.01547, "45.0", 0.01451, "50.0", 0.01354, "75.0", 0.01557); # for CYME
+#my %FL = ("10", 0.0261, "15", 0.0216, "25", 0.01924, "30", 0.01773, "38", 0.01547, "45", 0.01451, "50", 0.01354, "75", 0.01557); 
+my %FL_spot = ();
+my %FL_pole = ("25", 0.01568, "38", 0.011703, "50", 0.010560, "75", 0.009347, "100", 0.00765, "167", 0.009072); #polemount
+my %FL_pad 	= ("10", 0.00760, "25", 0.008280, "38", 0.007757, "50", 0.007400, "75", 0.006067, "167", 0.007257); #padmount
+
+my $default_nl = 0.003; #default no load loss (CYME)
+my $default_fl = 0.015; #default full load loss (CYME)
+my $sum_DL_KW = 0;
+my $sum_DL_KVAR = 0;
+my $sum_spot_KW = 0;
+my $sum_spot_KVAR = 0;
+my $sum_DL_KW_PV = 0;
+my $sum_DL_KVAR_PV = 0;
+my $sum_NonRes_KW = 0;
+my $sum_NonRes_KW_PV = 0;
+my $sum_NonRes_KVAR = 0;
+my $sum_NonRes_KVAR_PV = 0;
+
+#0 -- file names
+my $dbDevFile	= $ARGV[0]; # database filename
+my $feeder_id   = $ARGV[1]; # inputted name of feeder
+
+#1 -- equipment source
+my (%NominalVLL, %DisiredVLL) = ();
+
+# Open database file.
+my $dsnDev="Driver={Microsoft Access Driver (*.mdb)};Dbq=$dbDevFile;Uid=Admin;Pwd=";
+#my $dsnDev = "DSN=kihei_extract;Uid=Admin;Pwd=";
+my $db = Win32::ODBC->new($dsnDev) or die( Win32::ODBC::Error() );
+
+# Get feeder ID from database
+my $sql = "SELECT FeederId, NominalKvll FROM InstFeeders;";
+SQLError() if ( $db->Sql($sql) );
+
+my ($feederName,@feeders);
+while ( $db->FetchRow() ) {
+	$feederName = $db->Data("FeederId");
+	push @feeders, $feederName;
+	$NominalVLL{$feederName} = $db->Data("NominalKvll");
+}
+
+my $matchfound = 0;
+# Check that the provided feeder name matches one of the feeders in the database
+if ($#feeders >= 1) { #two or more feeders listed in Database
+	if ($feeder_id ne "") {
+		$feeder_id =~ s/[_\W]//g;
+		foreach (@feeders) {
+			my $temp = $_;
+			$temp =~ s/[_\W]//g;
+			if ($temp eq $feeder_id){
+				$feederName = $_;
+				$matchfound = 1;
+				last;
+			}
+		}
+		if ($matchfound == 0 ) {
+			die("The feeder name you input does not match any of the feeders listed in the Database. Please try again.\n");
+		}
+	}else{
+		die("More than one feeder is listed in the Database. Please specify a feeder name in addition to the database filename.\n");
+	}
+}
+
+$feederName =~ s/\s/_/; # change any spaces to underscores for use in GLM
+
+my $glmFile 	= $feederName.".glm"; # name glm file
+my $log = $feederName."_log.txt"; # name log file
+
+#2 -- conductor
+my (%condR25, %condGMR, %condRating, %condCap, %condDiam, %condDiam_cond, %condDiam_neut, %condDiam_outside, %condR_neut, %condStrands, %condGMR_neut, @conductors, %kihei_Conductors)=();
+my (%z11, %z12, %z13, %z22, %z23, %z33);
+my (%dAB, %dBC, %dCA, %dAN, %dBN, %dCN);
+my (%LineIDP, %LineIDN, %LineIDSpacing) = ();
+
+#3 -- cable
+my (@cables, @UGcables,@UGLineCFGs);
+my (%cableRating, %cablePR, %cableZR, %cablePX, %cableZX, %cablePB, %cableZB) = ();
+my (%UGOD,%UGRating,%UGCGMR,%UGCR,%UGCD,%UGNGMR,%UGNR,%UGND,%UGStrands,%UGDAB,%UGDAC,%UGDBC)=();
+my (%UGCFG) =();
+
+#4 -- network
+my @networkIDs;
+
+#5 -- node
+my @nodes;
+my (%nodeX, %nodeY, %nodeNetworkID) =();
+my %hashNodePhase = ();
+
+#6 -- overhead line
+my (@OHSecs, @uniqueOHSecs, @OHConds, @UniqueOHConds);
+my (%OHA, %OHB, %OHC, %OHN, %OHSpacing, %OHLength, %OHCFG) = (); 
+my %OHLineID = ();
+
+#7 -- underground line
+my (@UGSecs, @uniqueUGSecs);
+my (%UGCable, %UGLength) = ();
+
+#7.5 -- other lines (BB)
+my (@OtherSecs, %OtherLength);
+
+#8 -- section
+my (@secs, @LineCFGs, @UniqueLineCFGs, @UniqueUGLineCFGs,@LineSpacings,@UniqueLineSpacings, @To);
+my (%secFrom, %secTo, %secPhase) = ();
+
+#9 -- custom load
+my (%loadKVA1, %loadKVA2, %loadKVA3, %loadKW1, %loadKW2, %loadKW3, %loadKVAR1, %loadKVAR2, %loadKVAR3, %IsSpotLoad, %LoadTableId);
+my (%loadType, %loadCustomerNum, %loadClass, %loadPhase, %loadnoCust) = ();
+my ($loadValueType,$loadV1, $loadV2);
+my (@residential, @tn1,@loads,@spotloads,@uniquespotloads);
+my (@non_residential, @unique_non_residential);
+my (%non_residential_phase, %non_residential_KVA1, %non_residential_KW1, %non_residential_KVAR1);
+my (%non_residential_KVA2, %non_residential_KW2, %non_residential_KVAR2,%non_residential_KVA3, %non_residential_KW3,%non_residential_KVAR3);
+my (%residential_phase, %tn1_phase);
+my (@SPCTCFG, @UniqueSPCTCFG, @WYEWYECFG,@uniqueWYEWYECFG);
+my (%loadKVA,%loadKW,%loadKVAR,%SPCTID,%tn_cfg) = ();
+my (%spotload,%spotloadKW1,%spotloadKW2,%spotloadKW3,) = ();
+my (%spotloadKVAR1,%spotloadKVAR2,%spotloadKVAR3,%spotloadPhase) = ();
+my (%spotloadKVA1,%spotloadKVA2,%spotloadKVA3,%spotloadKVA) = ();
+my %loadphase = ();
+my @UnknownLoadClass;
+
+#10 -- source
+my $source;
+my %sourceEqID = ();
+
+#11 -- device
+my @deviceNums;
+my (%DevType, %DevSection, %DevLoc, %sectionDev ) = ();
+my (@fusesec, @swsec, @recsec, @sectionalizersec, @regsec);
+# CYME:
+# devloc = 0: n/a 
+# devloc = 1: at from node
+# devloc = 2: at to node
+
+#12 -- shuntcapacitor
+my @shuntcaps;
+my (%capEquID, %capST, %capPhase, %capCFG, %capA, %capB, %capC, %capVLN, %capType) = ();
+
+#13 -- equipment capacitor
+my (%capEquRatedKVAR, %capEquRatedKVLL);	   
+
+#14 -- capacitorcontrol_current CYMCAPACITORCONTROL_KVAR
+my (%capcurrentOn,%capcurrentOff,%capcurrentPhase) = ();
+my (%capvarOn,%capvarOff,%capvarPhase) = ();
+
+#15 -- switch
+my (%swEquID, %swPhase, %swST, %swTCC, %swFeedingNodeID ) = (); 
+
+#16 -- recloser
+my (%recEquID, %recPhase, %recST, %recTCC, %recFeedingNodeID ) = (); 
+
+#17 -- fuse
+my (%fuseEquID, %fusePhase, %fuseST, %fuseTCC, %fuseFeedingNodeID ) = (); 
+
+#18 -- equipment fuse
+my (%fuseEquRatedI1,%fuseEquRatedI2, %fuseEquRatedV, %fuseEquReversible,%fuseEquSinglPhaseLocking );	   
+
+#19 -- sectionalizer
+my (%sectionalizerEquID, %sectionalizerPhase, %sectionalizerST, %sectionalizerTCC, %sectionalizerFeedingNodeID) = (); 
+
+#20 -- regulator
+my (%regEquID, %regPhase, %regCFG, %regCT, %regPT, %regBW, %regBoost, %regBuck,%regSetting, %regTapA,
+    %regTapB,%regTapC,%regCtrST, %regNormalFeedingNodeId, %hashRegCFG ) = (); 
+
+#21 -- equipment regulator
+my (%regEquRatedKVA1,%regEquRatedKVA2, %regEquRatedKVLN, %regEquMaxBoost, %regEquMaxBuck, %regEquBW, %regEquCT, %regEquPT, %regEquTaps );	   
+
+#22 -- series reactance
+my (%SXEquID, %SXPhase, %SXX, %SXEquRatedI1, %SXEquRatedI2 ) = (); 
+my @SXSec;
+	
+open( GLM_FILE, ">$glmFile" ) or die "Error: Cannot open file $glmFile";
+
+if ($logfile eq 1) {
+    open ( LOG_FILE, ">$log" ) or die "Error: Cannot open $log";
+    print "Warnings and Checks are being logged in $log.\n";
+}
+
+# print header to log file
+if ($logfile eq 1) {
+	my $date = date_time ();
+	chomp($date);
+	print LOG_FILE "// \$ID: $glmFile $date $0 \$\n";
+	print LOG_FILE "// *********************************************\n\n";
+}
+
+# read *** underground cable information from "*** cable data.xls"
+#   This may be needed if all of the cable values are not available from the CYME/SynerGEE
+#   database.  May be removed if all data is available in the database.
+my $input_cable = "*** cable data.xls";
+my $oExcel = new Spreadsheet::ParseExcel;
+my $oBook = $oExcel->Parse($input_cable);
+
+print "Your *** underground cable spreadsheet is:", $oBook->{File} , "\n\n" if ($iwarning eq 1);
+print LOG_FILE "Your underground cable spreadsheet is: ", $oBook->{File}, "\n\n" if ($logfile eq 1);
+
+# Read ** cable data
+my $sheet_bus = $oBook->{Worksheet}[0];
+my $n_row = $sheet_bus->{MaxRow};
+
+foreach my $i(3..$n_row) {
+	my $eqID = $sheet_bus->{Cells}[$i][0]->Value;
+	my $rating = $sheet_bus->{Cells}[$i][1]->Value;
+	my $OD = $sheet_bus->{Cells}[$i][19]->Value;
+	my $DAB = $sheet_bus->{Cells}[$i][16]->Value;
+	my $DAC = $sheet_bus->{Cells}[$i][17]->Value;
+	my $DBC = $sheet_bus->{Cells}[$i][18]->Value;
+	my $CGMR = $sheet_bus->{Cells}[$i][12]->Value;
+	my $CR = $sheet_bus->{Cells}[$i][13]->Value;
+	my $CD = $sheet_bus->{Cells}[$i][11]->Value;
+	my $NGMR = $sheet_bus->{Cells}[$i][23]->Value;
+	my $NR = $sheet_bus->{Cells}[$i][24]->Value;
+	my $ND = $sheet_bus->{Cells}[$i][22]->Value;
+	my $strands = $sheet_bus->{Cells}[$i][25]->Value;
+	$UGOD{$eqID} = $OD;
+	$UGCGMR{$eqID} = $CGMR;
+	$UGCR{$eqID} = $CR;
+	$UGCD{$eqID} = $CD;
+	$UGNGMR{$eqID} = $NGMR;
+	$UGNR{$eqID} = $NR;
+	$UGND{$eqID} = $ND;
+	$UGStrands{$eqID} = $strands;
+	$UGRating{$eqID} = $rating;
+	$UGDAB{$eqID} = $DAB;
+	$UGDAC{$eqID} = $DAC;
+	$UGDBC{$eqID} = $DBC;	
+}
+
+#-0-CYME
+# ************************ read data for CYMEQSOURCE
+#my $sql =
+#  "SELECT EquipmentId, NominalKVLL, DesiredKVLL "
+#  . "FROM CYMEQSOURCE;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ) {
+#	my $temp = $db->Data("EquipmentId");
+#	$NominalVLL{$temp} = $db->Data("NominalKVLL");
+#	$DisiredVLL{$temp} = $db->Data("DesiredKVLL");
+#}
+
+#-1-CYME
+# ************************ read data for CYMEQCONDUCTOR
+#my $sql =
+#  "SELECT EquipmentId, FirstRating, GMR, R25 "
+#  . "FROM CYMEQCONDUCTOR;";
+#SQLError() if ( $db->Sql($sql) );
+#while ( $db->FetchRow() ) {
+#	my $temp = $db->Data("EquipmentId");
+#	$temp = $temp."_OH" if ($temp =~ /DEFAULT/i);		
+#	$condRating{$temp} = $db->Data("FirstRating");
+#	$condGMR{$temp} = $db->Data("GMR");
+#	$condR25{$temp} = $db->Data("R25");    
+#}
+
+#-1-SYNERGEE
+# ************************ read conductor data from columns of InstSection
+# --manually create hash mapping conductor names listed in InstSection.PhaseConductorID and InstSection.NeutralConductorID
+#  to the more succinct names listed in InstSection.PhaseConductor2Id and PhaseConductor3Id. 
+# --map "OTHER" to "DEFAULT"
+# my %Conductors = (
+			# #"OTHER OH",			"OTHER_OH",
+			# "OTHER OH",			"DEFAULT_OH",
+			# #"OTHER UG",			"OTHER_UG",
+			# "OTHER UG",			"DEFAULT_UG",
+			# "SUBSTATIONBUS",		"SUBSTATIONBUS");
+
+
+# foreach my$key (%Conductors) {
+	# $condRating{$key} = 144; #amps (FROM DEFAULT in *** cable Data.xls)
+	# $condGMR{$key} = sprintf("%.4f", 0.1027 * $inches2cm); #cm (FROM DEFAULT(inches) in *** cable Data.xls)
+	# $condR25{$key} = sprintf("%.4f", 1.7720/$miles2km); #ohms/km at 90 degrees C (FROM DEFAULT(ohms/mi) in *** cable Data.xls)
+# }
+
+# ************************ read data for CYMEQCABLE 
+#my $sql =
+#  "SELECT EquipmentId, FirstRating, PositiveSequenceResistance, PositiveSequenceReactance, "
+#  . "ZeroSequenceResistance, ZeroSequenceReactance, PosSeqShuntSusceptance, ZeroSequenceShuntSusceptance "
+#  . "FROM CYMEQCABLE;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ) {
+#	my $temp = $db->Data("EquipmentId");
+#	#push @cables, $temp;
+#	$cableRating{$temp} = $db->Data("FirstRating");
+#	$cablePR{$temp} = sprintf("%.4f", $db->Data("PositiveSequenceResistance")/$meter2ft);
+#	$cableZR{$temp} = sprintf("%.4f", $db->Data("ZeroSequenceResistance")/$meter2ft);
+#	$cablePX{$temp} = sprintf("%.4f", $db->Data("PositiveSequenceReactance")/$meter2ft);
+#	$cableZX{$temp} = sprintf("%.4f", $db->Data("ZeroSequenceReactance")/$meter2ft);
+#	$cablePB{$temp} = sprintf("%.4f", $db->Data("PosSeqShuntSusceptance")/$meter2ft);
+#	$cableZB{$temp} = sprintf("%.4f", $db->Data("ZeroSequenceShuntSusceptance")/$meter2ft);
+#}
+
+# -2-CYME
+# ************************ read data for CYMEQSHUNTCAPACITOR
+#my $sql =
+#  "SELECT EquipmentId, RatedKVAR, RatedVoltageKVLL "
+#  . "FROM CYMEQSHUNTCAPACITOR;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ) {
+#	my $temp = $db->Data("EquipmentId"); 
+#	$capEquRatedKVAR{$temp} =  $db->Data("RatedKVAR"); 
+#	$capEquRatedKVLL{$temp} =  $db->Data("RatedVoltageKVLL")*1000; 
+#}
+
+# -2-SYNERGEE 
+# *********************** read data for capacitors from InstCapacitors
+$sql = "SELECT 	InstCapacitors.UniqueDeviceId,
+		RatedKv
+	FROM InstCapacitors;";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ) {
+	my $temp = $db->Data("UniqueDeviceId"); 
+	#$capEquRatedKVAR{$temp} =  $db->Data("RatedKVAR"); -not used
+	$capEquRatedKVLL{$temp} =  $db->Data("RatedKv")*1000; 
+}	
+
+# -3-CYME
+# ************************ read data for CYMEQFUSE
+#my $sql =
+#  "SELECT EquipmentId, FirstRatedCurrent, SecondRatedCurrent, "
+#  . "RatedVoltage, Reversible,SinglePhaseLocking "
+#  . "FROM CYMEQFUSE;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ) {
+#	my $temp = $db->Data("EquipmentId"); 
+#	$fuseEquRatedI1{$temp} =  $db->Data("FirstRatedCurrent"); 
+#	$fuseEquRatedI2{$temp} =  $db->Data("SecondRatedCurrent"); -not used
+#	$fuseEquRatedV{$temp} =  $db->Data("RatedVoltage"); -not used
+#	$fuseEquReversible{$temp} =  $db->Data("Reversible"); -not used
+#	$fuseEquSinglPhaseLocking{$temp} =  $db->Data("SinglePhaseLocking"); -not used
+#}	
+
+# -3-SYNERGEE
+# ************************ read fuse data from InstFuses
+$sql = 	"SELECT InstFuses.UniqueDeviceId,
+		InstFuses.AmpRating
+	FROM InstFuses;";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ) {
+	my $temp = $db->Data("UniqueDeviceId"); 
+	$fuseEquRatedI1{$temp} =  $db->Data("AmpRating");
+}	
+
+# -4-CYME
+# ************************ read data for CYMEQREGULATOR
+#my $sql =
+#  "SELECT EquipmentId, FirstRatedKVA, SecondRatedKVA, "
+#  . "RatedKVLN, MaximumBoost,MaximumBuck, BandWidth, CTPrimaryRating, "
+#  . "PTRatio,NumberOfTaps "
+#  . "FROM CYMEQREGULATOR;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ) {
+#	my $temp = $db->Data("EquipmentId"); 
+#	$regEquRatedKVA1{$temp} =  $db->Data("FirstRatedKVA"); -not used	   
+#	$regEquRatedKVA2{$temp} =  $db->Data("SecondRatedKVA"); -not used	   
+#	$regEquRatedKVLN{$temp} =  $db->Data("RatedKVLN"); -not used	   
+#	$regEquMaxBoost{$temp} =  $db->Data("MaximumBoost"); -not used	   
+#	$regEquMaxBuck{$temp} =  $db->Data("MaximumBuck"); -not used	   
+#	$regEquBW{$temp} =  $db->Data("BandWidth"); -not used	   
+#	$regEquCT{$temp} =  $db->Data("CTPrimaryRating"); -not used	   
+#	$regEquPT{$temp} =  $db->Data("PTRatio"); -not used	   
+#	$regEquTaps{$temp} =  $db->Data("NumberOfTaps"); 	   	   
+#}
+
+# -4-SYNERGEE 
+# ************************* read regulator data from InstRegulators
+$sql = "SELECT InstRegulators.UniqueDeviceId
+	FROM InstRegulators;";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ) {
+	my $temp = $db->Data("UniqueDeviceId"); 
+	#$regEquTaps{$temp} =  $db->Data("NumberOfTaps"); 	   	   
+}	
+
+# -5-CYME
+# ************************ read data for CYMEQOVERHEADLINE
+#my $sql =
+#  "SELECT EquipmentId, PhaseConductorId, NeutralConductorId, "
+#  . "ConductorSpacingId, FirstRating "
+#  . "FROM CYMEQOVERHEADLINE;";
+#SQLError() if ( $db->Sql($sql) );
+#while ( $db->FetchRow() ) {
+#	my $temp = $db->Data("EquipmentId"); 
+#	my $temp_p = $db->Data("PhaseConductorId");
+#	my $temp_n = $db->Data("NeutralConductorId");
+#	$temp_p = $temp_p."_OH" if ($temp_p =~ /DEFAULT/i);
+#	$temp_n = $temp_n."_OH" if ($temp_n =~ /DEFAULT/i);		
+#	$LineIDP{$temp}  =  $temp_p; 
+#	$LineIDN{$temp}  =  $temp_n; 
+#	$LineIDSpacing{$temp}  =  $db->Data("ConductorSpacingId");
+#	push @OHConds,  $temp_p;
+#	push @OHConds,  $temp_n;
+#}
+
+# -5-SYNERGEE
+# ************************ read overhead line data from InstSection
+$sql = "SELECT SectionId, PhaseConductorId, NeutralConductorId
+	FROM InstSection
+	WHERE Description = 'OH';";
+SQLError() if ( $db->Sql($sql) );
+while ( $db->FetchRow() ) {
+	my $temp = $db->Data("SectionId"); 
+	my $temp_p = $kihei_Conductors{$db->Data("PhaseConductorId")};
+	my $temp_n = $kihei_Conductors{$db->Data("NeutralConductorId")};	
+	$LineIDP{$temp}  =  $temp_p; 
+	$LineIDN{$temp}  =  $temp_n; 
+	#$LineIDSpacing{$temp}  =  $db->Data("ConductorSpacingId");
+	$LineIDSpacing{$temp}  =  "HORIZONTAL"; 
+	push @OHConds,  $temp_p;
+	push @OHConds,  $temp_n;
+	
+}	
+
+## ************************ read data for CYMEQSERIESREACTOR
+#my $sql =
+#  "SELECT EquipmentId, FirstRatedCurrent, SecondRatedCurrent, ReactanceOhms "
+#  . "FROM CYMEQSERIESREACTOR;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ) {
+#	my $temp = $db->Data("EquipmentId"); 
+#	$SXEquRatedI1{$temp} =  $db->Data("FirstRatedCurrent"); 
+#	#$SXEquRatedI2{$temp} =  $db->Data("SecondRatedCurrent"); -not used 
+#	$SXX{$temp} =  $db->Data("ReactanceOhms"); 
+#}	
+## End of reading from equipment database
+#$db->Close();
+## Open network database file for data
+#my $dsnMod="Driver={Microsoft Access Driver (*.mdb)};Dbq=$dbModFile;Uid=Admin;Pwd=";
+#my $db = Win32::ODBC->new($dsnMod) or die( Win32::ODBC::Error() );
+## ************************  read data from  CYMNETWORK -not used
+#$sql = "SELECT NetworkId FROM CYMNETWORK;";
+#SQLError() if ( $db->Sql($sql) );
+#while ( $db->FetchRow() ){  
+#	push @networkIDs, $db->Data("NetworkId"); 
+#}
+
+# -6-CYME	
+# ************************ read data from CYMNODE:
+#$sql = "SELECT NodeId, X, Y FROM CYMNODE;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("NodeId");
+#	push @nodes, $temp;
+#	$nodeX{$temp} = $db->Data("X"); -not used
+#	$nodeY{$temp} = $db->Data("Y"); -not used
+#	#$nodeNetworkID{$temp} = $db->Data("NetworkId"); -not used
+#}	
+
+# -6-SYNERGEE
+# ************************ read Node data from InstSection
+# -- if node is listed in either 'To' or 'From' columns of InstSection for any section catagorized under the feeder in question,
+#    it is included in this node list.
+$sql = "SELECT DISTINCT(NodeId)
+	FROM (
+		SELECT DISTINCT(IIF(FromNodeId like 'e%', FromNodeId & '_node', FromNodeId)) AS NodeId FROM InstSection
+		UNION
+		SELECT DISTINCT(IIf(ToNodeId like 'e%', ToNodeId & '_node', ToNodeId)) AS NodeId FROM InstSection)
+	AS temp_table
+	ORDER BY NodeId;";
+
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	my $temp = $db->Data("NodeId");
+	push @nodes, $temp;	
+}
+
+foreach (@nodes) {
+        $_ =~ s/\s/_/g; # replace spaces with underscores
+}
+
+# -7-CYME
+# ************************ read data from CYMOVERHEADLINE:
+#$sql = "SELECT DeviceNumber, LineId, Length "
+#	   ."FROM CYMOVERHEADLINE;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber");
+#	push @OHSecs, $temp;
+#	$OHLineID{$temp} = $db->Data("LineId");
+#	$OHLength{$temp} = sprintf("%.3f", $db->Data("Length") * $meter2ft);
+#}
+
+# -7-SYNERGEE
+# ************************* read overhead line data from InstSection
+$sql = "SELECT 	SectionId,
+		SectionLength_MUL
+	FROM InstSection
+	WHERE	Description = 'OH';";
+
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	my $temp = $db->Data("SectionId");
+	push @OHSecs, $temp;
+	$OHLineID{$temp} = $db->Data("SectionId");
+	$OHLength{$temp} = sprintf("%.3f", $db->Data("SectionLength_MUL") #* $meter2ft
+				   );
+}	
+
+# -8-CYME
+# ************************ read data from CYMOVERHEADBYPHASE:
+#$sql = "SELECT DeviceNumber, PhaseConductorIdA, PhaseConductorIdB, PhaseConductorIdC, "
+#       ."NeutralConductorId, ConductorSpacingId, Length "
+#	   ."FROM CYMOVERHEADBYPHASE;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber");
+#	push @OHSecs, $temp;
+#	$OHA{$temp} = $db->Data("PhaseConductorIdA");
+#	$OHB{$temp} = $db->Data("PhaseConductorIdB");
+#	$OHC{$temp} = $db->Data("PhaseConductorIdC");
+#	$OHN{$temp} = $db->Data("NeutralConductorId");
+#	push @OHConds, $db->Data("PhaseConductorIdA");
+#	push @OHConds, $db->Data("PhaseConductorIdB");
+#	push @OHConds, $db->Data("PhaseConductorIdC");
+#	push @OHConds, $db->Data("NeutralConductorId");	
+#	$OHSpacing{$temp} = $db->Data("ConductorSpacingId");
+#	$OHLength{$temp} = sprintf("%.3f", $db->Data("Length") * $meter2ft);
+#}
+
+# -8-SYNERGEE
+# ************************* read conductors-by-phase (overhead) info from InstSection
+$sql = "SELECT 	SectionId,
+		PhaseConductorId,
+		PhaseConductor2Id,
+		PhaseConductor3Id,
+		NeutralConductorId,
+		SectionLength_MUL
+	FROM InstSection
+	WHERE Description = 'OH';";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	my $temp = $db->Data("SectionId");
+	push @OHSecs, $temp;
+	$OHA{$temp} = $kihei_Conductors{$db->Data("PhaseConductorId")};
+	$OHB{$temp} = SpaceReplace($db->Data("PhaseConductor2Id"));
+	$OHC{$temp} = SpaceReplace($db->Data("PhaseConductor3Id"));
+	$OHN{$temp} = $kihei_Conductors{$db->Data("NeutralConductorId")};
+	push @OHConds, $kihei_Conductors{$db->Data("PhaseConductorId")};
+	my $tempCond2 = $db->Data("PhaseConductor2Id");
+	if (exists $kihei_Conductors{$tempCond2}){
+		push @OHConds, SpaceReplace($kihei_Conductors{$db->Data("PhaseConductor2Id")});	
+	}else{
+		push @OHConds, SpaceReplace($db->Data("PhaseConductor2Id"));
+	}
+	my $tempCond3 = $db->Data("PhaseConductor3Id");
+	if (exists $kihei_Conductors{$tempCond3}){
+		push @OHConds, SpaceReplace($kihei_Conductors{$db->Data("PhaseConductor3Id")});	
+	}else{
+		push @OHConds, SpaceReplace($db->Data("PhaseConductor3Id"));
+	}
+	push @OHConds, $kihei_Conductors{$db->Data("NeutralConductorId")};	
+	#$OHSpacing{$temp} = $db->Data("ConductorSpacingId");
+	$OHSpacing{$temp}  =  "HORIZONTAL"; 
+	$OHLength{$temp} = sprintf("%.3f", $db->Data("SectionLength_MUL") #* $meter2ft
+				   );
+}	
+
+# -9-CYME
+# ************************ read data from CYMUNDERGROUNDLINE:
+#$sql = "SELECT DeviceNumber, CableId, Length "
+#	   ."FROM CYMUNDERGROUNDLINE;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber");
+#	push @UGSecs, $temp;
+#	my $temp_cable = $db->Data("CableId");
+#	$UGCable{$temp} = $db->Data("CableId");
+#	push @cables, $temp_cable;
+#	$UGLength{$temp} = sprintf("%.3f", $db->Data("Length") * $meter2ft);
+#}	
+
+# -9-SYNERGEE
+# ************************ read underground conductor info from InstSection
+# -- 'CableID' in CYME is used as underground conductor id, so here we're using PhaseConductorId in place of CableID id
+$sql = "SELECT SectionId, PhaseConductorId, SectionLength_MUL
+	FROM InstSection
+	WHERE Description = 'UG';";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	my $temp = $db->Data("SectionId");
+	push @UGSecs, $temp;
+	my $temp_cable = $kihei_Conductors{$db->Data("PhaseConductorId")};
+	$UGCable{$temp} = $kihei_Conductors{$db->Data("PhaseConductorId")};
+	push @cables, $temp_cable;
+	$UGLength{$temp} = sprintf("%.3f", $db->Data("SectionLength_MUL") #* $meter2ft
+				   );
+}	
+
+# -9.5-SYNERGEE 
+# *********************** read SectionID's from InstSection that are not OH or UG
+$sql = "SELECT SectionId, SectionLength_MUL
+	FROM InstSection
+	WHERE Description <> 'UG'
+	AND   Description <> 'OH';";
+	
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){
+	my $temp = $db->Data("SectionId");
+	push @OtherSecs, $temp;
+	$OtherLength{$temp} = sprintf("%.3f", $db->Data("SectionLength_MUL"));
+}
+
+# -10-CYME
+# ************************ read data from CYMSECTION:
+#$sql = "SELECT SectionId, FromNodeId, ToNodeId, Phase "
+#	   ."FROM CYMSECTION;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("SectionId");
+#	push @secs, $temp;
+#	my $temp_Fnode = $db->Data("FromNodeId");
+#	my $temp_Tnode = $db->Data("ToNodeId");
+#	my $temp_p = int($db->Data("Phase"));
+#	my $temp_phase;
+#	$temp_phase= $convertPhase{$temp_p};
+#	# save spacing and line configuration for OH lines;
+#	if ( grep{$_ eq $temp} @OHSecs ) {
+#		my $temp_spacing = $OHSpacing{$temp}.":".$temp_phase;
+#		$temp_spacing = $LineIDSpacing{$OHLineID{$temp}}.":".$temp_phase if (exists $LineIDSpacing{$OHLineID{$temp}});
+#		push @LineSpacings, $temp_spacing;
+#		my $temp_cfg;
+#		$temp_cfg = $OHA{$temp}.":".$OHB{$temp}.":".$OHC{$temp}.":".$OHN{$temp}.":".$temp_spacing;
+#		$temp_cfg = $LineIDP{$OHLineID{$temp}}.":".$LineIDN{$OHLineID{$temp}}.":".$temp_spacing if (exists $LineIDSpacing{$OHLineID{$temp}});
+#		push @LineCFGs, $temp_cfg;
+#		$OHCFG{$temp} = $temp_cfg;
+#	}
+#	if ( grep{$_ eq $temp} @UGSecs ) {
+#		my $temp_cfg = $UGCable{$temp}.":".$temp_phase;
+#		push @UGLineCFGs, $temp_cfg;
+#		$UGCFG{$temp} = $temp_cfg;
+#	}
+#	$secPhase{$temp} = $temp_phase;	
+#	$secFrom{$temp} = $db->Data("FromNodeId");
+#	$secTo{$temp} = $db->Data("ToNodeId");
+#	push @To, $db->Data("ToNodeId");
+#	
+#	if ( !exists $hashNodePhase{$temp_Fnode} ) {
+#		$hashNodePhase{$temp_Fnode}	= $temp_phase; 
+#	} else {
+#		if ($hashNodePhase{$temp_Fnode}	ne $temp_phase){
+#			my $new_phase = combinePhases($temp_phase, $hashNodePhase{$temp_Fnode}) ;
+#			$hashNodePhase{$temp_Fnode} = $new_phase;
+#		}	
+#	}
+#	if ( !exists $hashNodePhase{$temp_Tnode} ) {
+#		$hashNodePhase{$temp_Tnode}	= $temp_phase; 
+#	} else {
+#		if ($hashNodePhase{$temp_Tnode}	ne $temp_phase){
+#			my $new_phase = combinePhases($temp_phase, $hashNodePhase{$temp_Tnode});
+#			$hashNodePhase{$temp_Tnode} = $new_phase;
+#		}	
+#	}		
+#}
+
+my (%hashFromNodePhase, %hashToNodePhase, @PhaseMismatches);
+# -10-SYNERGEE
+# ************************* read Section data from InstSection
+$sql = "SELECT SectionId, IIF(FromNodeId like 'e%', FromNodeId & '_node', FromNodeId) as FromNode, IIf(ToNodeId like 'e%', ToNodeId & '_node', ToNodeId) as ToNode, SectionPhases
+	FROM InstSection;";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	my $temp = $db->Data("SectionId");
+	push @secs, $temp;
+	my $temp_Fnode = $db->Data("FromNode");
+	$temp_Fnode =~ s/\s/_/g;
+	my $temp_Tnode = $db->Data("ToNode");
+	$temp_Tnode =~ s/\s/_/g;
+	my $temp_p = $db->Data("SectionPhases");
+	my $temp_phase;
+	$temp_phase= $convertPhase{$temp_p};
+	# save spacing and line configuration for OH lines;
+	if ( grep{$_ eq $temp} @OHSecs ) {
+		my $temp_spacing = $OHSpacing{$temp}.":".$temp_phase;
+		$temp_spacing = $LineIDSpacing{$OHLineID{$temp}}.":".$temp_phase if (exists $LineIDSpacing{$OHLineID{$temp}});
+		push @LineSpacings, $temp_spacing;
+		my $temp_cfg;
+		$temp_cfg = $OHA{$temp}.":".$OHB{$temp}.":".$OHC{$temp}.":".$OHN{$temp}.":".$temp_spacing;
+		$temp_cfg = $LineIDP{$OHLineID{$temp}}.":".$LineIDN{$OHLineID{$temp}}.":".$temp_spacing if (exists $LineIDSpacing{$OHLineID{$temp}});
+		push @LineCFGs, $temp_cfg;
+		$OHCFG{$temp} = $temp_cfg;
+	}
+	if ( grep{$_ eq $temp} @UGSecs ) {
+		my $temp_cfg = $UGCable{$temp}.":".$temp_phase;
+		push @UGLineCFGs, $temp_cfg;
+		$UGCFG{$temp} = $temp_cfg;
+	}
+	$secPhase{$temp} = $temp_phase;	
+	#$secFrom{$temp} = $db->Data("FromNode");
+	$secFrom{$temp} = $temp_Fnode;
+	#$secTo{$temp} = $db->Data("ToNode");
+	$secTo{$temp} = $temp_Tnode;
+	push @To, $db->Data("ToNode");
+	
+	if ( !exists $hashNodePhase{$temp_Fnode} ) {
+		$hashNodePhase{$temp_Fnode}	= $temp_phase;
+	} else {
+		if ($hashNodePhase{$temp_Fnode}	ne $temp_phase){
+			my $new_phase = combinePhases($temp_phase, $hashNodePhase{$temp_Fnode}) ;
+			$hashNodePhase{$temp_Fnode} = $new_phase;
+		}	
+	}
+	if ( !exists $hashNodePhase{$temp_Tnode} ) {
+		$hashNodePhase{$temp_Tnode}	= $temp_phase; 
+	} else {
+		if ($hashNodePhase{$temp_Tnode}	ne $temp_phase){
+			my $new_phase = combinePhases($temp_phase, $hashNodePhase{$temp_Tnode});
+			$hashNodePhase{$temp_Tnode} = $new_phase;
+		}	
+	}
+	
+	#create hashes for phases mismatch check
+	if ( !exists $hashFromNodePhase{$temp_Fnode} ) {
+		$hashFromNodePhase{$temp_Fnode}	= $temp_phase;
+	} else {
+		if ($hashFromNodePhase{$temp_Fnode}	ne $temp_phase){
+			my $new_phase = combinePhases($temp_phase, $hashFromNodePhase{$temp_Fnode}) ;
+			$hashFromNodePhase{$temp_Fnode} = $new_phase;
+		}	
+	}
+	if ( !exists $hashToNodePhase{$temp_Tnode} ) {
+		$hashToNodePhase{$temp_Tnode}	= $temp_phase; 
+	} else {
+		if ($hashToNodePhase{$temp_Tnode}	ne $temp_phase){
+			my $new_phase = combinePhases($temp_phase, $hashToNodePhase{$temp_Tnode});
+			$hashToNodePhase{$temp_Tnode} = $new_phase;
+		}	
+	}		
+}
+
+#check for phase mismatch coming in and out of nodes
+foreach my $n (@nodes) {
+	if (exists $hashFromNodePhase{$n} && exists $hashToNodePhase{$n}) {
+	    if ($hashFromNodePhase{$n} ne $hashToNodePhase{$n}) {
+		push @PhaseMismatches, $n;
+	    }
+	}
+}
+if ($#PhaseMismatches >=0 ) {
+	my(@ToSections,@FromSections);
+    my $p = "*** Warning: There is a mismatch between the phases entering and the phases exiting for the following ".@PhaseMismatches." nodes:\n".join("\n",@PhaseMismatches)."\n\n";
+    foreach my $m (@PhaseMismatches) {
+		@ToSections = ();
+		@FromSections = ();
+		foreach (keys %secTo){
+			if ($secTo{$_} eq $m){
+				push @ToSections, $_;
+			}
+		}
+		foreach (keys %secFrom){
+			if ($secFrom{$_} eq $m){
+				push @FromSections, $_;
+			}
+		}
+		print LOG_FILE "\n***Warning: Phase Mismatch, Node ".$m." has \n";
+			foreach(@ToSections){
+				print LOG_FILE "Section ".$_." coming in with phases ".$secPhase{$_}."\n";
+			}
+		print LOG_FILE "and\n";
+			foreach(@FromSections){
+				print LOG_FILE "Section ".$_." leaving with phases ".$secPhase{$_}."\n";
+			}
+	}
+	#if ($logfile eq 1) {
+	#print LOG_FILE $p;
+    #}
+    print $p;
+}
+
+# check for potential loops
+my @temp_to = findDuplicate(@To);
+if ($#temp_to >=0) {
+	print "*** Warning: Potential Loops: \n  There are ". @temp_to ." nodes recorded multiple times as \"ToNodes\". See $log for the list. \n\n";
+	if ($logfile eq 1){
+	    print LOG_FILE "*** Warning: Potential Loops (There are ".@temp_to." nodes recorded as \"To Nodes\"  more than once) :\n" . join("\n",@temp_to) . "\n\n";
+	}
+}
+
+# -11-CYME
+# ************************ read data from CYMSECTIONDEVICE:
+#$sql = "SELECT DeviceNumber, DeviceType, SectionId, Location "
+#	   ."FROM CYMSECTIONDEVICE;";
+#SQLError() if ( $db->Sql($sql) );
+#
+## 4 regulator 10 recloser 12 sectionalizer 13 switch 14 fuse 17 capacitor
+#
+#my @temp_sec_chks;
+#while ( $db->FetchRow() ){  
+#	my $temp_dev = $db->Data("DeviceNumber");	
+#	my $temp_type = $db->Data("DeviceType");
+#	# added a post-fix for type number 4-17.
+#	if (($temp_type >3) and ($temp_type<18)) {
+#		$temp_dev = $temp_dev."_".$temp_type;
+#		my $temp_devsec = $db->Data("SectionId");
+#		push @temp_sec_chks, $temp_devsec;
+#	}
+#	push @deviceNums, $temp_dev;
+#	$DevType{$temp_dev} = $db->Data("DeviceType");
+#	$DevSection{$temp_dev} = $db->Data("SectionId");
+#	$DevLoc{$temp_dev} = $db->Data("Location") if (($temp_type >3) and ($temp_type<18)) ;
+#	my $temp_sec = $db->Data("SectionId");
+#	$sectionDev{$temp_sec} = $temp_dev if (($temp_type >3) and ($temp_type<18)) ;
+#	if ($DevType{$temp_dev} eq 4 ) {
+#		push @regsec, $DevSection{$temp_dev};
+#	}
+#	if ($DevType{$temp_dev} eq 10 ) {
+#		push @recsec, $DevSection{$temp_dev};
+#	}
+#	if ($DevType{$temp_dev} eq 12 ) {
+#		push @sectionalizersec, $DevSection{$temp_dev};
+#	}
+#	if ($DevType{$temp_dev} eq 13 ) {
+#		push @swsec, $DevSection{$temp_dev};
+#	}
+#	if ($DevType{$temp_dev} eq 14 ) {
+#		push @fusesec, $DevSection{$temp_dev};
+#	}
+#	if ($DevType{$temp_dev} eq 16 ) {
+#		push @SXSec, $DevSection{$temp_dev};
+#	}
+#	
+#}
+
+# -11-SYNERGEE
+# ************************ collect device data
+# -- create a table like CYMESECTIONDEVICE from several tables in the SynerGee db. 
+$sql =	"SELECT UniqueDeviceId, 'Regulator' as DeviceType, SectionId, NearFromNode 
+	    FROM InstRegulators
+
+	    UNION 
+
+	    SELECT UniqueDeviceId, 'Recloser' as DeviceType, SectionId, NearFromNode
+	    FROM InstReclosers
+	    
+	    UNION
+
+	    SELECT UniqueDeviceId, 'Sectionalizer' as DeviceType, SectionId, NearFromNode
+	    FROM InstSectionalizers
+	    
+	    UNION
+
+	    SELECT UniqueDeviceId, 'Switch' as DeviceType, SectionId, NearFromNode
+	    FROM InstSwitches
+	    
+	    UNION
+
+	    SELECT UniqueDeviceId, 'Fuse' as DeviceType, SectionId, NearFromNode
+	    FROM InstFuses
+	    
+	    UNION 
+
+	    SELECT UniqueDeviceId, 'Capacitor' as DeviceType, SectionId, null as NearFromNode
+	    FROM InstCapacitors;";
+
+SQLError() if ( $db->Sql($sql) );
+
+my @temp_sec_chks;
+while ( $db->FetchRow() ){  
+	my $temp_dev = SpaceReplace($db->Data("UniqueDeviceId"));	
+	my $temp_type = $db->Data("DeviceType");
+	#$temp_dev = $temp_dev."_".$temp_type;
+	my $temp_devsec = $db->Data("SectionId");
+	#my $temp_sec = $db->Data("SectionId");
+	push @temp_sec_chks, $temp_devsec;
+	#push @temp_sec_chks, $temp_sec;
+	push @deviceNums, $temp_dev;
+	$DevType{$temp_dev} = $db->Data("DeviceType");
+	$DevSection{$temp_dev} = $db->Data("SectionId");
+	$DevLoc{$temp_dev} = $db->Data("NearFromNode"); 
+	my $temp_sec = $db->Data("SectionId");
+	$sectionDev{$temp_sec} = $temp_dev; 
+	if ($DevType{$temp_dev} eq "Regulator" ) {
+		push @regsec, $DevSection{$temp_dev};
+	}
+	if ($DevType{$temp_dev} eq "Recloser" ) {
+		push @recsec, $DevSection{$temp_dev};
+	}
+	if ($DevType{$temp_dev} eq "Sectionalizer" ) {
+		push @sectionalizersec, $DevSection{$temp_dev};
+	}
+	if ($DevType{$temp_dev} eq "Switch" ) {
+		push @swsec, $DevSection{$temp_dev};
+	}
+	if ($DevType{$temp_dev} eq "Fuse" ) {
+		push @fusesec, $DevSection{$temp_dev};
+	}
+	if ($DevType{$temp_dev} eq "Series_Reactor" ) {
+		push @SXSec, $DevSection{$temp_dev};
+	}
+	
+}
+
+# check for multiple devices on a section
+my @temp_check_section = findDuplicate(@temp_sec_chks);
+if ($#temp_check_section >=0) {
+	my $w = "*** Warning: at least two devices located at same line: \n". join("\n  ",@temp_check_section). "\n\n";
+	if ($logfile eq 1) {
+	    print LOG_FILE $w;
+	}else{
+	    print $w;
+	}
+}
+
+# -12-CYME
+# ************************ read data from CYMSWITCH:
+#$sql = "SELECT DeviceNumber, EquipmentId, Phase, " #, ActualStatus, "
+#	   ."TCCSettingId, NormalFeedingNodeId "
+#	   ."FROM CYMSWITCH;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber")."_13";
+#	$swEquID{$temp} = $db->Data("EquipmentId"); -not used
+#	$swPhase{$temp} = $convertPhase{int($db->Data("Phase"))};
+#	$swST{$temp} = 1;#$db->Data("ActualStatus");
+#	$swTCC{$temp} = $db->Data("TCCSettingId"); -not used
+#	$swFeedingNodeID{$temp} = $db->Data("NormalFeedingNodeId"); -not used
+#}
+
+# -12-SYNERGEE
+# ************************ read switch data from InstSwitches
+$sql = "SELECT 	UniqueDeviceId,
+		InstSection.SectionPhases,
+		InstSection.FromNodeId,
+		SwitchIsOpen
+	FROM InstSwitches
+	LEFT JOIN InstSection ON (InstSection.SectionId = InstSwitches.SectionId);";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	my $temp = SpaceReplace($db->Data("UniqueDeviceId"));
+	#$swPhase{$temp} = $convertPhase{int($db->Data("Phase"))};
+	$swPhase{$temp} = $convertPhase{$db->Data("SectionPhases")};
+	$swST{$temp} = $db->Data("SwitchIsOpen"); 
+}	
+
+# -13-CYME
+# ************************ read data from CYMSECTIONALIZER:
+#$sql = "SELECT DeviceNumber, EquipmentId, Phase, "#ActualStatus, "
+#	   ."TCCSettingId, NormalFeedingNodeId "
+#	   ."FROM CYMSECTIONALIZER;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber")."_12"; #added device type
+#	$sectionalizerEquID{$temp} = $db->Data("EquipmentId"); -not used
+#	$sectionalizerPhase{$temp} = $convertPhase{int($db->Data("Phase"))};
+#	$sectionalizerST{$temp} = 1;#$db->Data("ActualStatus");
+#	$sectionalizerTCC{$temp} = $db->Data("TCCSettingId"); -not used
+#	$sectionalizerFeedingNodeID{$temp} = $db->Data("NormalFeedingNodeId"); -not used
+#}
+
+# -13-SYNERGEE (not used for Kihei => probably needs further modification)
+# ************************ read sectionalizer data from InstSectionalizers
+$sql = "SELECT 	InstSectionalizers.UniqueDeviceId,
+		ConnectedPhases
+	FROM InstSectionalizers;";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	my $temp = $db->Data("UniqueDeviceId");
+	$sectionalizerPhase{$temp} = $convertPhase{int($db->Data("ConnectedPhases"))};
+	$sectionalizerST{$temp} = 1;#$db->Data("ActualStatus");
+}	
+
+# -14-CYME
+# ************************ read data from CYMFUSE:
+#$sql = "SELECT DeviceNumber, EquipmentId, Phase, "#ActualStatus, "
+#	   ."TCCSettingId, NormalFeedingNodeId "
+#	   ."FROM CYMFUSE;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber")."_14"; #added device type
+#	$fuseEquID{$temp} = $db->Data("EquipmentId");
+#	$fusePhase{$temp} = $convertPhase{int($db->Data("Phase"))}; -not used
+#	$fuseST{$temp} = 1;#$db->Data("ActualStatus");
+#	$fuseTCC{$temp} = $db->Data("TCCSettingId"); -not used
+#	$fuseFeedingNodeID{$temp} = $db->Data("NormalFeedingNodeId"); -not used
+#}
+
+# -14-SYNERGEE
+# *********************** read fuse data from InstFuses
+$sql = "SELECT 	InstFuses.UniqueDeviceId,
+		ConnectedPhases,
+		InstSection.FromNodeId,
+		FuseIsOpen
+	FROM InstFuses
+	LEFT JOIN InstSection ON (InstSection.SectionId = InstFuses.SectionId);";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	#my $temp = $db->Data("DeviceNumber")."_14"; #added device type
+	my $temp = $db->Data("UniqueDeviceId");
+	$fuseEquID{$temp} = $db->Data("UniqueDeviceId");
+	$fuseST{$temp}=$db->Data("FuseIsOpen");
+}	
+
+# -15-CYME
+## ************************ read data from CYMSERIESREACTOR:
+#$sql = "SELECT DeviceNumber, EquipmentId, Phase "
+#	   ."FROM CYMSERIESREACTOR;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber")."_16"; #added device type
+#	$SXEquID{$temp} = $db->Data("EquipmentId");
+#	$SXPhase{$temp} = $convertPhase{int($db->Data("Phase"))};	
+#}	
+# -16-CYME
+# ************************ read data from CYMRECLOSER:
+#$sql = "SELECT DeviceNumber, EquipmentId, Phase, "#ActualStatus, "
+#	   ."TCCSettingId, NormalFeedingNodeId "
+#	   ."FROM CYMRECLOSER;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber")."_10"; #added device type;
+#	$recEquID{$temp} = $db->Data("EquipmentId"); -not used
+#	$recPhase{$temp} = $convertPhase{int($db->Data("Phase"))};
+#	$recST{$temp} = 1;#$db->Data("ActualStatus");
+#	$recTCC{$temp} = $db->Data("TCCSettingId"); -not used
+#	$recFeedingNodeID{$temp} = $db->Data("NormalFeedingNodeId"); -not used
+#}
+
+# -16-SYNERGEE 
+# ************************ read recloser data from InstReclosers
+$sql =	"SELECT InstReclosers.UniqueDeviceId, ConnectedPhases
+	FROM InstReclosers;";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	#my $temp = $db->Data("DeviceNumber")."_10"; #added device type;
+	my $temp = $db->Data("UniqueDeviceId");
+	$recPhase{$temp} = $convertPhase{$db->Data("ConnectedPhases")};
+	$recST{$temp} = 1;#$db->Data("ActualStatus");
+}	
+
+# -17-CYME
+# ************************ read data from CYMREGULATOR:
+#$sql = "SELECT DeviceNumber, EquipmentId, ConnectedPhase, ConnectionConfiguration, "
+#	   ."CTPrimaryRating, PTRatio,BandWidth,BoostPercent, BuckPercent,SettingOption,  "
+#	   ."TapPositionA, TapPositionB, TapPositionC, ControlStatus, NormalFeedingNodeId "
+#	   ."FROM CYMREGULATOR;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber")."_4"; #added device type
+#	$regEquID{$temp} = $db->Data("EquipmentId");
+#	$regPhase{$temp} = $RegconvertPhase{$db->Data("ConnectedPhase")};
+#	$regCFG{$temp} = $db->Data("ConnectionConfiguration"); -not used
+#	$regCT{$temp} = $db->Data("CTPrimaryRating");
+#	$regPT{$temp} = $db->Data("PTRatio");
+#	$regBW{$temp} = $db->Data("BandWidth");
+#	$regBoost{$temp} = $convertPhase{$db->Data("BoostPercent")}; -not used
+#	$regBuck{$temp} = $db->Data("BuckPercent"); -not used
+#	$regSetting{$temp} = $db->Data("SettingOption"); -not used
+#	$regTapA{$temp} = $db->Data("TapPositionA");
+#	$regTapB{$temp} = $db->Data("TapPositionB");
+#	$regTapC{$temp} = $db->Data("TapPositionC");
+#	$regCtrST{$temp} = $db->Data("ControlStatus"); -not used
+#	$regNormalFeedingNodeId{$temp} = $db->Data("NormalFeedingNodeId"); -not used	
+#}
+
+# -17-SYNERGEE 
+# ************************ read regulator info from InstRegulators
+$sql = "SELECT 	InstRegulators.UniqueDeviceId,
+		ConnectedPhases,
+		TapPositionPhase1,
+		TapPositionPhase2,
+		TapPositionPhase3
+	FROM InstRegulators;";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	#my $temp = $db->Data("DeviceNumber")."_4"; #added device type
+	my $temp = $db->Data("UniqueDeviceId");
+	$regEquID{$temp} = $db->Data("UniqueDeviceId");
+	$regPhase{$temp} = $RegconvertPhase{$db->Data("ConnectedPhases")};
+	#$regCT{$temp} = $db->Data("CTPrimaryRating");
+	#$regPT{$temp} = $db->Data("PTRatio");
+	#$regBW{$temp} = $db->Data("BandWidth");
+	$regTapA{$temp} = $db->Data("TapPositionPhase1");
+	$regTapB{$temp} = $db->Data("TapPositionPhase2");
+	$regTapC{$temp} = $db->Data("TapPositionPhase3");
+}	
+
+# -18-CYME
+# ************************ read data from CYMSOURCE:
+##$sql = "SELECT NodeId, NetworkId, EquipmentId "
+##	   ."FROM CYMSOURCE;";
+##SQLError() if ( $db->Sql($sql) );
+##
+##while ( $db->FetchRow() ){  
+##	$source = $db->Data("NodeId");
+##	$sourceEqID{$source} = $db->Data("EquipmentId");
+##}
+
+# -18-SYNERGEE
+# ************************ get source node
+my$feederID = $feederName;
+$feederID =~ s/_/ /; #need the space for query from db
+
+$sql = "SELECT FromNodeId, SectionId
+	FROM InstSection
+	WHERE FromNodeId = '$feederID';";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	$source = SpaceReplace($db->Data("FromNodeId"));
+	$sourceEqID{$source} = $db->Data("SectionId");
+}	
+
+# -19-CYME
+# ************************ read data from CYMSHUNTCAPACITOR:
+#$sql = "SELECT DeviceNumber, EquipmentId, Status, Phase, "
+#	   ."ConnectionConfiguration, KVARA,KVARB,KVARC,KVLN, CapacitorControlType "
+#	   ."FROM CYMSHUNTCAPACITOR;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber")."_17"; #added device type
+#	push @shuntcaps, $temp;
+#	$capEquID{$temp} = $db->Data("EquipmentId");
+#	$capST{$temp} = $db->Data("Status");
+#	$capPhase{$temp} = $convertPhase{int($db->Data("Phase"))};
+#	$capCFG{$temp} = $db->Data("ConnectionConfiguration"); -not used
+#	$capA{$temp} = $db->Data("KVARA");
+#	$capB{$temp} = $db->Data("KVARB");
+#	$capC{$temp} = $db->Data("KVARC");
+#	$capVLN{$temp} = $db->Data("KVLN,"); -not used
+#	my $type = $db->Data("CapacitorControlType");
+#	$capType{$temp} = $type;	
+#	$flag_time = 1 if ($type eq 1);
+#	$flag_kvar = 1 if ($type eq 2);
+#	$flag_current = 1 if ($type eq 3);
+#	$flag_pf = 1 if ($type eq 4);
+#	$flag_reactive = 1 if ($type eq 5);
+#	$flag_temp = 1 if ($type eq 6);
+#	$flag_voltage = 1 if ($type eq 7);
+#}
+
+# -19-SYNERGEE 
+# ************************** read capacitor data from InstCapacitors
+$sql = "SELECT 	InstCapacitors.SectionId,
+		UniqueDeviceId,
+		CapacitorIsOn,
+		ConnectedPhases,
+		FixedKvarPhase1,
+		FixedKvarPhase2,
+		FixedKvarPhase3,
+		PrimaryControlMode
+	FROM InstCapacitors;";
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	#my $temp = $db->Data("DeviceNumber")."_17"; #added device type
+	my $temp = $db->Data("SectionId");
+	push @shuntcaps, $temp;
+	$capEquID{$temp} = $db->Data("UniqueDeviceId");
+	$capST{$temp} = $db->Data("CapacitorIsOn");
+	#$capPhase{$temp} = $convertPhase{int($db->Data("Phase"))};
+	$capPhase{$temp} = $convertPhase{$db->Data("ConnectedPhases")};
+	$capA{$temp} = $db->Data("FixedKvarPhase1");
+	$capB{$temp} = $db->Data("FixedKvarPhase2");
+	$capC{$temp} = $db->Data("FixedKvarPhase3");
+	my $type = $db->Data("PrimaryControlMode");
+# 0-Manual; 1-Time; 2-kVAR; 3-Current; 4-Power Factor; 5-Reactive Current; 6-Temperature; 7-Voltage
+# THe following needs to be changed to work with SynerGee if capacitors are present. 
+	$capType{$temp} = $type;	
+	$flag_time = 1 if ($type eq 1);
+	$flag_kvar = 1 if ($type eq 2);
+	$flag_current = 1 if ($type eq 3);
+	$flag_pf = 1 if ($type eq 4);
+	$flag_reactive = 1 if ($type eq 5);
+	$flag_temp = 1 if ($type eq 6);
+	$flag_voltage = 1 if ($type eq 7);
+}
+
+# CYME- 
+#if ($flag_current eq 1) {
+## ************************ read data from CYMCAPACITORCONTROL_CURRENT
+#	$sql = "SELECT DeviceNumber, OnCurrent, OffCurrent, ControlledPhase "
+#	   ."FROM CYMCAPACITORCONTROL_CURRENT;";
+#	SQLError() if ( $db->Sql($sql) );
+#
+#	while ( $db->FetchRow() ){     
+#		my $temp = $db->Data("DeviceNumber")."_17";
+#		$capcurrentOn{$temp} = $db->Data("OnCurrent");
+#		$capcurrentOff{$temp} = $db->Data("OffCurrent");
+#		$capcurrentPhase{$temp} = $convertPhase{$db->Data("ControlledPhase")};
+#	}	
+#}	   
+#if ($flag_kvar eq 1) {
+## ************************ read data from CYMCAPACITORCONTROL_CURRENT
+#	$sql = "SELECT DeviceNumber, OnKVAR, OffKVAR, ControlledPhase "
+#	   ."FROM CYMCAPACITORCONTROL_KVAR;";
+#	SQLError() if ( $db->Sql($sql) );
+#
+#	while ( $db->FetchRow() ){     
+#		my $temp = $db->Data("DeviceNumber")."_17";
+#		$capvarOn{$temp} = $db->Data("OnKVAR")*1000;
+#		$capvarOff{$temp} = $db->Data("OffKVAR")*1000;
+#		$capvarPhase{$temp} = $convertPhase{$db->Data("ControlledPhase")};
+#	}	
+#}
+# -20-CYME
+# ************************ read data from CYMCUSTOMERLOAD to find the load phases:
+#$sql = "SELECT DeviceNumber, DeviceType, CustomerNumber, ConsumerClassId, "
+#	   ."LoadValueType, Phase, LoadValue1, LoadValue2, ConnectedKVA "
+#	   ."FROM CYMCUSTOMERLOAD;";
+#SQLError() if ( $db->Sql($sql) );
+#
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber");
+#	my $temp_phase = int($db->Data("Phase"));
+#	my $phase;
+#	$phase = "A" if ($temp_phase eq 1);
+#	$phase = "B" if ($temp_phase eq 2);
+#	$phase = "C" if ($temp_phase eq 3);	
+#	if ( exists $loadphase{$temp}) {
+#		$loadphase{$temp} = combinePhases($loadphase{$temp}, $phase);
+#	} else {
+#		$loadphase{$temp}  = $phase;			
+#	}	
+#}
+
+# -20-SYNERGEE 
+# ********************** read data from Loads to find load phases.
+$sql = "SELECT Loads.SectionId, InstSection.SectionPhases
+	FROM Loads
+	LEFT JOIN InstSection ON (InstSection.SectionId = Loads.SectionId)
+	UNION
+	SELECT 	InstLargeCust.SectionId & '_PV', InstSection.SectionPhases
+	FROM InstLargeCust
+	LEFT JOIN InstSection ON (InstSection.SectionId = InstLargeCust.SectionId)";
+	
+SQLError() if ( $db->Sql($sql) );
+
+while ( $db->FetchRow() ){  
+	my $temp = $db->Data("SectionId");
+	my $temp_phase = $convertPhase{$db->Data("SectionPhases")};
+	$temp_phase =~ s/N$//;
+	my $phase = $temp_phase;
+	$loadphase{$temp}  = $phase;				
+}	
+
+# -21-CYME
+# 19************************ reopen CYMCSTOMERLOAD table and read data:
+#$sql = "SELECT DeviceNumber, DeviceType, CustomerNumber, ConsumerClassId, "
+#	   ."LoadValueType, Phase, LoadValue1, LoadValue2, ConnectedKVA, NumberOfCustomer "
+#	   ."FROM CYMCUSTOMERLOAD;";
+#SQLError() if ( $db->Sql($sql) );
+#my $total_Rload=0;
+#my $total_Xload=0;
+#while ( $db->FetchRow() ){  
+#	my $temp = $db->Data("DeviceNumber");
+#	my $temp_phase = int($db->Data("Phase"));	
+#	my $phase;
+#	my $temp_load = $db->Data("LoadValue1");
+#	if (($temp_phase ne 0) and ($temp_load ne 0)){
+#		$phase = "A" if ($temp_phase eq 1);
+#		$phase = "B" if ($temp_phase eq 2);
+#		$phase = "C" if ($temp_phase eq 3);		
+#		my $temp_tn = $temp.":".$phase;	
+#		push @loads, $temp_tn;
+#		$loadPhase{$temp_tn} = $phase;
+#		$loadType{$temp_tn} = int($db->Data("DeviceType"));
+#		print "loadtype $temp_tn-> $loadType{$temp_tn}\n";
+#		$loadCustomerNum{$temp_tn} = $db->Data("CustomerNumber"); -not used
+#		$loadClass{$temp_tn} = $db->Data("ConsumerClassId");
+#		$loadClass{$temp} = $db->Data("ConsumerClassId");
+#		$loadValueType = $db->Data("LoadValueType");
+#		$loadV1 = $db->Data("LoadValue1");
+#		$loadV2 = $db->Data("LoadValue2");
+#		$loadKVA{$temp_tn} = $db->Data("ConnectedKVA");
+#		my $no_of_customer = $db->Data("NumberOfCustomer"); -not used
+#		$loadnoCust{$temp_tn} = sprintf("%d",$no_of_customer);
+#		if ($loadValueType eq 0) { #(KW & KVAR)
+#			$loadKW{$temp_tn} = $loadV1*1000;
+#			$loadKVAR{$temp_tn} = $loadV2*1000;
+#			$total_Rload = $total_Rload + $loadV1;
+#			$total_Xload = $total_Xload + $loadV2;
+#		} elsif	($loadValueType eq 1) { #(KVA & PF)
+#			if ($loadV2 >0) {
+#				$loadKW{$temp_tn} = sprintf("%.3f", $loadV1 * $loadV2/100 *1000);
+#				$loadKVAR{$temp_tn} = sprintf("%.3f", $loadV1 * sqrt(1-($loadV2/100)**2) * 1000);
+#			} else {	
+#				$loadKW{$temp_tn} = sprintf("%.3f", -$loadV1 * $loadV2/100 *1000);
+#				$loadKVAR{$temp_tn} = sprintf("%.3f", -$loadV1 * sqrt(1-($loadV2/100)**2) * 1000);
+#			}	
+#			$total_Rload = $total_Rload + $loadKW{$temp_tn}/1000;
+#			$total_Xload = $total_Xload + $loadKVAR{$temp_tn}/1000;
+#		} else	{ #(KW & PF)
+#			$loadKW{$temp_tn} = $loadV1*1000;
+#			$loadKVAR{$temp_tn} = sprintf("%.3f", $loadV1/($loadV2/100)* sqrt(1-($loadV2/100)**2) * 1000);
+#			$total_Rload = $total_Rload + $loadV1;
+#			$total_Xload = $total_Xload + $loadKVAR{$temp_tn}/1000;
+#		}	
+#		# spot loads
+#		if ($loadType{$temp_tn} eq 20) {
+#			if ($phase =~/A/i) {
+#				$spotloadKW1{$temp}= $loadKW{$temp_tn};
+#				$spotloadKVAR1{$temp}= $loadKVAR{$temp_tn};
+#				my $temp_rating = sqrt($loadKW{$temp_tn}**2 + $loadKVAR{$temp_tn}**2)/1000;
+#				my $return_rating = sprintf("%.1f", return_rating($temp_rating));
+#				$spotloadKVA1{$temp}= $return_rating;
+#			} elsif ($phase =~/B/i) {	
+#				$spotloadKW2{$temp}= $loadKW{$temp_tn};
+#				$spotloadKVAR2{$temp}= $loadKVAR{$temp_tn};
+#				my $temp_rating = sqrt($loadKW{$temp_tn}**2 + $loadKVAR{$temp_tn}**2)/1000;
+#				my $return_rating = sprintf("%.1f", return_rating($temp_rating));
+#				$spotloadKVA2{$temp}= $return_rating;
+#			} elsif ($phase =~ /C/i) {
+#				$spotloadKW3{$temp}= $loadKW{$temp_tn};
+#				$spotloadKVAR3{$temp}= $loadKVAR{$temp_tn};
+#				my $temp_rating = sqrt($loadKW{$temp_tn}**2 + $loadKVAR{$temp_tn}**2)/1000;
+#				my $return_rating = sprintf("%.1f", return_rating($temp_rating));
+#				$spotloadKVA3{$temp}= $return_rating;
+#			} else {
+#				print "*** warning: cannot recognize phase $phase at $temp_tn\n";
+#			}
+#			if ( !exists $spotload{$temp} ) {
+#				$spotload{$temp} = $temp;
+#				$spotloadPhase{$temp} = $phase;
+#			} else {	
+#				$spotloadPhase{$temp} = $spotloadPhase{$temp}.$phase;
+#			}	
+#			push @spotloads, $temp;
+#		}	
+#	}	
+#}
+## find distributed loads
+#for ( my $i = 0 ; $i <= $#loads ; $i++ ) {	
+#	my @temp = split(/\:/,$loads[$i]);
+#	my $type = $DevType{$DevSection{$temp[0]} };
+#	#print " $loads[$i] - >$loadClass{$loads[$i]} -> $loadType{$loads[$i]} \n";# if ($loads[$i] =~/776/);
+#	if (($loadType{$loads[$i]} eq 21) and ($loadKW{$loads[$i]} ne 0) and ($loadKVAR{$loads[$i]} ne 0)){
+#		# if residential load, use SPCT
+#		#if (($loadClass{$loads[$i]} =~ /Residential/i ) or (length($loadphase{$temp[0]}) <2)) {			
+#		if ($loadClass{$loads[$i]} =~ /Residential/i ) {			
+#			my $temp_spct_cfg = $loadKVA{$loads[$i]}.":".$loadPhase{$loads[$i]}.":".$type;
+#			$tn_cfg{$loads[$i]} = $temp_spct_cfg;
+#			push @SPCTCFG,$temp_spct_cfg;
+#			push @residential, $loads[$i];
+#			my $temp_tn1 = $loads[$i]."_tn";
+#			push @tn1, $temp_tn1;
+#			$tn1_phase{$temp_tn1} = $loadPhase{$loads[$i]};
+#		} else { #non_residential
+#			my @temp_key = split(/:/,$loads[$i]);
+#			$non_residential_phase{$temp_key[0]} = $loadphase{$temp_key[0]};
+#			push @non_residential, $temp_key[0];
+#			# 2. load
+#			if($temp_key[1] =~/A/i){ 
+#				$non_residential_KVA1{$temp_key[0]} = $loadKVA{$loads[$i]}; 
+#				$non_residential_KW1{$temp_key[0]} = $loadKW{$loads[$i]};
+#				$non_residential_KVAR1{$temp_key[0]} = $loadKVAR{$loads[$i]};				
+#			}	
+#			if($temp_key[1] =~/B/i){ 
+#				$non_residential_KVA2{$temp_key[0]} = $loadKVA{$loads[$i]}; 
+#				$non_residential_KW2{$temp_key[0]} = $loadKW{$loads[$i]};
+#				$non_residential_KVAR2{$temp_key[0]} = $loadKVAR{$loads[$i]};
+#			}
+#			if($temp_key[1] =~/C/i){ 
+#				$non_residential_KVA3{$temp_key[0]} = $loadKVA{$loads[$i]}; 
+#				$non_residential_KW3{$temp_key[0]} = $loadKW{$loads[$i]};
+#				$non_residential_KVAR3{$temp_key[0]} = $loadKVAR{$loads[$i]};
+#			}
+#		}	
+#	}
+#}
+
+# -21-SYNERGEE
+# ************************* read load data from Loads
+# -- InstLargeCust table is added as negative loads to represent PV
+# -- loads are grouped by section instead of by device like they were in CYME
+$sql = "SELECT 	Loads.SectionId,
+		InstSection.SectionPhases,
+		Loads.Phase1Kva, Loads.Phase2Kva, Loads.Phase3Kva,
+		Loads.Phase1Kw, Loads.Phase2Kw, Loads.Phase3Kw,
+		Loads.Phase1Kvar, Loads.Phase2Kvar, Loads.Phase3Kvar,
+		IsSpotLoad,
+		IIF([Loads.SectionId] like '%_OH', 'OH', IIF([Loads.SectionId] like '%_UG', 'UG', 'BB')) as Description,
+		InstSection.DistLoadCustZone,
+		'A' as LoadTableId
+		FROM ((Loads
+		LEFT JOIN InstSection ON (InstSection.SectionId = Loads.SectionId))
+		LEFT JOIN InstLargeCust ON (InstLargeCust.SectionId = Loads.SectionId))
+		WHERE InstLargeCust.SectionId is NULL
+		OR InstSection.SectionPhases <> 'ABCN'". # pull out all Loads w/o corresponding records in InstLargeCust, and any single-phase (in Loads table) 
+
+		"UNION
+
+		SELECT Loads.SectionId,
+		InstSection.SectionPhases,
+		Loads.Phase1Kva+InstLargeCust.GenPhase1Kw as Phase1Kva, Loads.Phase2Kva+InstLargeCust.GenPhase2Kw as Phase2Kva, Loads.Phase3Kva+InstLargeCust.GenPhase3Kw as Phase3Kva,
+		Loads.Phase1Kw+InstLargeCust.GenPhase1Kw as Phase1Kw, Loads.Phase2Kw+InstLargeCust.GenPhase2Kw as Phase2Kw, Loads.Phase3Kw+InstLargeCust.GenPhase3Kw as Phase3Kw,
+		Loads.Phase1Kvar,Loads.Phase2Kvar,Loads.Phase3Kvar,
+		IsSpotLoad,
+		IIF([Loads.SectionId] like '%_OH', 'OH', IIF([Loads.SectionId] like '%_UG', 'UG', 'BB')) as Description,
+				InstSection.DistLoadCustZone,
+		'AB' as LoadTableId
+		FROM ((Loads
+		LEFT JOIN InstSection ON (InstSection.SectionId = Loads.SectionId))
+		LEFT JOIN InstLargeCust ON (InstLargeCust.SectionId = Loads.SectionId))
+		WHERE InstLargeCust.SectionId is not NULL
+		AND InstSection.SectionPhases = 'ABCN'
+		AND InstLargeCust.SectionId <> 'name1'
+		AND InstLargeCust.SectionId <> 'name2'
+		AND InstLargeCust.SectionId <> 'name3'
+		AND InstLargeCust.SectionId <> 'name4'". # pull out all Loads with corresponding records in InstLargeCust (only 3-phase) and combine kW from the records (the named sections are the exceptions in 1384)
+		
+		"UNION
+		SELECT 	Loads.SectionId,
+		InstSection.SectionPhases,
+		Loads.Phase1Kva, Loads.Phase2Kva, Loads.Phase3Kva,
+		Loads.Phase1Kw, Loads.Phase2Kw, Loads.Phase3Kw,
+		Loads.Phase1Kvar, Loads.Phase2Kvar, Loads.Phase3Kvar,
+		IsSpotLoad,
+		IIF([Loads.SectionId] like '%_OH', 'OH', IIF([Loads.SectionId] like '%_UG', 'UG', 'BB')) as Description,
+		InstSection.DistLoadCustZone,
+		'A' as LoadTableId
+		FROM ((Loads
+		LEFT JOIN InstSection ON (InstSection.SectionId = Loads.SectionId))
+		LEFT JOIN InstLargeCust ON (InstLargeCust.SectionId = Loads.SectionId))
+		WHERE InstLargeCust.SectionId = 'name1'
+		OR InstLargeCust.SectionId = 'name2'
+		OR InstLargeCust.SectionId = 'name3'
+		OR InstLargeCust.SectionId = 'name4'". #need to get these loads 
+		
+		"UNION
+
+		SELECT 	InstLargeCust.SectionId & '_PV',
+		InstSection.SectionPhases,
+		GenPhase1Kw as Phase1Kva, GenPhase2Kw as Phase2Kva, GenPhase3Kw as Phase3Kva,
+		-GenPhase1Kw as Phase1Kw, -GenPhase2Kw as Phase2Kw, -GenPhase3kw as Phase3Kw,
+		GenPhase1Kvar as Phase1Kvar, GenPhase2Kvar as Phase2Kvar, GenPhase3Kvar as Phase3Kvar,
+		0 as IsSpotLoad,
+		IIF([InstLargeCust.SectionId] like '%_OH', 'OH', IIF([InstLargeCust.SectionId] like '%_UG', 'UG', 'BB')) as Description,
+		InstSection.DistLoadCustZone,
+		'B' as LoadTableId
+		FROM InstLargeCust
+		LEFT JOIN InstSection ON (InstSection.SectionId = InstLargeCust.SectionId)
+		WHERE InstSection.SectionPhases <> 'ABCN'
+		OR InstLargeCust.SectionId = 'name1'
+		OR InstLargeCust.SectionId = 'name2'
+		OR InstLargeCust.SectionId = 'name3'
+		OR InstLargeCust.SectionId = 'name4';"; # pull out records from InstLargeCust that are single-phase. These are PV (populated as negative loads)
+		
+SQLError() if ( $db->Sql($sql) );
+my $total_Rload=0;
+my $total_Xload=0;
+while ( $db->FetchRow() ){  
+	my $temp = $db->Data("SectionId");
+	my $phase = $convertPhase{$db->Data("SectionPhases")};
+	$phase =~ s/N$//; #remove the neutral
+	#my $phase = $temp_phase;
+	my $temp_tn = $temp.":".$phase;	#SectionID:phase
+	push @loads, $temp_tn;
+	$loadPhase{$temp_tn} = $phase; 
+	$loadType{$temp_tn} = $db->Data("Description");
+	$loadClass{$temp_tn} = $db->Data("DistLoadCustZone"); 
+	$loadClass{$temp} = $db->Data("DistLoadCustZone");
+	#-load KW
+	$loadKW1{$temp_tn} = $db->Data("Phase1Kw"); #kW for phase A
+	$loadKW2{$temp_tn} = $db->Data("Phase2Kw"); #kW for phase B
+	$loadKW3{$temp_tn} = $db->Data("Phase3Kw"); #kW for phase C
+	$loadV1 = $loadKW1{$temp_tn} + $loadKW2{$temp_tn} + $loadKW3{$temp_tn};
+	#-load KVAR
+	$loadKVAR1{$temp_tn} = $db->Data("Phase1Kvar"); #kVAR A
+	$loadKVAR2{$temp_tn} = $db->Data("Phase2Kvar"); #kVAR B
+	$loadKVAR3{$temp_tn} = $db->Data("Phase3Kvar"); #kVAR C
+	$loadV2 = $loadKVAR1{$temp_tn} + $loadKVAR2{$temp_tn} + $loadKVAR3{$temp_tn}; #kVAR total
+	#-load KVA
+	$loadKVA1{$temp_tn} = $db->Data("Phase1Kva"); #kVA A
+	$loadKVA2{$temp_tn} = $db->Data("Phase2Kva"); #kVA B
+	$loadKVA3{$temp_tn} = $db->Data("Phase3Kva"); #kVA C
+	$loadKVA{$temp_tn} = $loadKVA1{$temp_tn} + $loadKVA2{$temp_tn} + $loadKVA3{$temp_tn}; #kVA total
+	$IsSpotLoad{$temp_tn} = $db->Data("IsSpotLoad"); #(0|1)
+	#$IsSpotLoad{$temp_tn} = 0; # decided not to separate the spot loads, but read and print them according to load classification instead 
+	$LoadTableId{$temp_tn} = $db->Data("LoadTableId"); #(A=Loads|B=InstLargeCust) 
+	$loadKW{$temp_tn} = sprintf("%.3f", $loadV1*1000); #W total
+	$loadKVAR{$temp_tn} = sprintf("%.3f", $loadV2*1000); #VAR total
+	$total_Rload = $total_Rload + $loadV1; #kW, used later to check that printed loads in .glm add up correctly
+	$total_Xload = $total_Xload + $loadV2; #kVAR
+		
+	# spot loads (decided to absorb spot loads into either Res or Com classification instead of handling separately) 
+	#if ($IsSpotLoad{$temp_tn} eq 1) { #is spot load
+	if ($IsSpotLoad{$temp_tn} eq 45) { # set to ridiculous number since we aren't using this spot load stuff now 
+			if ($phase =~/A/i) {
+				$spotloadKW1{$temp}= $loadKW1{$temp_tn}*1000; #W
+				$spotloadKVAR1{$temp}= $loadKVAR1{$temp_tn}*1000; #VAR
+				#my $temp_rating = sqrt($loadKW{$temp_tn}**2 + $loadKVAR{$temp_tn}**2)/1000;
+				my $temp_rating = sqrt($loadKW1{$temp_tn}**2 + $loadKVAR1{$temp_tn}**2);
+				my $return_rating = sprintf("%.1f", return_rating($temp_rating));
+				$spotloadKVA1{$temp}= $return_rating;
+			}
+			if ($phase =~/B/i){
+				$spotloadKW2{$temp}= $loadKW2{$temp_tn}*1000; #W
+				$spotloadKVAR2{$temp}= $loadKVAR2{$temp_tn}*1000; #VAR
+				#my $temp_rating = sqrt($loadKW{$temp_tn}**2 + $loadKVAR{$temp_tn}**2)/1000;
+				my $temp_rating = sqrt($loadKW2{$temp_tn}**2 + $loadKVAR2{$temp_tn}**2);
+				my $return_rating = sprintf("%.1f", return_rating($temp_rating));
+				$spotloadKVA2{$temp}= $return_rating;
+			} 
+			if ($phase =~ /C/i) {
+				$spotloadKW3{$temp}= $loadKW3{$temp_tn}*1000; #W
+				$spotloadKVAR3{$temp}= $loadKVAR3{$temp_tn}*1000; #VAR
+				#my $temp_rating = sqrt($loadKW{$temp_tn}**2 + $loadKVAR{$temp_tn}**2)/1000;
+				my $temp_rating = sqrt($loadKW3{$temp_tn}**2 + $loadKVAR3{$temp_tn}**2);
+				my $return_rating = sprintf("%.1f", return_rating($temp_rating));
+				$spotloadKVA3{$temp}= $return_rating;
+			}
+			if ($phase !~ /(A|B|C)/i) {
+				print "*** warning: cannot recognize phase $phase at $temp_tn\n";
+			}
+			if ( !exists $spotload{$temp} ) {
+				$spotload{$temp} = $temp;
+				$spotloadPhase{$temp} = $phase;
+			} else {	
+				$spotloadPhase{$temp} = $spotloadPhase{$temp}.$phase;
+			}	
+			push @spotloads, $temp;
+	}		
+} #end fetchRow from DB 
+
+# find distributed loads
+my $ratedKVA;
+my ($temp_spct_cfg, $tempA, $tempA2, $tempB, $tempB2, $tempC, $tempC2, $spct_cfgA, $spct_cfgB, $spct_cfgC);
+for ( my $i = 0 ; $i <= $#loads ; $i++ ) {	
+	my @temp = split(/\:/,$loads[$i]); # $temp[0]=SectionID, $temp[1]=phases
+	my $type = $loadType{$loads[$i]};			
+	my $length = length($loadPhase{$loads[$i]}); #find number of phases
+	my $tempKVA = sprintf("%.0f", $loadKVA{$loads[$i]}/$length); #find kVA per phase
+	#if ($IsSpotLoad{$loads[$i]} == 0 && !($loadKW{$loads[$i]} == 0 && $loadKVAR{$loads[$i]} == 0)) { # if not a spot load, and not a 0 load
+	if (!($loadKW{$loads[$i]} == 0 && $loadKVAR{$loads[$i]} == 0)) { # if not a 0 load
+		#if ($LoadTableId{$loads[$i]} eq "A" || ($LoadTableId{$loads[$i]} eq "B" && $loadKW{$loads[$i]} >= ($resKWcutoff*-1000))) { #this was used before load classification was done
+		if ($loadClass{$loads[$i]} =~ /^r/i && $res_secondary == 1){ #if load class is one of the 6 residential zones.
+			my $temp_tn1; #for triplex nodes
+			if ($type eq "OH"){ #if overhead
+				if ($tempKVA <= 167 && !exists $FL_pole{$tempKVA}) { #if rating not in FL or NL hash for polemounted (167 is highest single-phase transformer rating)
+					$ratedKVA = NextGreatest($tempKVA, "pole");  #find next greatest hash value
+				}else{ #rating is in FL or NL hash, or rating is greater than 167
+					$ratedKVA = $tempKVA;
+				}
+			}else{ #if underground or busbar
+				if ($tempKVA <= 167 && !exists $FL_pad{$tempKVA}) { #if rating not in FL or NL hash for padmounted
+					$ratedKVA = NextGreatest($tempKVA, "pad"); #find next greatest hash value
+				}else{
+					$ratedKVA = $tempKVA;
+				}	
+			}
+			# Is kVA rating still too big for our single phase transformers?
+			my $ratedKVA_split2X = 0;
+			if ($ratedKVA <= 334 && $ratedKVA > 167) { #if per-phase rating is greater than 167 but less than 2*167, split rating again. 
+				my $tempKVA_split2X = $ratedKVA/2;
+				if ($type eq "OH"){
+					if (!exists $FL_pole{$tempKVA_split2X}){
+						$ratedKVA = NextGreatest($tempKVA_split2X, "pole");
+					}else{
+						$ratedKVA = $tempKVA_split2X;
+					}
+				}else{ #UG or BB
+					if (!exists $FL_pad{$tempKVA_split2X}){
+						$ratedKVA = NextGreatest($tempKVA_split2X, "pad");
+					}else{
+						$ratedKVA = $tempKVA_split2X;
+					}
+				}
+				$ratedKVA_split2X = 1;
+			}else{ #do nothing. TODO: write another split if necessary
+			}
+				
+			#for each phase, triplex node, transformer config are added
+			if ($loadPhase{$loads[$i]} =~ /A/){
+				$tempA 		= $temp[0].":A";
+				$tempA 		= $temp[0]."_S1:A" if ($ratedKVA_split2X == 1);
+				$temp_tn1 	= $tempA."_tn";
+				$spct_cfgA 	= $ratedKVA.":A:".$type;
+				push @tn1, $temp_tn1; 		#triplex nodes
+				push @residential, $tempA; 	#residential loads
+				push @SPCTCFG, $spct_cfgA; 	#transformer configurations
+				$tn1_phase{$temp_tn1} = "A";
+				$tn_cfg{$tempA} = $spct_cfgA;
+				if ($ratedKVA_split2X == 1) { # split the line one more time
+					$tempA2 = $temp[0]."_S2:A";
+					$temp_tn1 = $tempA2."_tn";
+					$tn1_phase{$temp_tn1} = "A";
+					push @tn1, $temp_tn1;
+					push @residential, $tempA2;
+					$tn_cfg{$tempA2} = $spct_cfgA;
+				}
+			}
+			if ($loadPhase{$loads[$i]} =~ /B/){
+				$tempB 		= $temp[0].":B";
+				$tempB 		= $temp[0]."_S1:B" if ($ratedKVA_split2X == 1);
+				$temp_tn1 	= $tempB."_tn";
+				$spct_cfgB 	= $ratedKVA.":B:".$type;
+				push @tn1, $temp_tn1;
+				push @residential, $tempB;
+				push @SPCTCFG, $spct_cfgB;
+				$tn1_phase{$temp_tn1} = "B";
+				$tn_cfg{$tempB} = $spct_cfgB;  
+				if ($ratedKVA_split2X == 1) { # split the line one more time
+					$tempB2 = $temp[0]."_S2:B";
+					$temp_tn1 = $tempB2."_tn";
+					$tn1_phase{$temp_tn1} = "B";
+					push @tn1, $temp_tn1;
+					push @residential, $tempB2;
+					$tn_cfg{$tempB2} = $spct_cfgB;
+				} 				
+			}
+			if ($loadPhase{$loads[$i]} =~ /C/){
+				$tempC 		= $temp[0].":C";
+				$tempC 		= $temp[0]."_S1:C" if ($ratedKVA_split2X == 1);
+				$temp_tn1 	= $tempC."_tn";
+				$spct_cfgC 	= $ratedKVA.":C:".$type;
+				push @tn1, $temp_tn1;
+				push @residential, $tempC;
+				push @SPCTCFG, $spct_cfgC;
+				$tn1_phase{$temp_tn1} = "C";
+				$tn_cfg{$tempC} = $spct_cfgC;
+				if ($ratedKVA_split2X == 1) { # split the line one more time
+					$tempC2 = $temp[0]."_S2:C";
+					$temp_tn1 = $tempC2."_tn";
+					$tn1_phase{$temp_tn1} = "C";
+					push @tn1, $temp_tn1;
+					push @residential, $tempC2;
+					$tn_cfg{$tempC2} = $spct_cfgC;
+				}
+			}  	 
+		}else{#non_residential (also includes any unclassified, or 'Unknown' loads (TODO: change this in the future?) 
+			my @temp_key = split(/:/,$loads[$i]); # $temp_key[0]=SectionId, $temp_key[1]=phase
+			$non_residential_phase{$temp_key[0]} = $loadPhase{$loads[$i]};
+			push @non_residential, $temp_key[0];
+			if($temp_key[1] =~/A/i){ 
+				$non_residential_KVA1{$temp_key[0]} 	= sprintf("%.3f",$loadKVA1{$loads[$i]}); 		#kVA
+				$non_residential_KW1{$temp_key[0]} 		= sprintf("%.3f",$loadKW1{$loads[$i]}*1000); 	#W
+				$non_residential_KVAR1{$temp_key[0]} 	= sprintf("%.3f",$loadKVAR1{$loads[$i]}*1000);  #VAR
+			}	
+			if($temp_key[1] =~/B/i){ 
+				$non_residential_KVA2{$temp_key[0]} 	= sprintf("%.3f",$loadKVA2{$loads[$i]}); 		#kVA
+				$non_residential_KW2{$temp_key[0]} 		= sprintf("%.3f",$loadKW2{$loads[$i]}*1000); 	#W
+				$non_residential_KVAR2{$temp_key[0]} 	= sprintf("%.3f",$loadKVAR2{$loads[$i]}*1000);  #VAR
+			}
+			if($temp_key[1] =~/C/i){ 
+				$non_residential_KVA3{$temp_key[0]} 	= sprintf("%.3f",$loadKVA3{$loads[$i]}); 		#kVA
+				$non_residential_KW3{$temp_key[0]} 		= sprintf("%.3f",$loadKW3{$loads[$i]}*1000); 	#W
+				$non_residential_KVAR3{$temp_key[0]} 	= sprintf("%.3f",$loadKVAR3{$loads[$i]}*1000);  #VAR
+			}
+		}	
+	}
+} #END find distributed loads
+
+$db->Close(); # END reading from  database
+
+# define voltages
+#$my $temp_VLN = ($NominalVLL{$sourceEqID{$source}}+$DisiredVLL{$sourceEqID{$source}})/2;
+#my $VLN = sprintf("%.3f",($DisiredVLL{$sourceEqID{$source}})*1000/sqrt(3)) ;
+my $VLN = sprintf("%.3f",(12.47)*1000/sqrt(3)) ;# Using nominalkvll from InstFeeders table. 
+#my $VLN = 7379.25;
+my $realb  = sprintf("%.3f", $VLN * cos( -120 * $pi / 180.0 ) );
+my $imageb = sprintf("%.3f", $VLN * sin( -120 * $pi / 180.0 ) );
+my $realc  = sprintf("%.3f", $VLN * cos( 120  * $pi / 180.0 ) );
+my $imagec = sprintf("%.3f", $VLN * sin( 120  * $pi / 180.0 ) );
+my $VA = $VLN."+0.000j";
+my $VB = $realb.$imageb."j";
+my $VC = $realc."+".$imagec."j";
+#my $V2nd = 124;
+my $V2nd = 120;
+my $temp_ratio = $VLN/$V2nd;
+#print "ratio = $temp_ratio \n";-
+my $realb2  = sprintf("%.3f", $V2nd * cos( -120 * $pi / 180.0 ) );
+my $imageb2 = sprintf("%.3f", $V2nd * sin( -120 * $pi / 180.0 ) );
+my $realc2  = sprintf("%.3f", $V2nd * cos( 120  * $pi / 180.0 ) );
+my $imagec2 = sprintf("%.3f", $V2nd * sin( 120  * $pi / 180.0 ) );
+my $VA2 = $V2nd."+0.000j";
+my $VB2 = $realb2.$imageb2."j";
+my $VC2 = $realc2."+".$imagec2."j";
+
+# we don't want to print duplicate objects to the .glm
+@UniqueLineCFGs=findUnique(@LineCFGs);
+@UniqueUGLineCFGs=findUnique(@UGLineCFGs);
+@UniqueLineSpacings=findUnique(@LineSpacings);
+@UniqueOHConds=findUnique(@OHConds);
+@UniqueSPCTCFG = findUnique(@SPCTCFG);
+@uniquespotloads = findUnique(@spotloads);
+@UGcables = findUnique(@cables);
+@unique_non_residential = findUnique(@non_residential);
+@uniqueOHSecs = findUnique (@OHSecs);
+@uniqueUGSecs = findUnique (@UGSecs);
+
+# find spot loads 
+# for ( my $i = 0 ; $i <= $#uniquespotloads ; $i++ ) {	
+	# #my $temp_type = $DevType{$DevSection{$uniquespotloads[$i]} };
+	# my $temp_type = $DevType{$uniquespotloads[$i]};
+	# my $temp_cfg = $spotloadKVA1{$uniquespotloads[$i]}.":".$spotloadKVA2{$uniquespotloads[$i]}.":".
+		# $spotloadKVA3{$uniquespotloads[$i]}.":".$spotloadPhase{$uniquespotloads[$i]}.":".$temp_type;
+	# push @WYEWYECFG, $temp_cfg;
+# }		
+
+# # find non_residential distribute loads 
+# for ( my $i = 0 ; $i <= $#unique_non_residential ; $i++ ) {	
+	# #my $temp_type = $DevType{$DevSection{$unique_non_residential[$i]} };
+	# my $temp_type = $DevType{$unique_non_residential[$i]};
+	# my $temp_cfg = $non_residential_KVA1{$unique_non_residential[$i]}.":"
+		# .$non_residential_KVA2{$unique_non_residential[$i]}.":"
+		# .$non_residential_KVA3{$unique_non_residential[$i]}.":"
+		# .$non_residential_phase{$unique_non_residential[$i]}.":".$temp_type;
+	# push @WYEWYECFG, $temp_cfg;
+# }		
+@uniqueWYEWYECFG = findUnique(@WYEWYECFG);
+
+
+# start creating .glm file
+printHeader();
+
+if ($volt_dump eq 1) {
+	printVoltDump();
+}
+
+print GLM_FILE "// Overhead Line Conductors\n";
+for ( my $i = 0 ; $i <= $#UniqueOHConds ; $i++ ) {
+	 printOHCond($UniqueOHConds[$i]) unless $UniqueOHConds[$i] eq "";
+}
+
+print GLM_FILE "// Underground Line Conductors\n";
+for ( my $i = 0 ; $i <= $#UGcables ; $i++ ) {	
+	printUGCond($UGcables[$i]);
+}
+
+print GLM_FILE "// Triplex Line\n";
+printTLCond();
+
+print GLM_FILE "// Overhead Line Spacings\n";
+for ( my $i = 0 ; $i <= $#UniqueLineSpacings ; $i++ ) {	
+	printLineSpacing($UniqueLineSpacings[$i]);
+}
+
+print GLM_FILE "// Underground Line Spacings\n";
+for ( my $i = 0 ; $i <= $#UniqueUGLineCFGs ; $i++ ) {	
+	printUGLineSpacing($UniqueUGLineCFGs[$i]);
+}	
+
+print GLM_FILE "// Overhead Line Configurations\n";
+for ( my $i = 0 ; $i <= $#UniqueLineCFGs ; $i++ ) {	
+	printLineCFG($UniqueLineCFGs[$i]);
+}	
+
+print GLM_FILE "// Underground Line Configurations\n";
+for ( my $i = 0 ; $i <= $#UniqueUGLineCFGs ; $i++ ) {
+	printUGLineCFG($UniqueUGLineCFGs[$i]);
+}	
+
+printDefaultCFG(); #configuration such that impedance is as low as possible for lines described as busbar
+
+print GLM_FILE "// Transformer Configurations\n";
+for ( my $i = 0 ; $i <= $#UniqueSPCTCFG ; $i++ ) {	
+	printSPCTCFG($UniqueSPCTCFG[$i]);
+}
+
+# print warnings:
+my(@SPCT_over75, @SPCT_under10, @SPCT_not_set);
+my @UniqueSPCT_over75 = findUnique(@SPCT_over75);
+my@i = join ( "\n", @UniqueSPCT_over75);
+my @UniqueSPCT_under10 = findUnique(@SPCT_under10);
+my@j = join ("\n", @UniqueSPCT_under10);
+my @UniqueSPCT_not_set = findUnique(@SPCT_not_set);
+my@n = join ("\n", @UniqueSPCT_not_set);
+my $w1 = "*** Warning: no transformer losses exist for SPCT ratings(KVA):\n@i. \n Set to no-load-loss = 0.0022, full-load-loss = 0.015.\n\n"; 
+my $w2 = "*** Warning: no transformer losses exist for SPCT ratings(KVA):\n@j. \n Set to no-load-loss = 0.004, full-load-loss = 0.028.\n\n";
+my $w3 = "*** Warning: no transfromer losses exists for SPCT ratings(KVA):\n@n. \n NO-LOAD-LOSS AND FULL-LOAD-LOSS NOT SET (defaults)!\n\n";
+
+if ($logfile eq 1) {
+    print LOG_FILE $w1 if (@UniqueSPCT_over75 ne 0);
+	print LOG_FILE $w2 if (@UniqueSPCT_under10 ne 0);
+	print LOG_FILE $w3 if (@UniqueSPCT_not_set ne 0);
+}else{
+    print  $w1 if (@UniqueSPCT_over75 ne 0);
+	print  $w2 if (@UniqueSPCT_under10 ne 0);
+	print  $w3 if (@UniqueSPCT_not_set ne 0);
+}
+
+=pod
+for ( my $i = 0 ; $i <= $#uniqueWYEWYECFG ; $i++ ) {	
+	printWYEWYECFG($uniqueWYEWYECFG[$i]);
+}	
+=cut
+
+print GLM_FILE "// Nodes\n";
+for ( my $i = 0 ; $i <= $#nodes ; $i++ ) {	
+	printNodes($nodes[$i]);
+}	
+
+for ( my $i = 0 ; $i <= $#uniquespotloads ; $i++ ) {	
+	#$ic = $ic + 1;
+	printSPOTLOAD($uniquespotloads[$i]);
+}	
+
+for ( my $i = 0 ; $i <= $#uniquespotloads ; $i++ ) {	
+	printMeter($uniquespotloads[$i]);
+}	
+
+for ( my $i = 0 ; $i <= $#uniquespotloads ; $i++ ) {	
+	#printXFMR($uniquespotloads[$i]);
+	printLine($uniquespotloads[$i]);
+}	
+
+for ( my $i = 0 ; $i <= $#unique_non_residential ; $i++ ) {	
+	printNon_Res($unique_non_residential[$i]);
+}	
+
+for ( my $i = 0 ; $i <= $#unique_non_residential ; $i++ ) {	
+	printNon_Res_Meter($unique_non_residential[$i]);
+}	
+
+for ( my $i = 0 ; $i <= $#unique_non_residential ; $i++ ) {	
+	#printNon_Res_XFMR($unique_non_residential[$i]);
+	printNon_Res_Line($unique_non_residential[$i]);
+}	
+
+
+for ( my $i = 0 ; $i <= $#swsec ; $i++ ) {	
+	printsw($swsec[$i]);
+}
+
+for ( my $i = 0 ; $i <= $#swsec ; $i++ ) {
+    if ($swsec[$i] !~ /^.*_BB$/){ #--if section is not Busbar
+	printswnode($swsec[$i]);
+    }
+}
+
+#- Not updated for SynerGee (no reclosers listed)
+for ( my $i = 0 ; $i <= $#recsec ; $i++ ) {	
+	printrec($recsec[$i]);
+}
+
+#- Not updated for SynerGee (no reclosers listed)
+for ( my $i = 0 ; $i <= $#recsec ; $i++ ) {	
+	printrecnode($recsec[$i]);
+}
+
+print GLM_FILE "// Fuses\n";
+for ( my $i = 0 ; $i <= $#fusesec ; $i++ ) {
+	printfuse($fusesec[$i]);
+}
+
+for ( my $i = 0 ; $i <= $#fusesec ; $i++ ) {
+    if ($fusesec[$i] !~ /^.*_BB$/){ #--if section is not Busbar
+	printfusenode($fusesec[$i]);
+    }
+}
+
+#- Not updated for SynerGee (no sectionalizers listed)
+for ( my $i = 0 ; $i <= $#sectionalizersec ; $i++ ) {	
+	printsectionalizer($sectionalizersec[$i]);
+}
+
+#- Not updated for SynerGee (no sectionalizers listed)
+for ( my $i = 0 ; $i <= $#sectionalizersec ; $i++ ) {	
+	printsectionalizernode($sectionalizersec[$i]);
+}
+
+#- Not updated for SynerGee (no regulators listed)
+for ( my $i = 0 ; $i <= $#regsec ; $i++ ) {
+	$hashRegCFG{$regsec[$i]} = $regsec[$i]."-regcfg";
+	printRegCFG($regsec[$i]);
+	
+}
+
+#- Not updated for SynerGee (no regulators listed)
+for ( my $i = 0 ; $i <= $#regsec ; $i++ ) {
+	printReg($regsec[$i]);
+}
+
+#- Not updated for SynerGee (no regulators listed)
+for ( my $i = 0 ; $i <= $#regsec ; $i++ ) {
+	printRegnode($regsec[$i]);
+}
+
+#- Not updated for SynerGee (no series reactors listed)
+for ( my $i = 0 ; $i <= $#SXSec ; $i++ ) {
+	printSX($SXSec[$i]);
+}
+
+#- Not updated for SynerGee (no series reactors listed)
+for ( my $i = 0 ; $i <= $#SXSec ; $i++ ) {	
+	printSXnode($SXSec[$i]);
+}
+
+# print OH sections
+print GLM_FILE "// OH Sections\n";
+#for ( my $i = 0 ; $i <= $#deviceNums ; $i++ ) {
+for ( my $i = 0 ; $i <= $#uniqueOHSecs ; $i++ ) {	
+	#if (($DevType{$deviceNums[$i]} eq 2) or ($DevType{$deviceNums[$i]} eq 3)) {
+		#if ( 	( !grep{$_ eq $deviceNums[$i]} @swsec ) and
+		#	 ( !grep{$_ eq $deviceNums[$i]} @fusesec ) and
+		#	 ( !grep{$_ eq $deviceNums[$i]} @SXSec ) and
+		#	 ( !grep{$_ eq $deviceNums[$i]} @regsec ) and
+		#	 ( !grep{$_ eq $deviceNums[$i]} @sectionalizersec ) and
+		#	 ( !grep{$_ eq $deviceNums[$i]} @recsec )) {
+		#	printOHSecs($deviceNums[$i]);
+		if ( 	 ( !grep{$_ eq $uniqueOHSecs[$i]} @swsec ) and
+			 ( !grep{$_ eq $uniqueOHSecs[$i]} @fusesec ) and
+			 ( !grep{$_ eq $uniqueOHSecs[$i]} @SXSec ) and
+			 ( !grep{$_ eq $uniqueOHSecs[$i]} @regsec ) and
+			 ( !grep{$_ eq $uniqueOHSecs[$i]} @sectionalizersec ) and
+			 ( !grep{$_ eq $uniqueOHSecs[$i]} @recsec )) {
+			printOHSecs($uniqueOHSecs[$i]);
+		} else {
+		}	
+	#}	
+}
+
+print GLM_FILE "// UG Sections\n";
+# print cable
+#for ( my $i = 0 ; $i <= $#deviceNums+1 ; $i++ ) {
+for ( my $i = 0 ; $i <= $#uniqueUGSecs; $i++ ) {
+	#if ($DevType{$deviceNums[$i]} eq 1) {
+		#if ( ( !grep{$_ eq $deviceNums[$i]} @swsec ) and
+		#	 ( !grep{$_ eq $deviceNums[$i]} @fusesec ) and
+		#	 ( !grep{$_ eq $deviceNums[$i]} @SXSec ) and
+		#	 ( !grep{$_ eq $deviceNums[$i]} @regsec ) and
+		#	 ( !grep{$_ eq $deviceNums[$i]} @sectionalizersec ) and
+		#	 ( !grep{$_ eq $deviceNums[$i]} @recsec )) {
+		#	printUGSecs($deviceNums[$i]);
+		#}
+		if ( ( !grep{$_ eq $uniqueUGSecs[$i]} @swsec ) and
+			 ( !grep{$_ eq $uniqueUGSecs[$i]} @fusesec ) and
+			 ( !grep{$_ eq $uniqueUGSecs[$i]} @SXSec ) and
+			 ( !grep{$_ eq $uniqueUGSecs[$i]} @regsec ) and
+			 ( !grep{$_ eq $uniqueUGSecs[$i]} @sectionalizersec ) and
+			 ( !grep{$_ eq $uniqueUGSecs[$i]} @recsec )) {
+			printUGSecs($uniqueUGSecs[$i]);
+		}	
+	#}	
+}
+
+# print 'other' sections
+# 'other' sections are busbar sections, or others not classified as OH or UG in the db.
+#  They will use a default line configuration such that they will have nearly no impedence value
+for ( my $i = 0 ; $i <= $#OtherSecs; $i++ ) {
+		if ( ( !grep{$_ eq $OtherSecs[$i]} @swsec ) and
+			 ( !grep{$_ eq $OtherSecs[$i]} @fusesec ) and
+			 ( !grep{$_ eq $OtherSecs[$i]} @SXSec ) and
+			 ( !grep{$_ eq $OtherSecs[$i]} @regsec ) and
+			 ( !grep{$_ eq $OtherSecs[$i]} @sectionalizersec ) and
+			 ( !grep{$_ eq $OtherSecs[$i]} @recsec )) {
+			printOtherSecs($OtherSecs[$i]);
+		}	
+	#}	
+}
+# print tn1
+for ( my $i = 0 ; $i <= $#tn1 ; $i++ ) {	
+	printTN1($tn1[$i]);
+}
+
+# print tn load
+for ( my $i = 0 ; $i <= $#residential ; $i++ ) {	
+	printTN($residential[$i]);
+}
+
+# print tn meter
+for ( my $i = 0 ; $i <= $#residential ; $i++ ) {	
+	printTM($residential[$i]);
+}
+
+# print triplex line (from $TN1 to $TM)
+for ( my $i = 0 ; $i <= $#residential ; $i++ ) {	
+	printTL($residential[$i]);
+}
+
+# print SPCT (from $TO to $TN1)
+for ( my $i = 0 ; $i <= $#residential ; $i++ ) {	
+	$ic = $ic+1;
+	#printSPCT($residential[$i]);
+	printSPCT($residential[$i]);
+}
+
+# print capacitor
+# Not updated for SynerGee (no capacitors listed)
+for ( my $i = 0 ; $i <= $#deviceNums ; $i++ ) {	
+	if ($DevType{$deviceNums[$i]} eq 17) {
+		printCap($deviceNums[$i]);
+	}	
+}
+
+printSubstation_Meter() if ($sm_flag eq 0); #if FBS
+
+# Powerflow Checks:
+# check for orphaned nodes
+my @links; #includes all 'to' or 'from' nodes for any link objects. 
+my @nodecheck; #includes all printed nodes
+my @orphaned;
+foreach my $i (@nodecheck) {
+	if( !grep{$_ eq $i} @links ){
+	    push @orphaned, $i;
+	}
+}
+if ($#orphaned >= 0) {
+    print "*** Warning: Orphaned Nodes:\n";
+	foreach (@orphaned) {
+	print $_."\n";
+	}
+    if ($logfile eq 1) {
+	print LOG_FILE "*** Warning: Orphaned Nodes:\n";
+	foreach (@orphaned) {
+	    print $_."\n";
+	}
+    }
+}
+
+# check for nodes that are not both 'to' and 'from' 
+my @tonodes; #includes all nodes that a link goes 'to'. (exclude 'device' nodes e.g._swnode, _fusenode, or triplex nodes)
+my @uniquetonodes = findUnique(@tonodes);
+my @fromnodes; #includes all nodes that a link comes 'from'. (exclude 'device' nodes e.g._swnode, _fusenode)
+my @uniquefromnodes = findUnique (@fromnodes);
+my @fromnode_only;
+my @tonode_only;
+
+foreach my $i (@uniquefromnodes) {
+	if ( !grep{$_ eq $i} @uniquetonodes ){
+	    push @fromnode_only, $i;
+	}
+}
+
+if ($#fromnode_only >= 0) {
+    if ($logfile eq 1) {
+	print LOG_FILE "*** The following ".@fromnode_only." nodes are 'from nodes' only:\n";
+	foreach (@fromnode_only) {
+	    print LOG_FILE $_."\n";
+	}
+    }
+    print "*** There are ".@fromnode_only." nodes listed as 'from nodes' only. See $log for the complete list.\n";
+}
+
+foreach my $i (@uniquetonodes) {
+	if ( !grep{$_ eq $i} @uniquefromnodes ){
+	    push @tonode_only, $i;
+	}
+}
+
+if ($#tonode_only >= 0) {
+    if ($logfile eq 1) {
+	print LOG_FILE "*** The following ".@tonode_only." nodes are 'to nodes' only:\n";
+	foreach (@tonode_only) {
+	    print LOG_FILE $_."\n";
+	}
+    }
+    print "*** There are ".@tonode_only." nodes listed as 'to nodes' only. See $log for the complete list.\n";
+}
+
+# Check for 'unknown' load classes
+
+if (@UnknownLoadClass ne 0) {
+	print "There are ".@UnknownLoadClass." loads with class 'Unknown'. See log file for list.\n";
+	print LOG_FILE "The following sections have Customer Zones that are not Residential or Commercial.\n " . join ('\n' , @UnknownLoadClass);
+}
+
+#sum of loads printed to .glm
+$sum_DL_KW 			= sprintf("%.3f",$sum_DL_KW);
+$sum_DL_KW_PV 		= sprintf("%.3f",$sum_DL_KW_PV);
+$sum_DL_KVAR 		= sprintf("%.3f",$sum_DL_KVAR);
+$sum_DL_KVAR_PV		=sprintf("%.3f",$sum_DL_KVAR_PV);
+$sum_spot_KW 		= sprintf("%.3f",$sum_spot_KW);
+$sum_spot_KVAR 		= sprintf("%.3f",$sum_spot_KVAR);
+$sum_NonRes_KW 		= sprintf("%.3f",$sum_NonRes_KW);
+$sum_NonRes_KW_PV 	= sprintf("%.3f",$sum_NonRes_KW_PV);
+$sum_NonRes_KVAR 	= sprintf("%.3f",$sum_NonRes_KVAR);
+$sum_NonRes_KVAR_PV = sprintf("%.3f",$sum_NonRes_KVAR_PV);
+
+my $total_DL_real = $sum_DL_KW + $sum_DL_KW_PV;
+my $total_DL_reac = $sum_DL_KVAR + $sum_DL_KVAR_PV;
+my $total_NonRes_real = $sum_NonRes_KW + $sum_NonRes_KW_PV;
+my $total_NonRes_reac = $sum_NonRes_KVAR + $sum_NonRes_KVAR_PV;
+my $sum_KW = $total_DL_real + $total_NonRes_real + $sum_spot_KW;
+my $sum_KVAR = $total_DL_reac + $total_NonRes_reac + $sum_spot_KVAR;
+
+my $demandKVA = sqrt($sum_DL_KW**2 + $sum_DL_KVAR**2) + sqrt($sum_spot_KW **2 + $sum_spot_KVAR**2) + sqrt($sum_NonRes_KW**2+ $sum_NonRes_KVAR **2);
+
+print "Distributed Load:\t".$sum_DL_KW."+".$sum_DL_KVAR."j\n"; 	#residential
+print "Distributed Load (PV):\t".$sum_DL_KW_PV."+".$sum_DL_KVAR_PV."j\n"; #residential PV loads
+print "Total Distributed Load:\t".$total_DL_real."+".$total_DL_reac."j\n"; #total residential
+print "Spot  Load:\t".$sum_spot_KW."+".$sum_spot_KVAR."j\n"; #spotloads
+print "Non-Residential Load: \t".$sum_NonRes_KW."+".$sum_NonRes_KVAR."j\n"; #non residential
+print "Non-Residential Load (PV):\t".$sum_NonRes_KW_PV."+".$sum_NonRes_KVAR_PV."j\n"; #non residential PV
+print "Total Non-Residential Load:\t".$total_NonRes_real."+".$total_NonRes_reac."j\n"; #total non residential
+print "Total Load:\t".$sum_KW."+".$sum_KVAR."j\n"; 		# total load calculated as load objects are printed
+print "Total Load 2:\t".$total_Rload."+".$total_Xload."j\n"; #total load calculated as loads are coming from database (should match value above)
+print "Demand (KVA): \t".$demandKVA."\n";
+
+while( my ($k, $v) = each %recPhase ) {
+	#print "key: $k, value: $v \n";
+}
+for ( my $i = 0 ; $i <= $#recsec ; $i++ ) {	
+	#print "recloser: $recsec[$i]\n";
+}
+
+close (GLM_FILE);
+if ($logfile eq 1) { close (LOG_FILE) };
+
+#########################################
+# *********** Sub functions *********** #
+#########################################
+
+sub printUsage() {
+    print qq~
+---------------------------------------------------------------------
+Usage:
+
+$0 <dbFile> <feederID>
+
+<dbFile> Required 
+	- An absolute or relative path to the database file that is 
+	  to be parsed and imported.	
+
+
+Example: perl Cyme_to_GridLabD.pl F1405_network.mdb 
+         	    
+
+---------------------------------------------------------------------
+~;
+    exit(0);
+}
+
+sub SQLError() {
+	print "$sql\n";
+    print( "SQL Error 1: " . $db->Error() . "\n" );
+    $db->Close();
+    exit(123);
+}
+
+sub SpaceReplace($) {
+	my $temp = shift;
+	$temp =~ s/\s/_/g;
+	return $temp;
+}
+
+sub NextGreatest() {
+	my $i = shift;
+	my $hash =shift;
+	my %h;
+	if ($hash eq "pole") { %h = %FL_pole; } else { %h = %FL_pad; }
+	my $d;
+	my %greater;
+	my @vals;
+	
+    foreach my $k (keys %h) { # for each kVA value in the FL hash
+            $d = $k - $i;   
+            if ($d > 0) {
+                $greater{$d} = $k; # create hash of the kVA values that are greater than $i coupled with their difference from $i. 
+                push @vals, $d; 
+            }
+    }
+	# find smallest element of array of 'differences'
+    for (my $c = 0 ; $c <= $#vals-1 ; $c++ ) {
+        my $C = $c+1;
+        if ($vals[$c]<$vals[$C]) {
+            $vals[$C] = $vals[$c];
+        }
+    }
+    return $greater{$vals[$#vals]}; 
+
+}
+
+sub findUnique {
+    my @array = @_;
+	my %seen = ();
+	my @unique = grep{! $seen{$_}++}@array;
+    return @unique;
+}
+
+sub findDuplicate {
+	my %s;
+    undef %s;
+    my @out = grep( $s{$_}++, @_ );
+    return @out;
+}
+
+sub combinePhases($) {
+	my $p1 = shift;
+	my $p2 = shift;
+	my @out1 = ();
+	my @out2 = ();
+	@out1 = splitStrings($p1);
+	@out2 = splitStrings($p2);
+	my @union = ();
+	my %count = ();
+	foreach my $element (@out1, @out2){$count{$element}++}
+	foreach my $element (keys %count) {
+		push @union, $element;
+	}
+	@union = sort (@union);	
+	my $final_phase;
+	for ( my $i = 0 ; $i <= $#union; $i++ ) {
+		$final_phase = $final_phase.$union[$i];
+	}
+	return $final_phase;	
+}
+
+sub splitStrings($) {
+	my $array = shift;	
+	my $b = length($array);
+	my @out;
+	for ( my $i = 0 ; $i < length($array) ; $i++ ) {
+		my $temp = substr($array, $i, 1);
+		push @out, $temp;
+	}
+	return @out;
+}
+
+sub return_rating($) {
+	my @standard_ratings=(0, 5,10,15,25,30,37.5,50,75,87.5,100,112.5,125,137.5,150,162.5,175,187.5,200,225,250,262.5,300, 337.5, 400, 412.5, 450, 500, 750, 1000, 1250, 1500, 2000, 2500, 3000, 4000, 5000);
+	my $input = shift;
+	my $out;	
+	for ( my $i = 0 ; $i < $#standard_ratings ; $i++ ) {	
+		if ( ( $standard_ratings[$i] < $input ) and ( $standard_ratings[$i+1] >= $input ) )  {
+			$out = $standard_ratings[$i+1];
+		}	
+		if ( $input > $standard_ratings[-1] ) {
+			$out = $input;
+		}	
+	}
+	return $out;
+}	
+
+sub printHeader (){
+	my $temp_date = date_time ();
+	chomp($temp_date);
+	print GLM_FILE "// \$ID: ".$glmFile." ".$temp_date." ".$0 ."\$\n";
+	print GLM_FILE "// *********************************************\n\n";
+	#print GLM_FILE "#set urlbase=http://gridlabd.pnl.gov/\n\n";
+	print GLM_FILE "#set iteration_limit=50\n";
+	print GLM_FILE "#set profiler=1\n";
+	print GLM_FILE "#set pauseatexit=1\n";
+	#print GLM_FILE "#set relax_naming_rules=1\n";
+	print GLM_FILE "#define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0\n\n";
+	print GLM_FILE "clock{\n\t timezone EST+5EDT;\n\t timestamp '2000-01-01 0:00:00';\n}\n\n";
+	print GLM_FILE "// *********************************************\n";
+	print GLM_FILE "// modules\n";
+	print GLM_FILE "module powerflow {\n\tsolver_method ".$sm.";\n\tdefault_maximum_voltage_error 1e-9;\n};\n";
+	print GLM_FILE "module tape;\n" if ($rec_swing_power == 1);
+	print GLM_FILE "\n\n";
+}	
+
+sub date_time() {
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+	my $out = sprintf ("%4d-%02d-%02d %02d:%02d:%02d\n", $year+1900,$mon+1,$mday,$hour,$min,$sec);
+	return $out;
+}
+
+sub printVoltDump() {
+	print GLM_FILE "object voltdump {\n";
+	print GLM_FILE "\tfilename ".$feederName."_voltdump.csv;\n";
+	print GLM_FILE "\tgroup from_db;\n}\n";
+}
+	
+sub printNodes() {
+	my $temp_node = shift; #coming from @nodes
+	my $node_name = $temp_node;
+	$node_name =~ s/\s/_/g;
+	push @nodecheck, $node_name;
+	print GLM_FILE "object node {\n" if ($rec_swing_power == 0);
+	print GLM_FILE "object meter {\n" if ($rec_swing_power == 1);
+	print GLM_FILE "\tname ".$feederName."-".$node_name.";\n";
+	print GLM_FILE "\tgroupid from_db;\n";
+	my $source_meter = $feederName."-Substation_Meter";
+	print GLM_FILE "\tparent ".$source_meter.";\n" if (($temp_node eq $source) and ($sm_flag eq 0));
+	print GLM_FILE "\tbustype SWING;\n" if ($temp_node eq $source);
+	my $temp_phase = $hashNodePhase{$temp_node};
+	print GLM_FILE "\tphases ".$temp_phase.";\n";
+	print GLM_FILE "\tvoltage_A 7379.25;\n" if ($temp_node eq $source); #decided to up voltage for better calibration with SynerGEE model
+	print GLM_FILE "\tvoltage_B 7379.25;\n" if ($temp_node eq $source);
+	print GLM_FILE "\tvoltage_C 7379.25;\n" if ($temp_node eq $source);
+	print GLM_FILE "\tnominal_voltage ".$VLN.";\n";
+	if ($rec_swing_power == 1) {
+		print GLM_FILE "\tobject recorder{\n";
+		print GLM_FILE "\t\tproperty measured_real_power,measured_reactive_power,measured_power_A,measured_power_B,measured_power_C;\n";
+		print GLM_FILE "\t\tfile ".$feederName."_swing.csv;\n";
+		print GLM_FILE "\t\tinterval 60;\n";
+		print GLM_FILE "\t\tlimit 1;\n\t};\n";
+	}
+	print GLM_FILE "}\n\n";
+}	
+
+sub printsw() {
+	my $a = shift; #SectionID
+	my $temp_node = $sectionDev{$a}."_swnode";
+	if ($DevLoc{$sectionDev{$a}} == 1) { #switch is on from side of section
+		print GLM_FILE "object switch {\n";
+		my $name = $a."_sw";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $swPhase{$sectionDev{$a}};\n";
+		print GLM_FILE "\tfrom $feederName-$secFrom{$a};\n";
+		push @links, $secFrom{$a};
+		push @fromnodes, $secFrom{$a};
+		if ($a =~ /^.*_BB$/){ #if section is Busbar
+			print GLM_FILE "\tto $feederName-$secTo{$a};\n";
+			push @links, $secTo{$a};
+			push @tonodes, $secTo{$a};
+		}else{
+			print GLM_FILE "\tto $feederName-$temp_node;\n";
+			push @links, $temp_node;
+		}
+		if($a eq 'name1') { #reconfiguration
+			print GLM_FILE "\tstatus CLOSED; // changed from Database\n";
+			print GLM_FILE "}\n\n"; 
+		}
+		elsif ( $swST{$sectionDev{$a}} == 1 ) { #switch is open
+			print GLM_FILE "\tstatus OPEN;\n}\n\n" if ($closeallswitch eq 0);
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n" if ($closeallswitch eq 1); #flag to close all switches
+		}else{ #switch is closed
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";
+		}
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs1($a,$temp_node,"SW");
+		}	
+		if ( grep{$_ eq $a} @UGSecs ) {
+			printUGSecs1($a,$temp_node,"SW");		
+		}		
+	}		
+	if ($DevLoc{$sectionDev{$a}} == 0) { #to side (SYNERGEE)
+		print GLM_FILE "object switch {\n";
+		my $name = $a."_sw";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $swPhase{$sectionDev{$a}};\n";
+		if ($a =~ /^.*_BB$/){ #--if section is Busbar
+			print GLM_FILE "\tfrom $feederName-$secFrom{$a};\n";
+			push @links, $secFrom{$a};
+			push @fromnodes, $secFrom{$a};
+		}else{
+			print GLM_FILE "\tfrom $feederName-$temp_node;\n";
+			push @links, $temp_node;
+		}
+		print GLM_FILE "\tto $feederName-$secTo{$a};\n";
+		push @links, $secTo{$a};
+		push @tonodes, $secTo{$a};
+		if ($a eq 'name1') { #reconfiguration
+			print GLM_FILE "\tstatus CLOSED; // changed from Database\n";
+			print GLM_FILE "}\n\n";
+		}elsif ( $swST{$sectionDev{$a}} == 1 ) { #switch status is OPEN
+			print GLM_FILE "\tstatus OPEN;\n}\n\n" if ($closeallswitch eq 0);
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n" if ($closeallswitch eq 1); #flag to close all regardless of database record
+		} else { #switch is closed	
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  
+		}	
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs2($a,$temp_node,"SW");
+		}	
+		if ( grep{$_ eq $a} @UGSecs ) {
+			printUGSecs2($a,$temp_node,"SW");		
+		}		
+	}	
+}	
+
+sub printswnode() {
+	my $a = shift; #SectionID
+	my $temp_node = $sectionDev{$a}."_swnode";
+	push @nodecheck, $temp_node;
+	print GLM_FILE "object node {\n";
+	print GLM_FILE "\tname $feederName-$temp_node;\n";
+	print GLM_FILE "\tgroupid swnode;\n";
+	print GLM_FILE "\tphases $swPhase{$sectionDev{$a}};\n";
+	print GLM_FILE "\tnominal_voltage $VLN;\n";
+	print GLM_FILE "}\n\n";	
+}	
+
+sub printrec() {
+	my $a = shift;
+	my $temp_node = $sectionDev{$a}."_recnode";
+	if ($DevLoc{$sectionDev{$a}} == 1) { #from side
+		print GLM_FILE "// Recloser, used as switch for now \n";
+		print GLM_FILE "object switch {\n";
+		my $name = $a."_rec";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $recPhase{$sectionDev{$a}};\n";
+		print GLM_FILE "\tfrom $feederName-$secFrom{$a};\n"; 	
+		print GLM_FILE "\tto $feederName-$temp_node;\n"; 	
+		if ( $recST{$sectionDev{$a}} == 1 ) {
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  
+		} else {	
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  
+		}	
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs1($a,$temp_node,"rec");
+		}	
+		if ( grep{$_ eq $a} @UGSecs ) {
+			printUGSecs1($a,$temp_node,"rec");		
+		}
+	}		
+	if ($DevLoc{$sectionDev{$a}} == 2) { #to side
+		print GLM_FILE "// Recloser, used as switch for now \n";
+		print GLM_FILE "object switch {\n";
+		my $name = $a."_rec";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $recPhase{$sectionDev{$a}};\n";
+		print GLM_FILE "\tfrom $feederName-$temp_node;\n"; 	
+		print GLM_FILE "\tto $feederName-$secTo{$a};\n"; 	
+		if ( $recST{$sectionDev{$a}} == 1 ) {
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  
+		} else {	
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  
+		}	
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs2($a,$temp_node,"rec");
+		}	
+		if ( grep{$_ eq $a} @UGSecs ) {
+			printUGSecs2($a,$temp_node,"rec");		
+		}		
+	}	
+}	
+
+sub printrecnode() {
+	my $a = shift;
+	my $temp_node = $sectionDev{$a}."_recnode";
+	print GLM_FILE "object node {\n";
+	print GLM_FILE "\tname $feederName-$temp_node;\n";
+	print GLM_FILE "\tphases $recPhase{$sectionDev{$a}};\n";
+	print GLM_FILE "\tnominal_voltage $VLN;\n";
+	print GLM_FILE "}\n\n";	
+}	
+
+sub printfuse() {
+	my $a = shift; #SectionID	
+	my $temp_node = $sectionDev{$a}."_fusenode";
+		if ( grep{$_ eq $a} @secs ) { 
+		} else {
+			print "*** Warning: fuse $a connected to nowhere!\n";
+			print LOG_FILE "*** Warning: fuse $a connected to nowhere!\n";
+		}
+	if ($DevLoc{$sectionDev{$a}} == 1) { #fuse is on 'from' side of section
+		print GLM_FILE "object fuse {\n";
+		my $name = $a."_fuse";
+		print GLM_FILE "\tname ".$feederName."-".$name.";\n";
+		print GLM_FILE "\tphases ".$secPhase{$a}.";\n";
+		print GLM_FILE "\tfrom ".$feederName."-".$secFrom{$a}.";\n";
+		push @links, $secFrom{$a};
+		push @fromnodes, $secFrom{$a};
+		if ($a =~ /^.*_BB$/){ #--if section is Busbar
+			print GLM_FILE "\tto ".$feederName."-".$secTo{$a}.";\n";
+			push @links, $secTo{$a};
+			push @tonodes, $secTo{$a};
+		}else{
+			print GLM_FILE "\tto ".$feederName."-".$temp_node.";\n";
+			push @links, $temp_node;
+		}
+		print GLM_FILE "\tmean_replacement_time ".$mean_replacement_time.";\n"; 	
+		#print GLM_FILE "\tcurrent_limit $fuseEquRatedI1{$fuseEquID{$sectionDev{$a}}};\n";
+		print GLM_FILE "\tcurrent_limit $fuseEquRatedI1{$sectionDev{$a}};\n";
+		if ( $a eq 'name2'){
+			print GLM_FILE "\tstatus CLOSED; // changed from Database\n";
+			print GLM_FILE "}\n\n";
+		}
+		elsif ( $fuseST{$sectionDev{$a}} == 1 ) { #fuse is open
+			print GLM_FILE "\tstatus OPEN;\n}\n\n" if ($closeallfuse eq 0);
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n" if ($closeallfuse eq 1); #flag to close all fuses
+		} else { #fuse is closed	
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  
+		}	
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs1($a,$temp_node,"fuse");
+		}
+		if ( grep{$_ eq $a} @UGSecs ) {	
+			printUGSecs1($a,$temp_node,"fuse");		
+		}		
+	}		
+	if ($DevLoc{$sectionDev{$a}} == 0) { #fuse is on 'to' side of section
+		print GLM_FILE "object fuse {\n";
+		my $name = $a."_fuse";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $secPhase{$a};\n";
+		if ($a =~ /^.*_BB$/){ #--if Section is Busbar
+			print GLM_FILE "\tfrom $feederName-$secFrom{$a};\n";
+			push @links, $secFrom{$a};
+			push @fromnodes, $secFrom{$a};
+		}else{
+			print GLM_FILE "\tfrom $feederName-$temp_node;\n";
+			push @links, $temp_node;
+		}
+		print GLM_FILE "\tto $feederName-$secTo{$a};\n";
+		push @links, $secTo{$a};
+		push @tonodes, $secTo{$a};
+		print GLM_FILE "\tmean_replacement_time $mean_replacement_time;\n"; 	
+		#print GLM_FILE "\tcurrent_limit $fuseEquRatedI1{$fuseEquID{$sectionDev{$a}}};\n";
+		print GLM_FILE "\tcurrent_limit $fuseEquRatedI1{$sectionDev{$a}};\n";
+		if ( $a eq 'name3'){
+			print GLM_FILE "\tstatus CLOSED; // changed from Database\n";
+			print GLM_FILE "}\n\n";
+		}
+		elsif ( $fuseST{$sectionDev{$a}} == 1 ) { #fuse is open
+			print GLM_FILE "\tstatus OPEN;\n}\n\n" if ($closeallfuse eq 0);
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n" if ($closeallfuse eq 1);
+		} else { #fuse is closed	
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  
+		}	
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs2($a,$temp_node,"fuse");
+		}	
+		if ( grep{$_ eq $a} @UGSecs ) {
+			printUGSecs2($a,$temp_node,"fuse");		
+		}	
+	}
+}	
+
+sub printfusenode() {
+	my $a = shift; #SectionId 
+	my $temp_node = $sectionDev{$a}."_fusenode";
+	push @nodecheck, $temp_node;
+	print GLM_FILE "object node {\n";
+	print GLM_FILE "\tname $feederName-$temp_node;\n";
+	print GLM_FILE "\tgroupid fusenode;\n";
+	print GLM_FILE "\tphases $secPhase{$a};\n";
+	print GLM_FILE "\tnominal_voltage $VLN;\n";
+	print GLM_FILE "}\n\n";	
+}	
+
+sub printSX() {
+	my $a = shift;	
+	my $temp_node = $sectionDev{$a}."_SXnode";
+	if ( grep{$_ eq $a} @UGSecs ) {
+	} else {
+		if ( grep{$_ eq $a} @OHSecs ) {
+		} else {
+			print "warning SX $a connetcted to nowhere!\n";
+		}
+	}	
+	if ($DevLoc{$sectionDev{$a}} == 1) { #from side
+		print GLM_FILE "object series_reactor {\n";
+		my $name = $a."_SX";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $secPhase{$a};\n";
+		print GLM_FILE "\tfrom $feederName-$secFrom{$a};\n"; 	
+		print GLM_FILE "\tto $feederName-$temp_node;\n"; 	
+		print GLM_FILE "\tphase_A_reactance  $SXX{$SXEquID{$sectionDev{$a}}};\n" if ($secPhase{$a} =~ /A/i); 	
+		print GLM_FILE "\tphase_B_reactance  $SXX{$SXEquID{$sectionDev{$a}}};\n" if ($secPhase{$a} =~ /B/i); 	 	
+		print GLM_FILE "\tphase_C_reactance  $SXX{$SXEquID{$sectionDev{$a}}};\n" if ($secPhase{$a} =~ /C/i); 	 	
+		print GLM_FILE "\trated_current_limit $SXEquRatedI1{$SXEquID{$sectionDev{$a}}};\n}\n\n";	
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs1($a,$temp_node,"SX");
+		}
+		if ( grep{$_ eq $a} @UGSecs ) {	
+			printUGSecs1($a,$temp_node,"SX");		
+		}		
+	}		
+	if ($DevLoc{$sectionDev{$a}} == 2) { #to side
+		print GLM_FILE "object series_reactor {\n";
+		my $name = $a."_SX";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $secPhase{$a};\n";
+		print GLM_FILE "\tfrom $feederName-$temp_node;\n"; 	
+		print GLM_FILE "\tto $feederName-$secTo{$a};\n"; 	
+		print GLM_FILE "\tphase_A_reactance  $SXX{$SXEquID{$sectionDev{$a}}};\n" if ($secPhase{$a} =~ /A/i); 	
+		print GLM_FILE "\tphase_B_reactance  $SXX{$SXEquID{$sectionDev{$a}}};\n" if ($secPhase{$a} =~ /B/i); 	 	
+		print GLM_FILE "\tphase_C_reactance  $SXX{$SXEquID{$sectionDev{$a}}};\n" if ($secPhase{$a} =~ /C/i); 	 	
+		print GLM_FILE "\trated_current_limit $SXEquRatedI1{$SXEquID{$sectionDev{$a}}};\n}\n\n";	
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs2($a,$temp_node,"SX");
+		}	
+		if ( grep{$_ eq $a} @UGSecs ) {
+			printUGSecs2($a,$temp_node,"SX");		
+		}	
+	}	
+}	
+
+sub printSXnode() {
+	my $a = shift;
+	my $temp_node = $sectionDev{$a}."_SXnode";
+	print GLM_FILE "object node {\n";
+	print GLM_FILE "\tname $feederName-$temp_node;\n";
+	print GLM_FILE "\tphases $secPhase{$a};\n";
+	print GLM_FILE "\tnominal_voltage $VLN;\n";
+	print GLM_FILE "}\n\n";	
+}	
+
+sub printsectionalizer() {
+	my $a = shift;
+	my $temp_node = $sectionDev{$a}."_sectionalizernode";
+	if ($DevLoc{$sectionDev{$a}} == 1) { #from side
+		print GLM_FILE "// Sectionalizer, used as switch for now \n";
+		print GLM_FILE "object switch {\n";
+		my $name = $a."_sw";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $sectionalizerPhase{$sectionDev{$a}};\n";
+		print GLM_FILE "\tfrom $feederName-$secFrom{$a};\n"; 	
+		print GLM_FILE "\tto $feederName-$temp_node;\n"; 	
+		if ( $sectionalizerST{$sectionDev{$a}} == 1 ) {
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  
+		} else {	
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  #was OPEN, remove floating node for NR
+		}	
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs1($a,$temp_node,"sectionalizer");
+		}	
+		if ( grep{$_ eq $a} @UGSecs ) {
+			printUGSecs1($a,$temp_node,"sectionalizer");
+		}	
+		
+	}		
+	if ($DevLoc{$sectionDev{$a}} == 2) { #to side
+		print GLM_FILE "// Sectionalizer, used as switch for now \n";
+		print GLM_FILE "object switch {\n";
+		my $name = $a."_sw";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $sectionalizerPhase{$sectionDev{$a}};\n";
+		print GLM_FILE "\tfrom $feederName-$temp_node;\n"; 	
+		print GLM_FILE "\tto $feederName-$secTo{$a};\n"; 	
+		if ( $sectionalizerST{$sectionDev{$a}} == 1 ) {
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  
+		} else {	
+			print GLM_FILE "\tstatus CLOSED;\n}\n\n";  #was OPEN, remove floating node for NR
+		}	
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs2($a,$temp_node,"sectionalizer");
+		}	
+		if ( grep{$_ eq $a} @UGSecs ) {	
+			printUGSecs2($a,$temp_node,"sectionalizer");
+		}			
+	}	
+}	
+
+sub printsectionalizernode() {
+	my $a = shift;
+	my $temp_node = $sectionDev{$a}."_sectionalizernode";
+	print GLM_FILE "object node {\n";
+	print GLM_FILE "\tname $feederName-$temp_node;\n";
+	print GLM_FILE "\tphases $sectionalizerPhase{$sectionDev{$a}};\n";
+	print GLM_FILE "\tnominal_voltage $VLN;\n";
+	print GLM_FILE "}\n\n";	
+}	
+
+sub printRegCFG {
+	my $a = shift; # regrec
+	print GLM_FILE "object regulator_configuration {\n";
+	print GLM_FILE "\tname $feederName-$hashRegCFG{$a};\n";
+	print GLM_FILE "\tconnect_type WYE_WYE;\n";
+	print GLM_FILE "\tband_center $V2nd;\n";
+	print GLM_FILE "\tband_width $regBW{$sectionDev{$a}};\n";
+	print GLM_FILE "\ttime_delay 30;\n";
+	my $tap_r = $regEquTaps{$regEquID{$sectionDev{$a}}}/2;
+	print GLM_FILE "\traise_taps $tap_r;\n";
+	print GLM_FILE "\tlower_taps $tap_r;\n";
+	print GLM_FILE "\tcurrent_transducer_ratio  $regCT{$sectionDev{$a}};\n";
+	print GLM_FILE "\tpower_transducer_ratio   $regPT{$sectionDev{$a}};\n";
+	print GLM_FILE "\tcompensator_r_setting_A   6.0;\n";
+	print GLM_FILE "\tcompensator_r_setting_B   6.0;\n";
+	print GLM_FILE "\tcompensator_r_setting_C   6.0;\n";
+	print GLM_FILE "\tcompensator_x_setting_A   12.0;\n";
+	print GLM_FILE "\tcompensator_x_setting_B   12.0;\n";
+	print GLM_FILE "\tcompensator_x_setting_C   12.0;\n";
+	print GLM_FILE "\tCT_phase $regPhase{$sectionDev{$a}};\n";
+	print GLM_FILE "\tPT_phase $regPhase{$sectionDev{$a}};\n";
+	print GLM_FILE "\tregulation 0.10;\n";
+	print GLM_FILE "\ttap_pos_A $regTapA{$sectionDev{$a}};\n";
+	print GLM_FILE "\ttap_pos_B $regTapB{$sectionDev{$a}};\n";
+	print GLM_FILE "\ttap_pos_C $regTapC{$sectionDev{$a}};\n}\n\n";  
+}
+
+sub printReg () {
+	my $a = shift;
+	my $temp_node = $sectionDev{$a}."_regnode";
+	# replaced "=" with "_"
+	if ( $temp_node =~ /\=|\:/) {
+		$temp_node =~ s/\=/\_/;				
+		$temp_node =~ s/\:/\_/;
+	}
+	if ($DevLoc{$sectionDev{$a}} == 1) { #from side
+		print GLM_FILE "object regulator {\n";
+		my $name = $a."_reg";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $secPhase{$a};\n";
+		print GLM_FILE "\tfrom $feederName-$secFrom{$a};\n"; 	
+		print GLM_FILE "\tto $feederName-$temp_node;\n"; 	
+		print GLM_FILE "\tconfiguration $feederName-$hashRegCFG{$a};\n}\n\n"; 
+
+		# print line
+		#$ic = $ic + 1;
+
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs1($a,$temp_node);
+		}	
+
+		if ( grep{$_ eq $a} @UGSecs ) {
+			printUGSecs1($a,$temp_node);
+		}			
+	}		
+	if ($DevLoc{$sectionDev{$a}} == 2) { #to side
+		print GLM_FILE "object regulator {\n";
+		my $name = $a."_reg";
+		print GLM_FILE "\tname $feederName-$name;\n";
+		print GLM_FILE "\tphases $secPhase{$a};\n";
+		print GLM_FILE "\tfrom $feederName-$temp_node;\n"; 	
+		print GLM_FILE "\tto $feederName-$secTo{$a};\n"; 	
+		print GLM_FILE "\tconfiguration $feederName-$hashRegCFG{$a};\n}\n\n"; 
+		if ( grep{$_ eq $a} @OHSecs ) {
+			printOHSecs2($a,$temp_node);
+		}
+		if ( grep{$_ eq $a} @UGSecs ) {	
+			printUGSecs2($a,$temp_node);
+		}	
+	}	
+}	
+
+sub printRegnode() {
+	my $a = shift;
+	my $temp_node = $sectionDev{$a}."_regnode";
+	# replaced "=" with "_"
+	if ( $temp_node =~ /\=|\:/) {
+		$temp_node =~ s/\=/\_/;				
+		$temp_node =~ s/\:/\_/;
+	}
+	print GLM_FILE "object node {\n";
+	print GLM_FILE "\tname $feederName-$temp_node;\n";
+	#print GLM_FILE "\tphases $secPhase{$sectionDev{$a}};\n";	
+	print GLM_FILE "\tphases $secPhase{$a};\n";
+	print GLM_FILE "\tnominal_voltage $VLN;\n";
+	print GLM_FILE "}\n\n";	
+}	
+
+sub printOHSecs() {
+	my $temp_sec = shift;
+	print GLM_FILE "object overhead_line {\n";
+	#my $temp_name =$temp_sec."_OH"; #if sections aren't already labeled "_OH"
+	#print GLM_FILE "\tname $feederName-$temp_name;\n";
+	print GLM_FILE "\tname $feederName-$temp_sec;\n";
+	print GLM_FILE "\tphases $secPhase{$temp_sec};\n";
+	print GLM_FILE "\tfrom $feederName-$secFrom{$temp_sec};\n";
+	print GLM_FILE "\tto $feederName-$secTo{$temp_sec};\n";
+	print GLM_FILE "\tlength $OHLength{$temp_sec};\n";
+	my $temp_cfg = $OHCFG{$temp_sec};
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	$temp_cfg =~ s/HORIZONTAL/H/g;
+	$temp_cfg =~ s/PINTOP/P/g;
+	$temp_cfg =~ s/VERTICAL/V/g;
+	$temp_cfg =~ s/SPACERCABLE/S/g;
+	print GLM_FILE "\tconfiguration $feederName-$temp_cfg;\n";
+	print GLM_FILE "}\n\n";
+	push @links, $secTo{$temp_sec};
+	push @tonodes, $secTo{$temp_sec};
+	push @links, $secFrom{$temp_sec};
+	push @fromnodes, $secFrom{$temp_sec};
+}	
+
+sub printOtherSecs() { # any section not labeled 'OH' or 'UG'
+	my $temp_sec = shift;
+	print GLM_FILE "object overhead_line {\n";
+	print GLM_FILE "\tname $feederName-$temp_sec;\n";
+	print GLM_FILE "\tphases $secPhase{$temp_sec};\n";
+	print GLM_FILE "\tfrom $feederName-$secFrom{$temp_sec};\n";
+	print GLM_FILE "\tto $feederName-$secTo{$temp_sec};\n";
+	print GLM_FILE "\tlength $OtherLength{$temp_sec};\n";
+	print GLM_FILE "\tconfiguration $feederName-DEFAULT_NO_IMPEDANCE;\n";
+	print GLM_FILE "}\n\n";
+	push @links, $secTo{$temp_sec};
+	push @tonodes, $secTo{$temp_sec};
+	push @links, $secFrom{$temp_sec};
+	push @fromnodes, $secFrom{$temp_sec};
+}	
+sub printUGSecs() {
+	my $temp_sec = shift;
+	print GLM_FILE "object underground_line {\n";
+	#my $name = $temp_sec."_UG";
+	#print GLM_FILE "\tname $feederName-$name;\n";
+	print GLM_FILE "\tname $feederName-$temp_sec;\n";
+	print GLM_FILE "\tphases $secPhase{$temp_sec};\n";
+	print GLM_FILE "\tfrom $feederName-$secFrom{$temp_sec};\n";
+	print GLM_FILE "\tto $feederName-$secTo{$temp_sec};\n";
+	print GLM_FILE "\tlength $UGLength{$temp_sec};\n";
+	my $temp = $temp_sec.":".$secPhase{$temp_sec};
+	#print GLM_FILE "\tconfiguration $UGCFG{$temp_sec};\n";
+	my $temp_cfg = $UGCFG{$temp_sec};
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	print GLM_FILE "\tconfiguration $feederName-$temp_cfg;\n";
+	print GLM_FILE "}\n\n";
+	push @links, $secTo{$temp_sec};
+	push @tonodes, $secTo{$temp_sec};
+	push @links, $secFrom{$temp_sec};
+	push @fromnodes, $secFrom{$temp_sec};
+}
+
+sub printLineCFG() {
+	my $temp_cfg = shift;
+	my @temp = split (/\:/,$temp_cfg);
+	my @temp_a = grep {$_ ne ""} @temp;
+	print GLM_FILE "object line_configuration {\n";
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	$temp_cfg =~ s/HORIZONTAL/H/g;
+	$temp_cfg =~ s/PINTOP/P/g;
+	$temp_cfg =~ s/VERTICAL/V/g;
+	$temp_cfg =~ s/SPACERCABLE/S/g;
+	
+	print GLM_FILE "\tname ".$feederName."-".$temp_cfg.";\n";
+	if ($use_raw_z_matrix eq 1) {
+		print GLM_FILE "\tz11 ".$z11{$temp[0]}."; \n" if ($temp[-1] =~ /A/i);
+		print GLM_FILE "\tz12 ".$z12{$temp[0]}."; \n" if ($temp[-1] =~ /A/i && $temp[-1] =~ /B/i);
+		print GLM_FILE "\tz13 ".$z13{$temp[0]}."; \n" if ($temp[-1] =~ /A/i && $temp[-1] =~ /C/i);
+		print GLM_FILE "\tz22 ".$z22{$temp[0]}."; \n" if ($temp[-1] =~ /B/i);
+		print GLM_FILE "\tz23 ".$z23{$temp[0]}."; \n" if ($temp[-1] =~ /B/i && $temp[-1] =~ /C/i);
+		print GLM_FILE "\tz33 ".$z33{$temp[0]}."; \n" if ($temp[-1] =~ /C/i);
+	}else{ 
+		if($#temp_a > 3) { # Accounting for the fact that we don't have spacings info
+		#if ($#temp > 4) { # Phases A,B,C,N all accounted for
+			print GLM_FILE "\tconductor_A ".$feederName."-".$temp[0]."; \n" if ($temp[-1] =~ /A/i);
+			print GLM_FILE "\tconductor_B ".$feederName."-".$temp[1]."; \n" if ($temp[-1] =~ /B/i);
+			print GLM_FILE "\tconductor_C ".$feederName."-".$temp[2]."; \n" if ($temp[-1] =~ /C/i);
+			print GLM_FILE "\tconductor_N ".$feederName."-".$temp[3]."; \n" if ($temp[-1] =~ /N/i);
+		} else { 	
+			print GLM_FILE "\tconductor_A ".$feederName."-".$temp_a[0]."; \n" if ($temp[-1] =~ /A/i);
+			print GLM_FILE "\tconductor_B ".$feederName."-".$temp_a[0]."; \n" if ($temp[-1] =~ /B/i);
+			print GLM_FILE "\tconductor_C ".$feederName."-".$temp_a[0]."; \n" if ($temp[-1] =~ /C/i);
+			print GLM_FILE "\tconductor_N ".$feederName."-".$temp_a[1]."; \n" if ($temp[-1] =~ /N/i);
+		}
+		my $temp_spacing = $temp[-2]."_".$temp[-1];
+		print GLM_FILE "\tspacing ".$feederName."-".$temp_spacing.";\n";	
+	}
+	print GLM_FILE "}\n\n";
+}
+
+sub printUGLineCFG() {
+	my $temp_cfg = shift;
+	my @temp = split (/\:/,$temp_cfg);
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;	
+	print GLM_FILE "object line_configuration {\n";
+	print GLM_FILE "\tname ".$feederName."-".$temp_cfg.";\n";
+	if ($use_raw_z_matrix eq 1) {
+		print GLM_FILE "\tz11 ".$z11{$temp[0]}."; \n" if ($temp[-1] =~ /A/i);
+		print GLM_FILE "\tz12 ".$z12{$temp[0]}."; \n" if ($temp[-1] =~ /A/i && $temp[-1] =~ /B/i);
+		print GLM_FILE "\tz13 ".$z13{$temp[0]}."; \n" if ($temp[-1] =~ /A/i && $temp[-1] =~ /C/i);
+		print GLM_FILE "\tz22 ".$z22{$temp[0]}."; \n" if ($temp[-1] =~ /B/i);
+		print GLM_FILE "\tz23 ".$z23{$temp[0]}."; \n" if ($temp[-1] =~ /B/i && $temp[-1] =~ /C/i);
+		print GLM_FILE "\tz33 ".$z33{$temp[0]}."; \n" if ($temp[-1] =~ /C/i);
+	}else{ 
+		print GLM_FILE "\tconductor_A ".$feederName."-".$temp[0]."; \n" if ($temp[-1] =~ /A/i);
+		print GLM_FILE "\tconductor_B ".$feederName."-".$temp[0]."; \n" if ($temp[-1] =~ /B/i);
+		print GLM_FILE "\tconductor_C ".$feederName."-".$temp[0]."; \n" if ($temp[-1] =~ /C/i);
+		print GLM_FILE "\tconductor_N ".$feederName."-".$temp[0]."; \n" if ($temp[-1] =~ /N/i);
+		print GLM_FILE "\tspacing ".$feederName."-".$temp[0]."_".$temp[1]."_spacing;\n";	
+	}	
+	print GLM_FILE "}\n\n";
+}
+
+sub printDefaultCFG() {
+    print GLM_FILE "object line_configuration {\n";
+	print GLM_FILE "\tname ".$feederName."-DEFAULT_NO_IMPEDANCE;\n";
+	#print GLM_FILE "\tz11 0.01 ohm/ft;\n";
+	#print GLM_FILE "\tz22 0.01 ohm/ft;\n";
+	#print GLM_FILE "\tz33 0.01 ohm/ft;\n";
+	print GLM_FILE "\tz11 0.1+0.52690i;\n";
+	print GLM_FILE "\tz22 0.1+0.52690i;\n";
+	print GLM_FILE "\tz33 0.1+0.52690i;\n";
+	print GLM_FILE "}\n\n";
+}
+
+sub printLineSpacing() {
+	my $temp_spacing = shift;
+	my @temp = split (/\:/,$temp_spacing );
+	my $name = $temp[0]."_".$temp[1];
+	print GLM_FILE "object line_spacing {\n";
+	print GLM_FILE "\tname $feederName-$name;\n";
+	#my $dpp;
+	#my $dpn;
+	my $dpp = 48/12; #InstSection.PhaseToPhaseSpacing_MUL(SYNERGEE)
+	my $dpn = 36/12; #InstSection.PhaseToNeutralSpacing_MUL(SYNERGEE)
+	my $dab = 3.6667; #ft
+	my $dbc = 2.1667;
+	my $dca = 5.8333;
+	my $dan = 4.2590;
+	my $dbn = 3.9616;
+	my $dcn = 5.1854;
+	#Uncomment lines below if different conductor spacings are used
+	#if ($temp[0] =~ /HORIZONTAL|PINTOP/i) {
+	#	$dpp = 4.6730972;
+	#	$dpn = 6.2040028;
+	#} elsif ($temp[0] =~ /VERTICAL/i) {	
+	#	$dpp = 5.0396983;
+	#	$dpn = 8.0378939;
+	#} elsif ($temp[0] =~ /SPACERCABLE/i) {	
+	#	$dpp = 0.6814009;
+	#	$dpn = 0.8275;
+	#} elsif	($temp[0] eq "") {
+	#	$dpp = 4.6730972;
+	#	$dpn = 6.2040028;
+	#} else {
+	#	print " ****** Warning: cannot find spacing: $temp_spacing\n";
+	#	exit(123);
+	#}	
+	if ( $temp[1] =~ /A/ & $temp[1] =~ /B/ ) {
+		print GLM_FILE "\tdistance_AB ".$dab." ft; \n";	
+	} 
+	if ( $temp[1] =~ /B/ & $temp[1] =~ /C/ ) {
+		print GLM_FILE "\tdistance_BC ".$dbc." ft; \n";	
+	}
+	if ( $temp[1] =~ /A/ & $temp[1] =~ /C/ ) {
+		print GLM_FILE "\tdistance_AC ".$dca." ft; \n";	
+	} 
+	if ($temp[1] =~/N/i) {
+		print GLM_FILE "\tdistance_AN ".$dan." ft; \n" if ($temp[1] =~/A/i);
+		print GLM_FILE "\tdistance_BN ".$dbn." ft; \n" if ($temp[1] =~/B/i);
+		print GLM_FILE "\tdistance_CN ".$dcn." ft; \n" if ($temp[1] =~/C/i);
+	}	
+	print GLM_FILE "}\n\n";
+}	
+
+sub printUGLineSpacing() { # use $temp[0] as hash key to get spacing from ConductorInfo.xlsx
+	my $temp_spacing = shift;
+	my @temp = split (/\:/,$temp_spacing );
+	my $name = $temp[0]."_".$temp[1]."_spacing";
+	print GLM_FILE "object line_spacing {\n";
+	print GLM_FILE "\tname ".$feederName."-".$name.";\n";
+	#CURRENTLY USING DEFAULT VALUES FROM *** Cable Spreadsheet
+	# ** Now Using calculated line spacings from ConductorInfo.xlsx
+	#my$d = "DEFAULT";
+	if ( $temp[1] =~ /A/ & $temp[1] =~ /B/ ) {
+		#print GLM_FILE "\tdistance_AB $UGDAB{$temp[0]} in; \n";
+		#print GLM_FILE "\tdistance_AB ".$UGDAB{$d}." in; \n";	
+		print GLM_FILE "\tdistance_AB ".sprintf("%.4f",$dAB{$temp[0]})." ft; \n";
+	} 
+	if ( $temp[1] =~ /B/ & $temp[1] =~ /C/ ) {
+		#print GLM_FILE "\tdistance_BC $UGDBC{$temp[0]} in; \n";
+		#print GLM_FILE "\tdistance_BC ".$UGDBC{$d}." in; \n";
+		print GLM_FILE "\tdistance_BC ".sprintf("%.4f",$dBC{$temp[0]})." ft; \n";
+	}
+	if ( $temp[1] =~ /A/ & $temp[1] =~ /C/ ) {
+		#print GLM_FILE "\tdistance_AC $UGDAC{$temp[0]} in; \n";
+		#print GLM_FILE "\tdistance_AC ".$UGDAC{$d}." in; \n";
+		print GLM_FILE "\tdistance_AC ".sprintf("%.4f",$dCA{$temp[0]})." ft; \n";
+	} 
+	if ($temp[1] =~/N/i) {
+		# print GLM_FILE "\tdistance_AN 0; \n" if ($temp[1] =~/A/i);
+		# print GLM_FILE "\tdistance_BN 0; \n" if ($temp[1] =~/B/i);
+		# print GLM_FILE "\tdistance_CN 0; \n" if ($temp[1] =~/C/i);
+		print GLM_FILE "\tdistance_AN ".sprintf("%.4f",$dAN{$temp[0]})." ft; \n" if ($temp[1] =~/A/i);
+		print GLM_FILE "\tdistance_BN ".sprintf("%.4f",$dBN{$temp[0]})." ft; \n" if ($temp[1] =~/B/i);
+		print GLM_FILE "\tdistance_CN ".sprintf("%.4f",$dCN{$temp[0]})." ft; \n" if ($temp[1] =~/C/i);
+	}	
+	print GLM_FILE "}\n\n";
+}	
+
+my $rating;
+my $numphases;
+sub printSPCTCFG() {
+	my $a = shift; # rating and phase
+	my @temp = split (/\:/, $a );
+	print GLM_FILE "object transformer_configuration {\n";
+	my $temp_cfg = $a;
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	print GLM_FILE "\tname $feederName-$temp_cfg;\n";
+	print GLM_FILE "\tconnect_type ".$single.";\n";			
+	print GLM_FILE "\tinstall_type ".$poletop.";\n" if ($temp[2] eq "OH" ) ;		
+	print GLM_FILE "\tinstall_type ".$padmount.";\n" if ($temp[2] eq "UG" || $temp[2] eq "BB" ) ;	
+	print GLM_FILE "\tprimary_voltage ".$VLN." V;\n";
+	print GLM_FILE "\tsecondary_voltage ".$V2nd." V;\n";
+	print GLM_FILE "\tpower_rating ".$temp[0].";\n";
+	$numphases = length($temp[1]); #should all be single phase by this point, but just in case...
+	$rating = sprintf("%.3f", $temp[0]/$numphases) if ($numphases > 0);
+	if ($temp[1] =~ /A/) {
+		print GLM_FILE "\tpowerA_rating ".$rating.";\n";
+	}
+	if ($temp[1] =~ /B/) {
+		print GLM_FILE "\tpowerB_rating ".$rating.";\n";
+	}
+	if ($temp[1] =~ /C/) {
+		print GLM_FILE "\tpowerC_rating ".$rating.";\n";
+	}
+	#print GLM_FILE "\tpower$temp[1]_rating $temp[0];\n";
+	my $Rs;
+	my $Xs;
+	my $Rsh;
+	my $Xsh;
+	my $itemp;
+	
+		if ( exists $NL_pole{$temp[0]} || exists $NL_pad{$temp[0]} ){
+			if ($temp[2] eq "OH"){
+				$Rs = $FL_pole{$temp[0]};		
+				$Rsh = sprintf("%.4f", 1/$NL_pole{$temp[0]});
+			}else{
+				$Rs = $FL_pad{$temp[0]};		
+				$Rsh = sprintf("%.4f", 1/$NL_pad{$temp[0]});
+			}
+		} else {
+			$itemp = 1;
+			#print " warning, no transformer loss exist for SPCT rating $temp[0] KVA\n" if ($itemp eq 1);
+		
+			if ($temp[0] > 167) {
+				push @SPCT_over75, $temp[0]; #-to be used in printed warning
+				#$Rs  = 0.015;
+				$Rs = 0.00998; # average LL for ST530 150, 225, 300
+				#$Rsh = sprintf("%.4f", 1/0.0022);	
+				$Rsh = sprintf("%.4f", 1/.000665);				
+				#print " set to no-load-loss = 0.0022, full-load-loss = 0.015 \n" if ($iwarning eq 1);
+			}
+			# if ($temp[0] < 10) {
+				# push @SPCT_under10, $temp[0]; #-to be used in printed warning
+				# $Rs  = 0.028;
+				# $Rsh = sprintf("%.4f", 1/0.004);		
+				#print " set to no-load-loss = 0.004, full-load-loss = 0.028 \n" if ($iwarning eq 1);
+			#}
+			#if ($temp[0] >10 && $temp[0] < 75) { #-should be in %NL, but isn't. NL and FL not set (use default values).
+			if ($temp[0] < 167) {
+				push @SPCT_not_set, $temp[0];
+				$Rs = 0.015;
+				$Rsh = sprintf("%.4f", 1/0.003);
+			}
+		}
+	 
+	$Xs = $RXRatio * $Rs;	
+	$Xsh = sprintf("%.4f", $RXRatio * $Rsh);
+	print GLM_FILE "\timpedance ".$Rs."+".$Xs;
+	print GLM_FILE "j;\n\tshunt_impedance ".$Rsh."+".$Xsh;
+	print GLM_FILE "j;\n}\n\n";		
+}
+
+sub printWYEWYECFG(){
+	my $a = shift;
+	my @temp = split (/\:/, $a );
+	my $p = $temp[3];
+	my $temp_cfg = $a;
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	print GLM_FILE "object transformer_configuration {\n";
+	print GLM_FILE "\tname $feederName-$temp_cfg;\n";													     
+	print GLM_FILE "\tconnect_type $three;\n";		
+	if ($temp[4] eq 3|12 ) {
+		print GLM_FILE "\tinstall_type $poletop;\n";		
+	} elsif ($temp[4] eq 1 ) {
+		print GLM_FILE "\tinstall_type $padmount;\n";		
+	} else {
+		print "*** warning, cannot recognize install_type $temp[4]\n";
+		exist(123);
+	}			
+	print GLM_FILE "\tprimary_voltage $VLN V;\n";
+	print GLM_FILE "\tsecondary_voltage $V2nd V;\n";
+	my $temp_KVA = 0;
+	$temp_KVA = $temp_KVA + $temp[0] if ($temp[3] =~ /A/i ) ;
+	$temp_KVA = $temp_KVA + $temp[1] if ($temp[3] =~ /B/i ) ;
+	$temp_KVA = $temp_KVA + $temp[2] if ($temp[3] =~ /C/i ) ;
+	$temp_KVA = sprintf("%.1f",$temp_KVA);	
+	print GLM_FILE "\tpower_rating $temp_KVA;\n";
+	print GLM_FILE "\tpowerA_rating $temp[0];\n" if ($temp[3] =~ /A/i ) ;
+	print GLM_FILE "\tpowerB_rating $temp[1];\n" if ($temp[3] =~ /B/i ) ;
+	print GLM_FILE "\tpowerC_rating $temp[2];\n" if ($temp[3] =~ /C/i ) ;
+	my $Rs;
+	my $Xs;
+	my $Rsh;
+	my $Xsh;
+	# if ( exists $NL{$temp_KVA} ){
+		# $Rs = $FL{$temp_KVA};		
+		# $Rsh = sprintf("%.4f", 1/$NL{$temp_KVA});		
+	# } else {
+		# print " warning, no transformer loss exist for WYE_WYE rating $temp[0] KVA\n" if ($iwarning eq 1);
+		# if ($temp_KVA > 75) {
+			# $Rs  = 0.015;
+			# $Rsh = sprintf("%.4f", 1/0.0022);		
+			# print " set to no-load-loss = 0.0022, full-load-loss = 0.015 \n" if ($iwarning eq 1);
+		# }
+		# if ($temp_KVA <10) {
+			# $Rs  = 0.028;
+			# $Rsh = sprintf("%.4f", 1/0.004);		
+			# print " set to no-load-loss = 0.004, full-load-loss = 0.028 \n" if ($iwarning eq 1);
+		# }
+	# }	
+	$Xs = $RXRatio * $Rs;	
+	$Xsh = sprintf("%.4f", $RXRatio * $Rsh);
+	print GLM_FILE "\timpedance $Rs+$Xs";
+	print GLM_FILE "j;\n\tshunt_impedance $Rsh+$Xsh";
+	print GLM_FILE "j;\n}\n\n";		
+	
+}
+
+sub printSPOTLOAD() {
+	my $a = shift;
+	my $parent = $a."_M";
+	print GLM_FILE "// spotload;\n";
+	print GLM_FILE "object load {\n";	
+	print GLM_FILE "\tname ".$feederName."-".$a."_load;\n";
+	print GLM_FILE "\tparent ".$feederName."-".$parent.";\n";
+	print GLM_FILE "\tphases ".$spotloadPhase{$a}.";\n";
+	print GLM_FILE "\tnominal_voltage ".$VLN.";\n";
+	my $temp_loss;
+	
+	$sum_spot_KW = $sum_spot_KW + $spotloadKW1{$a}+ $spotloadKW2{$a}+ $spotloadKW3{$a};
+	$sum_spot_KVAR = $sum_spot_KVAR + $spotloadKVAR1{$a}+ $spotloadKVAR2{$a}+ $spotloadKVAR3{$a};
+	
+    if ( $spotloadPhase{$a} =~ /A/i ) {
+		# spotloads in kihei have 0 kVA.
+		# if ( exists $FL{$spotloadKVA1{$a}} ) {
+			# $temp_loss = sprintf("%.3f", $spotloadKW1{$a} - $FL{$spotloadKVA1{$a}}) ;
+		# } else {
+			#print "warning, spot load $default_fl loss is used for $spotloadKW1{$a} rating xfmr.\n";
+			$temp_loss = sprintf("%.3f",$spotloadKW1{$a}*(1-$default_fl));
+		#}
+		#$temp_loss = $spotloadKW1{$a};
+        print GLM_FILE "\tconstant_power_A ".$temp_loss;
+		#print GLM_FILE "\tconstant_power_A $spotloadKW1{$a}";
+		if ($spotloadKVAR1{$a} >=0.0) {
+			print GLM_FILE "+".$spotloadKVAR1{$a}."j;\n";
+		} else {
+			print GLM_FILE $spotloadKVAR1{$a}."j;\n";
+		}	
+	}	
+    if ( $spotloadPhase{$a} =~ /B/i ) {
+		# if ( exists $FL{$spotloadKVA2{$a}} ) {
+			# $temp_loss = sprintf("%.3f",$spotloadKW2{$a} - $FL{$spotloadKVA2{$a}}) ;
+		# } else {
+			#print "warning, spot load $default_fl loss is used for $spotloadKW1{$a} rating xfmr.\n";
+			$temp_loss = sprintf("%.3f",$spotloadKW2{$a}*(1-$default_fl));
+		#}
+		#$temp_loss = $spotloadKW2{$a};
+        print GLM_FILE "\tconstant_power_B ".$temp_loss;
+		#print GLM_FILE "\tconstant_power_B $spotloadKW2{$a}";
+		if ($spotloadKVAR2{$a} >=0) {
+			print GLM_FILE "+".$spotloadKVAR2{$a}."j;\n";
+		} else {
+			print GLM_FILE $spotloadKVAR2{$a}."j;\n";
+		}
+    }
+    if ( $spotloadPhase{$a} =~ /C/i ) {
+        # if ( exists $FL{$spotloadKVA3{$a}} ) {
+			# $temp_loss = sprintf("%.3f",$spotloadKW3{$a} - $FL{$spotloadKVA3{$a}}) ;
+		# } else {
+			#print "warning, spot load phase C $default_fl loss is used for $spotloadKW1{$a} rating xfmr.\n";
+			$temp_loss = sprintf("%.3f",$spotloadKW3{$a}*(1-$default_fl));
+		#}
+		#$temp_loss = $spotloadKW3{$a};
+        print GLM_FILE "\tconstant_power_C ".$temp_loss;
+		if ($spotloadKVAR3{$a} >=0) {
+			print GLM_FILE "+".$spotloadKVAR3{$a}."j;\n";
+		} else {
+			print GLM_FILE $spotloadKVAR3{$a}."j;\n";
+		}	
+	}
+	my $Class = SpaceReplace($loadClass{$a}); #load classification
+	if ($Class =~ /^[^rc]/i) {# if class doesn't begin with 'R' or 'C'
+		$Class = "Unknown";
+		push @UnknownLoadClass, $a;
+	}
+	my $class =  substr $Class, 0, 1;
+	print GLM_FILE "\tgroupid ".$Class.";\n";
+	print GLM_FILE "\tload_class ".$class.";\n";
+	print GLM_FILE "\t//house_tag ".$Class.";\n";
+    print GLM_FILE "}\n\n";	
+}	
+
+sub printNon_Res() {
+	my $a = shift; #SectionId
+	my $parent = $a."_M";
+	print GLM_FILE "// PV -- Negative Load;\n" if ($a =~ /^.*_PV$/);
+	print GLM_FILE "object load { ";
+	print GLM_FILE "//PV" if ($a =~ /^.*_PV$/);
+	print GLM_FILE "\n";	
+	print GLM_FILE "\tname ".$feederName."-".$a."_load;\n";
+	print GLM_FILE "\tparent ".$feederName."-".$parent.";\n";
+	print GLM_FILE "\tphases ".$non_residential_phase{$a}.";\n";
+	print GLM_FILE "\tnominal_voltage ".$VLN.";\n";
+	my $total_KW = $non_residential_KW1{$a} + $non_residential_KW2{$a} + $non_residential_KW3{$a}; #Watts
+	my $total_KVA = $non_residential_KVA1{$a} + $non_residential_KVA2{$a} + $non_residential_KVA3{$a}; #kVA
+	my $total_KVAR = $non_residential_KVAR1{$a} + $non_residential_KVAR2{$a} + $non_residential_KVAR3{$a}; #VAr
+    if ( $non_residential_phase{$a} =~ /A/i ) {
+        print GLM_FILE "\tconstant_power_A ".$non_residential_KW1{$a};
+		if ($non_residential_KVAR1{$a} >=0.0) {
+			print GLM_FILE "+".$non_residential_KVAR1{$a}."j;\n";
+		} else {
+			print GLM_FILE $non_residential_KVAR1{$a}."j;\n";
+		}	
+	}	
+    if ( $non_residential_phase{$a} =~ /B/i ) {
+        print GLM_FILE "\tconstant_power_B ".$non_residential_KW2{$a};
+		if ($non_residential_KVAR2{$a} >=0.0) {
+			print GLM_FILE "+".$non_residential_KVAR2{$a}."j;\n";
+		} else {
+			print GLM_FILE $non_residential_KVAR2{$a}."j;\n";
+		}	
+	}	
+    if ( $non_residential_phase{$a} =~ /C/i ) {
+        print GLM_FILE "\tconstant_power_C ".$non_residential_KW3{$a};
+		if ($non_residential_KVAR3{$a} >=0.0) {
+			print GLM_FILE "+".$non_residential_KVAR3{$a}."j;\n";
+		} else {
+			print GLM_FILE $non_residential_KVAR3{$a}."j;\n";
+		}	
+	}	
+	if ($total_KW < 0) {
+		$sum_NonRes_KW_PV = $sum_NonRes_KW_PV + $total_KW;
+		$sum_NonRes_KVAR_PV = $sum_NonRes_KVAR_PV + $total_KVAR;
+	}else{
+		$sum_NonRes_KW = $sum_NonRes_KW + $total_KW;
+		$sum_NonRes_KVAR = $sum_NonRes_KVAR + $total_KVAR;
+	}
+	my $Class = SpaceReplace($loadClass{$a});
+	if ($Class =~ /^[^rc]/i) {# if class doesn't begin with 'R' or 'C'
+		$Class = "Unknown";
+		push @UnknownLoadClass, $a;
+	}
+	my $class = substr $Class, 0, 1;
+	print GLM_FILE "\tgroupid ".$Class.";\n";
+	print GLM_FILE "\tload_class ".$class.";\n";	
+	print GLM_FILE "\t//house_tag ".$Class.";\n";
+	if ($a =~ /^.*_PV$/) {
+		$a =~ s/_PV$//;
+		print GLM_FILE "\t//PV_tag ".$a.";\n"; #record section that PV is on
+	}
+	my $l = $a.":".$non_residential_phase{$a}; 
+	if ($IsSpotLoad{$l} == 1) {
+		print GLM_FILE "\t//spotload\n";
+	}
+    print GLM_FILE "}\n\n";	
+}	
+	
+sub	printMeter($) {
+	my $a = shift; #load
+	my $name = $a."_M"; #meter name
+	print GLM_FILE "object meter {\n";
+	print GLM_FILE "\tname ".$feederName."-".$name.";\n";	
+	print GLM_FILE "\tphases ".$spotloadPhase{$a}.";\n";	
+	print GLM_FILE "\tnominal_voltage ".$VLN.";\n";	
+	print GLM_FILE "}\n\n";	
+}
+
+sub	printNon_Res_Meter($) {
+	my $a = shift; #load
+	my $name = $a."_M"; #meter name
+	print GLM_FILE "object meter {\n";
+	print GLM_FILE "\tname ".$feederName."-".$name.";\n";	
+	print GLM_FILE "\tphases ".$non_residential_phase{$a}.";\n";	
+	print GLM_FILE "\tnominal_voltage ".$VLN.";\n";	
+	print GLM_FILE "}\n\n";	
+}
+
+=pod
+sub printXFMR($) {
+	my $a = shift; # loads	
+	my $from = $secTo{$DevSection{$a}};
+	my $to = $a."_M";
+	my $temp_type = $DevType{$DevSection{$a} };
+	my $temp_cfg = $spotloadKVA1{$a}.":".$spotloadKVA2{$a}.":".
+		$spotloadKVA3{$a}.":".$spotloadPhase{$a}.":".$temp_type;
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	print GLM_FILE "object transformer  {\n";
+	print GLM_FILE "\tphases $spotloadPhase{$a};\n";	
+	print GLM_FILE "\tfrom $from;\n";
+	print GLM_FILE "\tto $to;\n";			
+	print GLM_FILE "\tconfiguration $feederName-$temp_cfg;\n}\n\n";		
+}	
+	
+sub printNon_Res_XFMR($) {
+	my $a = shift; # loads	
+	my $from = $secTo{$DevSection{$a}};
+	my $to = $a."_M";
+	my $temp_type = $DevType{$DevSection{$a} };
+	my $temp_cfg = $non_residential_KVA1{$a}.":".$non_residential_KVA2{$a}.":"
+		.$non_residential_KVA3{$a}.":".$non_residential_phase{$a}.":".$temp_type;	
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	print GLM_FILE "object transformer  {\n";
+	print GLM_FILE "\tphases $non_residential_phase{$a};\n";	
+	print GLM_FILE "\tfrom $from;\n";
+	print GLM_FILE "\tto $to;\n";				
+	print GLM_FILE "\tconfiguration $feederName-$temp_cfg;\n}\n\n";		
+}	
+=cut
+
+sub printLine($) {
+	my $a = shift; # SectionID (DeviceID in CYME)
+	#my $b = $DevSection{$a};
+	my $b = $a;
+	#my $from = $secTo{$DevSection{$a}};
+	my $from = $secTo{$a};
+	my $to = $a."_M";
+	#my $temp_type = $DevType{$DevSection{$a} };
+	my $temp_type = $DevType{$a};
+	my $temp_cfg;
+	#my $nameOH = $feederName."-".$b."_OH1";
+	#my $nameUG = $feederName."-".$b."_UG1";
+	my $nameOH = $feederName."-".$a."_OH1";
+	my $nameUG = $feederName."-".$a."_UG1";
+	#if ($temp_type eq 1) { #underground lines
+	if ($a =~ /^.*_UG$/){
+		print GLM_FILE "object underground_line  {\n";
+		print GLM_FILE "\tname ".$nameUG.";\n";	
+		$temp_cfg = $UGCFG{$b};
+	} elsif ($a =~ /^.*_OH/) {
+		print GLM_FILE "object overhead_line  {\n";
+		print GLM_FILE "\tname ".$nameOH.";\n";	
+		$temp_cfg = $OHCFG{$b};
+	} else {
+		print GLM_FILE "object overhead_line {\n";
+		print GLM_FILE "\tname ".$nameOH.";\n";
+		$temp_cfg = "DEFAULT_NO_IMPEDANCE";
+	}
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	$temp_cfg =~ s/HORIZONTAL/H/g;
+	$temp_cfg =~ s/PINTOP/P/g;
+	$temp_cfg =~ s/VERTICAL/V/g;
+	$temp_cfg =~ s/SPACERCABLE/S/g;	
+	print GLM_FILE "\tphases ".$spotloadPhase{$a}.";\n";	
+	print GLM_FILE "\tfrom ".$feederName."-".$from.";\n";
+	print GLM_FILE "\tto ".$feederName."-".$to.";\n";			
+	print GLM_FILE "\tlength ".$xfmr_length.";\n";
+	print GLM_FILE "\tconfiguration ".$feederName."-".$temp_cfg.";\n}\n\n";
+	push @links, $to;
+	push @links, $from;
+	push @fromnodes, $secTo{$a};
+}	
+
+sub printNon_Res_Line($) {
+	my $a = shift; # loads (SectionId_PV, or just SectionId)	
+	#my $b = $DevSection{$a};
+	my $b = $a;
+	$b =~ s/_PV$//; #--remove "_PV" to get SectionID
+	#my $from = $secTo{$DevSection{$a}};
+	my $from = $secTo{$b};
+	my $to = $a."_M";
+	#my $temp_type = $DevType{$DevSection{$a} };
+	my $temp_type = $DevType{$b};
+	my $temp_cfg;
+	#my $nameOH = $feederName."-".$b."_OH2";
+	#my $nameUG = $feederName."-".$b."_UG2";	
+	my $nameOH = $feederName."-".$a."_OH2";
+	my $nameUG = $feederName."-".$a."_UG2";	
+	#if ($temp_type eq 1) {
+	if ($a =~ /G/i){
+		print GLM_FILE "object underground_line  {\n";
+		print GLM_FILE "\tname ".$nameUG.";\n";	
+		$temp_cfg = $UGCFG{$b};
+	} elsif ($a =~ /^.*_OH/) {
+		print GLM_FILE "object overhead_line  {\n";
+		print GLM_FILE "\tname ".$nameOH.";\n";	
+		$temp_cfg = $OHCFG{$b};
+	} else {
+		print GLM_FILE "object overhead_line {\n";
+		print GLM_FILE "\tname ".$nameOH.";\n";
+		$temp_cfg = "DEFAULT_NO_IMPEDANCE";
+	}	
+	print GLM_FILE "\tphases ".$non_residential_phase{$a}.";\n";	
+	print GLM_FILE "\tfrom ".$feederName."-".$from.";\n";
+	print GLM_FILE "\tto ".$feederName."-".$to.";\n";					
+	print GLM_FILE "\tlength ".$xfmr_length.";\n";
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	$temp_cfg =~ s/HORIZONTAL/H/g;
+	$temp_cfg =~ s/PINTOP/P/g;
+	$temp_cfg =~ s/VERTICAL/V/g;
+	$temp_cfg =~ s/SPACERCABLE/S/g;	
+	print GLM_FILE "\tconfiguration ".$feederName."-".$temp_cfg.";\n}\n\n";
+	push @links, $to;
+	push @links, $from;
+	push @fromnodes, $from;
+}	
+	
+sub printTN1() {
+	my $TN1 = shift; # triplex_node
+	my @temp = split (/\:/, $TN1 );
+	my $name = $temp[0]."_".$temp[1];
+	my @phase = split (/\_/, $temp[1]);
+	print GLM_FILE "object triplex_node {\n";
+	print GLM_FILE "\tname ".$feederName."-".$name.";\n";
+	print GLM_FILE "\tgroupid triplex_node;\n";
+	print GLM_FILE "\tphases ".$phase[0]."S;\n";
+	print GLM_FILE "\tnominal_voltage ".$V2nd.";\n}\n\n";				
+}	
+
+sub printTN ($) {
+	my $TN = shift; # triplex_node load (SectionID:Phase)) (If a double split was performed, SectionID may have suffix '_S2' or '_S1')
+	my @temp = split (/\:/, $TN );
+	my $ID = $temp[0];
+	$ID =~ s/(_S2$|_S1$)//; #Remove '_S2' or '_S1' to get SectionID as read from DB
+	my$loadID = $ID.":".$loadphase{$ID}; #loadID before it was split into phases (if that happened)
+	my $name = $temp[0]."_".$temp[1];
+	my $length = length ($loadphase{$ID}); #number of phases of original load (before it was split)
+	my $divisor;
+	if ($temp[0] =~ /^.*(_S2$|_S1$)/) { $divisor = $length * 2; }else{ $divisor = $length;} 
+	my $TNM = $name."_tm";
+	print GLM_FILE "// PV -- Negative Load;\n" if ($ID =~ /^.*_PV$/);
+	print GLM_FILE "object triplex_node { ";
+	print GLM_FILE "//PV" if ($ID =~ /^.*_PV$/);
+	print GLM_FILE "\n";
+	print GLM_FILE "\tname ".$feederName."-".$name.";\n";
+	print GLM_FILE "\tphases ".$temp[1]."S;\n";
+	print GLM_FILE "\tparent ".$feederName."-".$TNM.";\n";
+	my $temp_loss = sprintf("%.3f", $loadKW{$loadID}/$divisor);  #W
+	my $tempKVAR = sprintf("%.3f", $loadKVAR{$loadID}/$divisor); #VAr
+	#if ( $loadKVAR{$TN} >=0 ) {
+	if ( $tempKVAR >=0 ) {
+		print GLM_FILE "\tpower_1 ".$temp_loss."+".$tempKVAR."j;\n"; #VA
+	} else {	
+		print GLM_FILE "\tpower_1 ".$temp_loss.$tempKVAR."j;\n";
+	}
+	if ($temp_loss < 0) {
+	$sum_DL_KW_PV = $sum_DL_KW_PV + $temp_loss;
+	}else{
+	$sum_DL_KW = $sum_DL_KW + $temp_loss; #W
+	}
+	if ($tempKVAR < 0) {
+	$sum_DL_KVAR_PV = $sum_DL_KVAR_PV + $tempKVAR;
+	}else{
+	$sum_DL_KVAR = $sum_DL_KVAR + $tempKVAR; #VAR
+	}
+	my $Class = SpaceReplace($loadClass{$ID});
+	if ($Class =~ /^[^rc]/i) {# if class doesn't begin with 'R' or 'C'
+		$Class = "Unknown";
+		push @UnknownLoadClass, $ID;
+	}
+	my $class = substr $Class, 0, 1;
+	print GLM_FILE "\tgroupid ".$Class.";\n";
+	#print GLM_FILE "\tload_class ".$class.";\n"; # not a defined property in triplex_node	
+	print GLM_FILE "\t//house_tag ".$Class.";\n";
+	if ($IsSpotLoad{$loadID} == 1) {
+		print GLM_FILE "\t//spotload\n";
+	}
+	if ($ID =~ /^.*_PV$/) {
+		$temp[0] =~ s/_PV//g;
+		print GLM_FILE "\t//PV_tag ".$temp[0]."_".$temp[1].";\n"; #need to append the phase because the load may have been split into phases 
+	}
+
+	print GLM_FILE "\tnominal_voltage ".$V2nd.";\n}\n\n";				
+}	
+
+sub printTM ($) {
+	my $TN = shift; # triplex_node load (SectionID:Phases)
+	my @temp = split (/\:/, $TN );
+	my $name = $temp[0]."_".$temp[1];
+	my $TNM = $name."_tm";
+	print GLM_FILE "object triplex_meter {\n";
+	print GLM_FILE "\tname ".$feederName."-".$TNM.";\n";		
+	print GLM_FILE "\tphases ".$temp[1]."S;\n";
+	print GLM_FILE "\tnominal_voltage ".$V2nd.";\n}\n\n";				
+}	
+
+sub printTL() {
+	my $a = shift; # residential (SectionID:Phases)
+	my @temp = split (/\:/, $a ); 
+	my $temp_to = $temp[0]."_".$temp[1]; #use with triplex node
+	my $from = $temp_to."_tn";
+	my $to = $temp_to."_tm";
+	my $name = $temp_to."_TL";
+	$triplex_length =  sprintf("%.1f",random_normal($mean,$mean,$sdev/2));
+	if ($triplex_length >60) {
+		$triplex_length = 60.0;
+	}	
+	if ($triplex_length <30) {
+		$triplex_length = 30.0;
+	}
+	print GLM_FILE "object triplex_line {\n";
+	print GLM_FILE "\tname ".$feederName."-".$name.";\n";		
+	print GLM_FILE "\tphases ".$temp[1]."S;\n";
+	print GLM_FILE "\tfrom ".$feederName."-".$from.";\n";
+	print GLM_FILE "\tto ".$feederName."-".$to.";\n";
+	print GLM_FILE "\tlength ".$triplex_length.";\n";
+	print GLM_FILE "\tconfiguration ".$feederName."-TLCFG;\n}\n\n";
+	push @links, $to;
+	push @links, $from;
+}	
+
+sub printSPCT($) {
+	my $a = shift; #residential
+	my @temp = split (/\:/, $a );
+	my $temp_to = $temp[0]."_".$temp[1];
+	my $to = $temp_to."_tn";		
+	#my $from = $secTo{$DevSection{$temp[0]}};
+	$temp[0] =~ s/(_S2$|_S1$)//; #remove '_S2' or '_S1' (appended if line was split)
+	$temp[0] =~ s/_PV$//; #remove '_PV' from section ID
+	my $from = $secTo{$temp[0]};
+	my $name = "SPCT_".$ic; 
+	print GLM_FILE "object transformer {\n";	
+	print GLM_FILE "\tname ".$feederName."-".$name.";\n";
+	print GLM_FILE "\tphases ".$temp[1]."S;\n";				
+	print GLM_FILE "\tfrom ".$feederName."-".$from.";\n";
+	print GLM_FILE "\tto ".$feederName."-".$to.";\n";			
+	my $temp_cfg = $tn_cfg{$a};
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	print GLM_FILE "\tconfiguration ".$feederName."-".$temp_cfg.";\n}\n\n";
+	push @links, $to;
+	push @links, $from;
+	push @fromnodes, $from;
+}	
+
+sub printCap() {
+	my $a = shift; # capacitor
+	print GLM_FILE "object capacitor{\n";			
+	print GLM_FILE "\tname $feederName-$a;\n";
+	my $parent = $secTo{$DevSection{$a}};
+	print GLM_FILE "\tparent $feederName-$parent;\n";
+	print GLM_FILE "\tphases $capPhase{$a};\n";		
+	my $temp_CTR_phase;
+	my $temp_CTR;
+	if ($capType{$a} == 0 ) {
+		$temp_CTR_phase = $capPhase{$a};
+		$temp_CTR = "MANUAL";
+	}	elsif ($capType{$a} == 3 ) {
+		$temp_CTR_phase = $capcurrentPhase{$a};
+		$temp_CTR = "CURRENT";
+	}	elsif ($capType{$a} == 7 ) {
+		$temp_CTR_phase = $capcurrentPhase{$a};
+		$temp_CTR = "VOLT";
+	}	elsif ($capType{$a} == 2 ) {
+		$temp_CTR_phase = $capPhase{$a};
+		$temp_CTR = "VAR";
+	}	else {
+		$temp_CTR_phase = $capPhase{$a};
+		$temp_CTR = "MANUAL";
+		print " warning: unrecognized capacitor type $capType{$a}, replaced by \"MANUAL\" mode.\n";
+	}		
+	print GLM_FILE "\tpt_phase $temp_CTR_phase;\n";		
+	print GLM_FILE "\tphases_connected $capPhase{$a};\n";		
+	print GLM_FILE "\tcontrol $temp_CTR;\n"; 	 	
+	print GLM_FILE "\tcapacitor_A $capA{$a} kVAr;\n" if ($capPhase{$a}=~/A/i );
+	print GLM_FILE "\tcapacitor_B $capB{$a} kVAr;\n" if ($capPhase{$a}=~/B/i );
+	print GLM_FILE "\tcapacitor_C $capC{$a} kVAr;\n" if ($capPhase{$a}=~/C/i );
+	print GLM_FILE "\tcontrol_level INDIVIDUAL;\n"; # INDIVIDUAL for now
+	my $temp_sec = $DevSection{$a};
+	$temp_sec = $temp_sec."_OH" if ( grep{$_ eq $temp_sec} @OHSecs ); 
+	$temp_sec = $temp_sec."_UG" if ( grep{$_ eq $temp_sec} @UGSecs );
+	print GLM_FILE "\tremote_sense $feederName-$temp_sec;\n" if ($capType{$a} == 3 );	
+	print GLM_FILE "\tcurrent_set_high $capcurrentOn{$a};\n" if ($capType{$a} == 3 );
+	print GLM_FILE "\tcurrent_set_low $capcurrentOff{$a};\n" if ($capType{$a} == 3 );
+	print GLM_FILE "\tremote_sense $feederName-$temp_sec;\n" if ($capType{$a} == 2 );	
+	print GLM_FILE "\tVAr_set_high $capvarOn{$a};\n" if ($capType{$a} == 2 );
+	print GLM_FILE "\tVAr_set_low $capvarOff{$a};\n" if ($capType{$a} == 2 );
+	
+	if ($capPhase{$a}=~/A/i ) {
+		if ( $capST{$a} == 1 ) {
+			print GLM_FILE "\tswitchA OPEN;\n";
+		} else {
+			print GLM_FILE "\tswitchA CLOSED;\n";
+		}	
+	}	
+	if ($capPhase{$a}=~/B/i ) {
+		if ( $capST{$a} == 1 ) {
+			print GLM_FILE "\tswitchB OPEN;\n";
+		} else {
+			print GLM_FILE "\tswitchB CLOSED;\n";
+		}	
+	}	
+	if ($capPhase{$a}=~/C/i ) {
+		if ( $capST{$a} == 1 ) {
+			print GLM_FILE "\tswitchC OPEN;\n";
+		} else {
+			print GLM_FILE "\tswitchC CLOSED;\n";
+		}	
+	}	
+	print GLM_FILE "\ttime_delay 2.0;\n";
+	print GLM_FILE "\tdwell_time 3.0;\n";
+	my $temp = $capEquRatedKVLL{$capEquID{$a}};
+	print GLM_FILE "\tcap_nominal_voltage $temp;\n";
+	print GLM_FILE "\tnominal_voltage $VLN;\n}\n\n";  	
+}	
+
+sub printOHCond() {
+	my $temp_OH = shift;
+	print GLM_FILE "object overhead_line_conductor {\n";
+	print GLM_FILE "\tname ".$feederName."-".$temp_OH.";\n";
+	print GLM_FILE "\trating.summer.continuous ".$condRating{$temp_OH}.";\n";
+	print GLM_FILE "\tgeometric_mean_radius ".sprintf("%.4f",$condGMR{$temp_OH}).";\n";			
+	print GLM_FILE "\tresistance ".sprintf("%.4f",$condR25{$temp_OH}).";\n}\n\n";
+}	
+ 
+sub	printUGCond() { 
+	$a = shift;
+	print GLM_FILE "object underground_line_conductor {\n";
+	print GLM_FILE "\tname ".$feederName."-".$a.";\n";
+	#print GLM_FILE "\trating.summer.continuous $UGRating{$a};\n";
+	print GLM_FILE "\touter_diameter ".sprintf("%.4f",$condDiam_outside{$a})." in;\n";
+	print GLM_FILE "\tconductor_gmr ".sprintf("%.4f",$condGMR{$a})." ft;\n";
+	print GLM_FILE "\tconductor_diameter ".sprintf("%.4f",$condDiam{$a})." in;\n"; # maybe use $condDiam_cond{$a} instead
+	print GLM_FILE "\tconductor_resistance ".sprintf("%.4f",$condR25{$a}).";\n";
+	print GLM_FILE "\tneutral_gmr ".sprintf("%.4f",$condGMR_neut{$a})." ft;\n";
+	print GLM_FILE "\tneutral_resistance ".sprintf("%.4f",$condR_neut{$a}).";\n";
+	print GLM_FILE "\tneutral_diameter ".sprintf("%.4f",$condDiam_neut{$a})." in;\n";
+	print GLM_FILE "\tneutral_strands ".sprintf("%.4f",$condStrands{$a}).";\n";
+	# USING DEFAULT VALUES FROM *** SPREADSHEET:
+	# my$d = "DEFAULT";
+	# print GLM_FILE "\trating.summer.continuous $UGRating{$d};\n";
+	# print GLM_FILE "\touter_diameter $UGOD{$d} in;\n";
+	# print GLM_FILE "\tconductor_gmr $UGCGMR{$d} in;\n";
+	# print GLM_FILE "\tconductor_diameter $UGCD{$d} in;\n";
+	# print GLM_FILE "\tconductor_resistance $UGCR{$d};\n";
+	# print GLM_FILE "\tneutral_gmr $UGNGMR{$d} in;\n";
+	# print GLM_FILE "\tneutral_resistance $UGNR{$d};\n";
+	# print GLM_FILE "\tneutral_diameter $UGND{$d} in;\n";
+	# print GLM_FILE "\tneutral_strands $UGStrands{$d};\n";
+	print GLM_FILE "\tshield_gmr 0.00;\n";
+	print GLM_FILE "\tshield_resistance 0.00;\n";
+	print GLM_FILE "}\n\n";
+}	
+
+sub printTLCond() { 
+	# create triplex_line_conductor object
+	 print GLM_FILE "object triplex_line_conductor {\n";
+	 print GLM_FILE "\tname $feederName-1/0_AA_triplex;\n";
+	 print GLM_FILE "\tresistance 0.97;\n";
+	 print GLM_FILE "\tgeometric_mean_radius 0.0111;\n}\n\n";
+	#print GLM_FILE "object triplex_line_conductor {\n";
+	#print GLM_FILE "\tname ".$feederName."-3/0_AA_triplex;\n";
+	#print GLM_FILE "\tresistance 0.611;\n";
+	#print GLM_FILE "\tgeometric_mean_radius 0.014;\n}\n\n";
+	
+	# set triplex_line_configuration id = 1 for now
+	print GLM_FILE "object triplex_line_configuration {\n";
+	print GLM_FILE "\tname $feederName-TLCFG;\n";
+	print GLM_FILE "\tconductor_1 $feederName-1/0_AA_triplex;\n";
+	#print GLM_FILE "\tconductor_1 ".$feederName."-3/0_AA_triplex;\n";
+	print GLM_FILE "\tconductor_2 $feederName-1/0_AA_triplex;\n";
+	#print GLM_FILE "\tconductor_2 ".$feederName."-3/0_AA_triplex;\n";
+	print GLM_FILE "\tconductor_N $feederName-1/0_AA_triplex;\n";
+	#print GLM_FILE "\tconductor_N ".$feederName."-3/0_AA_triplex;\n";
+	print GLM_FILE "\tinsulation_thickness 0.08;\n";
+	print GLM_FILE "\tdiameter 0.368;\n}\n\n";
+	#print GLM_FILE "\tdiameter 0.502;\n}\n\n";
+}	
+
+sub printSubstation_Meter() {
+	my $name = $feederName."-Substation_Meter"; 
+	print GLM_FILE "object meter {\n";
+	print GLM_FILE "\tname ".$name.";\n";	
+	print GLM_FILE "\tphases ABCN;\n";	
+	print GLM_FILE "\tvoltage_A ".$VA.";\n";
+	print GLM_FILE "\tvoltage_B ".$VB.";\n";
+	print GLM_FILE "\tvoltage_C ".$VC.";\n";
+	print GLM_FILE "\tnominal_voltage ".$VLN.";\n";	
+	print GLM_FILE "}\n\n";	
+}	
+
+sub printUGSecs1() {
+	my $a = shift; 
+	my $c = shift;	
+	my $d = shift;
+	#my $name = $a."_UG"; #if section not already labeled as such
+	print GLM_FILE "object underground_line {\n";
+	#print GLM_FILE "\tname $feederName-$name-$d;\n";
+	print GLM_FILE "\tname ".$feederName."-".$a."-".$d.";\n";
+	print GLM_FILE "\tphases ".$secPhase{$a}.";\n";
+	print GLM_FILE "\tfrom ".$feederName."-".$c.";\n";
+	print GLM_FILE "\tto ".$feederName."-".$secTo{$a}.";\n";	
+	print GLM_FILE "\tlength ".$UGLength{$a}.";\n";
+	my $temp_cfg = $UGCFG{$a};
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	print GLM_FILE "\tconfiguration ".$feederName."-".$temp_cfg.";\n";	
+	print GLM_FILE "}\n\n";
+	push @links, $secTo{$a};
+	push @tonodes, $secTo{$a};
+	push @links, $c;
+}
+
+sub printUGSecs2() {
+	my $a = shift; #SectionID
+	my $c = shift; #node
+	my $d = shift; #device suffix
+	#my $name = $a."_UG";
+	print GLM_FILE "object underground_line {\n";
+	#print GLM_FILE "\tname $feederName-$name-$d;\n";
+	print GLM_FILE "\tname ".$feederName."-".$a."-".$d.";\n";
+	print GLM_FILE "\tphases ".$secPhase{$a}.";\n";
+	print GLM_FILE "\tfrom ".$feederName."-".$secFrom{$a}.";\n";
+	#print GLM_FILE "\tto $sectionDev{$a};\n";	
+	print GLM_FILE "\tto ".$feederName."-".$c.";\n";	
+	print GLM_FILE "\tlength ".$UGLength{$a}.";\n";
+	#print GLM_FILE "\tconfiguration $UGCFG{$a};\n";
+	my $temp_cfg = $UGCFG{$a};
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	print GLM_FILE "\tconfiguration ".$feederName."-".$temp_cfg.";\n";	
+	print GLM_FILE "}\n\n";
+	push @links, $c;
+	push @links, $secFrom{$a};
+	push @fromnodes, $secFrom{$a};
+}
+
+sub printOHSecs1() {
+	my $a = shift; #SectionID
+	my $c = shift; #node
+	my $d = shift; #device suffix
+	#my $name = $a."_OH";	
+	print GLM_FILE "object overhead_line {\n";
+	#print GLM_FILE "\tname $feederName-$name-$d;\n";
+	print GLM_FILE "\tname ".$feederName."-".$a."-".$d.";\n";
+	print GLM_FILE "\tphases ".$secPhase{$a}.";\n";
+	print GLM_FILE "\tfrom ".$feederName."-".$c.";\n";
+	print GLM_FILE "\tto ".$feederName."-".$secTo{$a}.";\n";
+	print GLM_FILE "\tlength ".$OHLength{$a}.";\n";
+	my $temp_cfg = $OHCFG{$a};
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	$temp_cfg =~ s/HORIZONTAL/H/g;
+	$temp_cfg =~ s/PINTOP/P/g;
+	$temp_cfg =~ s/VERTICAL/V/g;
+	$temp_cfg =~ s/SPACERCABLE/S/g;
+	print GLM_FILE "\tconfiguration ".$feederName."-".$temp_cfg.";\n";
+	print GLM_FILE "}\n\n";
+	push @links, $secTo{$a};
+	push @tonodes, $secTo{$a};
+	push @links, $c;
+}	
+
+sub printOHSecs2() {
+	my $a = shift;
+	my $c = shift;
+	my $d = shift;
+	#my $name = $a."_OH";	
+	print GLM_FILE "object overhead_line {\n";
+	#print GLM_FILE "\tname $feederName-$name-$d;\n";
+	print GLM_FILE "\tname ".$feederName."-".$a."-".$d.";\n";
+	print GLM_FILE "\tphases ".$secPhase{$a}.";\n";
+	print GLM_FILE "\tfrom ".$feederName."-".$secFrom{$a}.";\n";
+	print GLM_FILE "\tto ".$feederName."-".$c.";\n";
+	print GLM_FILE "\tlength ".$OHLength{$a}.";\n";
+	my $temp_cfg = $OHCFG{$a};
+	$temp_cfg =~ tr/\./\-/;
+	$temp_cfg =~ tr/\:/\-/;
+	$temp_cfg =~ s/HORIZONTAL/H/g;
+	$temp_cfg =~ s/PINTOP/P/g;
+	$temp_cfg =~ s/VERTICAL/V/g;
+	$temp_cfg =~ s/SPACERCABLE/S/g;	
+	print GLM_FILE "\tconfiguration ".$feederName."-".$temp_cfg.";\n";
+	print GLM_FILE "}\n\n";
+	push @links, $c;
+	push @links, $secFrom{$a};
+	push @fromnodes, $secFrom{$a};
+}	
