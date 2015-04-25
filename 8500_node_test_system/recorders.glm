@@ -1,0 +1,71 @@
+object recorder {
+	file feeder_power.csv;
+	interval 900;
+	limit 96;
+	parent HVMV_Sub;
+	property power_in.real,power_in.imag;
+}
+
+object recorder {
+	file feeder_reg_taps.csv;
+	interval 900;
+	limit 96;
+	parent FEEDER_REG;
+	property tap_A,tap_B,tap_C;
+}
+
+object recorder {
+	file reg_taps_2.csv;
+	interval 900;
+	limit 96;
+	parent VREG2;
+	property tap_A,tap_B,tap_C;
+}
+
+object recorder {
+	file reg_taps_3.csv;
+	interval 900;
+	limit 96;
+	parent VREG3;
+	property tap_A,tap_B,tap_C;
+}
+
+object recorder {
+	file reg_taps_4.csv;
+	interval 900;
+	limit 96;
+	parent VREG4;
+	property tap_A,tap_B,tap_C;
+}
+
+object recorder {
+	file cap_0.csv;
+	interval 900;
+	limit 96;
+	parent CapBank0;
+	property switchA,switchB,switchC;
+}
+
+object recorder {
+	file cap_1.csv;
+	interval 900;
+	limit 96;
+	parent CapBank1;
+	property switchA,switchB,switchC;
+}
+
+object recorder {
+	file cap_2.csv;
+	interval 900;
+	limit 96;
+	parent CapBank2;
+	property switchA,switchB,switchC;
+}
+
+object recorder {
+	file cap_3.csv;
+	interval 900;
+	limit 96;
+	parent CapBank3;
+	property switchA,switchB,switchC;
+}
