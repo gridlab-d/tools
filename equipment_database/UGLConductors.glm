@@ -1,0 +1,2670 @@
+ //List of standardized conductor values.  Use at your
+ //own discretion -- may not agree with some published
+ //values.
+
+ //Note:  This file will not do anything on its own.
+ //       Use it only as a reference or an "include" file.
+
+module powerflow;
+//AV_SP_one2three_GLM
+object underground_line_conductor {
+	name AG_1000CUEPR;
+	outer_diameter 1.6600 in;
+	conductor_gmr 0.0393 ft;
+	conductor_diameter 1.117 in;
+	conductor_resistance 0.088 ohm/kft;
+	neutral_gmr 0.0037 ft;
+	neutral_resistance 4.6758 ohm/kft;
+	neutral_diameter 0.1144 in;
+	neutral_strands 26.0000;
+	shield_gmr 0.0000 ft;
+	shield_resistance 0.0000 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name AG_750CN15;
+	outer_diameter 1.4830 in;
+	conductor_gmr 0.0308 ft;
+	conductor_diameter 0.963 in;
+	conductor_resistance 0.0947 ohm/kft;
+	neutral_gmr 0.0033 ft;
+	neutral_resistance 5.9026 ohm/kft;
+	neutral_diameter 0.1019 in;
+	neutral_strands 25.0000;
+	shield_gmr 0.0000 ft;
+	shield_resistance 0.0000 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name AG_750CUEPR_4RUNS;
+	outer_diameter 1.4830 in;
+	conductor_gmr 0.0308 ft;
+	conductor_diameter 0.629 in;
+	conductor_resistance 0.0947 ohm/kft;
+	neutral_gmr 0.0033 ft;
+	neutral_resistance 5.9026 ohm/kft;
+	neutral_diameter 0.1019 in;
+	neutral_strands 25.0000;
+	shield_gmr 0.0000 ft;
+	shield_resistance 0.0000 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name AG_750CUXLP;
+	outer_diameter 2.5 in;
+	conductor_gmr 0.0308 ft;
+	conductor_diameter 1.059 in;
+	conductor_resistance 0.0947 ohm/kft;
+	neutral_gmr 0 ft;
+	neutral_resistance 0 ohm/kft;
+	neutral_diameter 0 in;
+	neutral_strands 0;
+	shield_gmr 0.07808 ft;
+	shield_resistance 2.704 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name AG_1_0CN15;
+	outer_diameter 0.8930 in;
+	conductor_gmr 0.0111 ft;
+	conductor_diameter 0.3680 in;
+	conductor_resistance 0.6070 ohm/kft;
+	neutral_gmr 0.0021 ft;
+	neutral_resistance 14.8722 ohm/kft;
+	neutral_diameter 0.0641 in;
+	neutral_strands 15.0000;
+	shield_gmr 0.0000 ft;
+	shield_resistance 0.0000 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name AG_1_0CN25;
+	outer_diameter 0.8380 in;
+	conductor_gmr 0.0111 ft;
+	conductor_diameter 0.3680 in;
+	conductor_resistance 0.6070 ohm/kft;
+	neutral_gmr 0.0021 ft;
+	neutral_resistance 14.8722 ohm/kft;
+	neutral_diameter 0.0641 in;
+	neutral_strands 25.0000;
+	shield_gmr 0.0000 ft;
+	shield_resistance 0.0000 Ohm/mile;
+}
+
+
+object underground_line_conductor {
+	name AG_2CN15;
+	outer_diameter 0.7330 in;
+	conductor_gmr 0.0084 ft;
+	conductor_diameter 0.2580 in;
+	conductor_resistance 0.9450 ohm/kft;
+	neutral_gmr 0.0021 ft;
+	neutral_resistance 14.8722 ohm/kft;
+	neutral_diameter 0.0641 in;
+	neutral_strands 15.0000;
+	shield_gmr 0.0000 ft;
+	shield_resistance 0.0000 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name AG_UNK;
+	outer_diameter 1.4830 in;
+	conductor_gmr 0.0308 ft;
+	conductor_diameter 0.9630 in;
+	conductor_resistance 0.0947 ohm/kft;
+	neutral_gmr 0.0033 ft;
+	neutral_resistance 5.9026 ohm/kft;
+	neutral_diameter 0.1019 in;
+	neutral_strands 25.0000;
+	shield_gmr 0.0000 ft;
+	shield_resistance 0.0000 Ohm/mile;
+}
+
+//DG_GLM
+object underground_line_conductor {
+    name "DG_1_0ALTRXLPECN15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+     
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALTRXLPECNJ15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALTRXLPECNJ35";
+    rating.summer.continuous 221 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALTRXLPELCJ15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALXLPECN15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALXLPECN25";
+    rating.summer.continuous 221 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0TRXLPELCJ15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0TRXLPELCJ25";
+    rating.summer.continuous 221 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000ALTRXLPEJ15";
+    rating.summer.continuous 725 A;
+    outer_diameter 1.175 in;
+    conductor_gmr 0.0395 ft;
+    conductor_diameter 1.165 in;
+    conductor_resistance 0.0141 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000ALTRXLPELCJ15";
+    rating.summer.continuous 725 A;
+    outer_diameter 1.175 in;
+    conductor_gmr 0.0395 ft;
+    conductor_diameter 1.165 in;
+    conductor_resistance 0.0141 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000ALTRXLPELCJ25";
+    rating.summer.continuous 700 A;
+    outer_diameter 1.175 in;
+    conductor_gmr 0.0395 ft;
+    conductor_diameter 1.165 in;
+    conductor_resistance 0.0141 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0CUB7SD";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALTRXLPECNJ15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALXLPECN15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_350ALTRXLPELC15";
+    rating.summer.continuous 405 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_350ALTRXLPELCJ15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_350ALTRXLPELCJ25";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0ALTRXLPECNJ15";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 8;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0CUB7SD";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.5618 in;
+    conductor_gmr 0.0175 ft;
+    conductor_diameter 0.5518 in;
+    conductor_resistance 0.063 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 8;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0CURRUG";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.5618 in;
+    conductor_gmr 0.0175 ft;
+    conductor_diameter 0.5518 in;
+    conductor_resistance 0.063 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 8;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750ALTRXLPELCJ15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.118 in;
+    conductor_gmr 0.0373 ft;
+    conductor_diameter 1.108 in;
+    conductor_resistance 0.0263 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 8;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750ALTRXLPELCJ25";
+    rating.summer.continuous 608 A;
+    outer_diameter 1.118 in;
+    conductor_gmr 0.0373 ft;
+    conductor_diameter 1.108 in;
+    conductor_resistance 0.0263 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 8;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750CUEPRJD15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 8;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 9;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000";
+    rating.summer.continuous 725 A;
+    outer_diameter 1.175 in;
+    conductor_gmr 0.0395 ft;
+    conductor_diameter 1.165 in;
+    conductor_resistance 0.0141 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 9;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 9;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_350";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 9;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 9;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.118 in;
+    conductor_gmr 0.0373 ft;
+    conductor_diameter 1.108 in;
+    conductor_resistance 0.0263 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 9;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALEPRCN35";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALEPRCNJ25";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALEPRCNJ15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALHMWPECN15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALTRXLPECNJAC35";
+    rating.summer.continuous 221 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALTRXLPELCJAC15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALTRXPECNJ15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALXLPECN35";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALHMWPECN25";
+    rating.summer.continuous 221 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000AL15KVUG";
+    rating.summer.continuous 725 A;
+    outer_diameter 1.175 in;
+    conductor_gmr 0.0395 ft;
+    conductor_diameter 1.165 in;
+    conductor_resistance 0.0141 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000ALXLPEDWJ25";
+    rating.summer.continuous 700 A;
+    outer_diameter 1.175 in;
+    conductor_gmr 0.0395 ft;
+    conductor_diameter 1.165 in;
+    conductor_resistance 0.0141 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0AL15KVCN";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0AL15KVUG";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0ALXLPE15";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0ALXLPECN15";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0CUPILCD35";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0CURR15";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALPECNJ15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALTRXLPECNJAC15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALHMWPECN25";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALHMWPECN15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALPECN15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALRC";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALTRXLPE15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CUB7SD";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CUKER35";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CUKER15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CUPECN15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CUPILCJD15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CURRUG";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_500ALTRXLPEJ15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_500ALXLPE15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_500CUTRXLPECNJ15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_500CUKER15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_500CUKERD5";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_500CURRUG";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_500CURR15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_6CURR";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_350ALXLPEDWJ15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_350ALXLPEDWJ25";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0AL15KVCNJ";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0AL15KVUG";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0ALEPRCNJ15";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0ALRC";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0ALTRXLPE15";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0ALWP7";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0ALXLPECN15";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0CUB7";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.5618 in;
+    conductor_gmr 0.0175 ft;
+    conductor_diameter 0.5518 in;
+    conductor_resistance 0.063 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0CUBS";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.5618 in;
+    conductor_gmr 0.0175 ft;
+    conductor_diameter 0.5518 in;
+    conductor_resistance 0.063 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0CURR15";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.5618 in;
+    conductor_gmr 0.0175 ft;
+    conductor_diameter 0.5518 in;
+    conductor_resistance 0.063 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0CUEPRJD15";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.5618 in;
+    conductor_gmr 0.0175 ft;
+    conductor_diameter 0.5518 in;
+    conductor_resistance 0.063 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_650CUPILCJD15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_650CUPIJ";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_6CUPELC5";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750ALXLPEDWJ15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.118 in;
+    conductor_gmr 0.0373 ft;
+    conductor_diameter 1.108 in;
+    conductor_resistance 0.0263 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750ALTRXLPE15";
+    rating.summer.continuous 608 A;
+    outer_diameter 1.118 in;
+    conductor_gmr 0.0373 ft;
+    conductor_diameter 1.108 in;
+    conductor_resistance 0.0263 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750ALTRXLPE3AC15";
+    rating.summer.continuous 608 A;
+    outer_diameter 1.118 in;
+    conductor_gmr 0.0373 ft;
+    conductor_diameter 1.108 in;
+    conductor_resistance 0.0263 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750ALTRXLPEJ3AC15";
+    rating.summer.continuous 608 A;
+    outer_diameter 1.118 in;
+    conductor_gmr 0.0373 ft;
+    conductor_diameter 1.108 in;
+    conductor_resistance 0.0263 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750CUTRXLPEJD35";
+    rating.summer.continuous 608 A;
+    outer_diameter 1.118 in;
+    conductor_gmr 0.0373 ft;
+    conductor_diameter 1.108 in;
+    conductor_resistance 0.0263 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750ALXLPEDWJ25";
+    rating.summer.continuous 608 A;
+    outer_diameter 1.118 in;
+    conductor_gmr 0.0373 ft;
+    conductor_diameter 1.108 in;
+    conductor_resistance 0.0263 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000CUPILCJD15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000CUXLPEJ15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750CUKER15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750CUPILCJ15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750CUTRXLPEJ15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_CUSTOMER_WIRE";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 8;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_Default";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 8;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_Unknown";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 8;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_397ACSR30X7";
+    rating.summer.continuous 461 A;
+    outer_diameter 0.676 in;
+    conductor_gmr 0.021 ft;
+    conductor_diameter 0.666 in;
+    conductor_resistance 0.063 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 8;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0CURR15";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000ALXLPEDWJ15";
+    rating.summer.continuous 700 A;
+    outer_diameter 1.175 in;
+    conductor_gmr 0.0395 ft;
+    conductor_diameter 1.165 in;
+    conductor_resistance 0.0141 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0ALHMWPECN15";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0CUB7";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0CUPILC3";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0CUPILC3D15";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0CUPILCD15";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0CUPILCJ15";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2_0CUPILCJ3D15";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2000CUPILCJ15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_250CURR15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALXLPECN35";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CUPILC315";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CUPILCD15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CUPILCJ15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CUPILCJ3D15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2CURR15";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_300CUKER5";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_336AACHC19";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_350CURR15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_394AAACB19";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0ALXLPEDWJ15";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0ALXLPEDWJ25";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0CUPILCJD15";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.573 in;
+    conductor_gmr 0.0105 ft;
+    conductor_diameter 0.563 in;
+    conductor_resistance 0.1189 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_400CUB19";
+    rating.summer.continuous 320 A;
+    outer_diameter 0.5618 in;
+    conductor_gmr 0.0175 ft;
+    conductor_diameter 0.5518 in;
+    conductor_resistance 0.063 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_400CUPILC3D15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_400CUPILCD15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_400CUPILCJ3D15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_400CUPILCJD15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_400CURRUG";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4CUPECN15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_500CUPILCD15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_500CUPILCD25";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_650CU";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_650CUPI";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_8CURR";
+    rating.summer.continuous 165 A;
+    outer_diameter 0.326 in;
+    conductor_gmr 0.0046 ft;
+    conductor_diameter 0.316 in;
+    conductor_resistance 0.332 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_8CUPELC";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_6CUPILC10";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_19FOUG";
+    rating.summer.continuous 245 A;
+    outer_diameter 0.457 in;
+    conductor_gmr 0.0077 ft;
+    conductor_diameter 0.447 in;
+    conductor_resistance 0.1765 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_650CUPILC3D15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_650CUPILCJ3D15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750ALXLPE15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750ALXLPE35";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750CUXLPEJ15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750CUXLPE15";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALEPRCNJ35";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALTRXLPELCJ25";
+    rating.summer.continuous 221 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_750CUTRXLPELCJ25";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000CUTRXLPELCJ25";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.102 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1_0ALTRXLPELCJ35";
+    rating.summer.continuous 700 A;
+    outer_diameter 1.175 in;
+    conductor_gmr 0.0395 ft;
+    conductor_diameter 1.165 in;
+    conductor_resistance 0.0141 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_650CUTRXLPEJ15";
+    rating.summer.continuous 421 A;
+    outer_diameter 0.689 in;
+    conductor_gmr 0.0215 ft;
+    conductor_diameter 0.679 in;
+    conductor_resistance 0.0605 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_Default_Neutral";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_4_0ALTRXPECN15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_2ALTRXPECN15";
+    rating.summer.continuous 235 A;
+    outer_diameter 0.408 in;
+    conductor_gmr 0.0071 ft;
+    conductor_diameter 0.398 in;
+    conductor_resistance 0.2169 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_1000ALTRXPELCJ15";
+    rating.summer.continuous 725 A;
+    outer_diameter 1.175 in;
+    conductor_gmr 0.0395 ft;
+    conductor_diameter 1.165 in;
+    conductor_resistance 0.0141 ohm/kft;
+    neutral_gmr 0 ft;
+    neutral_resistance 0 ohm/kft;
+    neutral_diameter 0 in;
+    neutral_strands 0;
+    shield_gmr 0.00 ft;
+    
+}
+
+object underground_line_conductor {
+    name "DG_400CUTRXLPEJ";
+    rating.summer.continuous 630 A;
+    outer_diameter 1.092 in;
+    conductor_gmr 0.0325 ft;
+    conductor_diameter 1.092 in;
+    conductor_resistance 0.0183 ohm/kft;
+    neutral_gmr 0.0132 ft;
+    neutral_resistance 2.3057 ohm/kft;
+    neutral_diameter 0.0254 in;
+    neutral_strands 7;
+    shield_gmr 0.00 ft;
+    
+}
+
+//GC-12.47-1.GLM
+
+object underground_line_conductor { 
+     name Conc_1000_AAC_1; 
+     rating.summer.continuous 488.0 A; 
+     outer_diameter 2.15 in; 
+     conductor_gmr 0.0371 ft; 
+     conductor_diameter 1.152 in; 
+     conductor_resistance 0.091872 ohm/kft; 
+     neutral_gmr 0.0842565914341201 ft; 
+     neutral_resistance 5.3856 ohm/kft; 
+     neutral_diameter 0.1019 in; 
+     neutral_strands 20.0; 
+     shield_gmr 0.00 ft; 
+     shield_resistance 0.00 Ohm/mile; 
+} 
+
+object underground_line_conductor { 
+     name Conc_2_AL_1; 
+     rating.summer.continuous 112.0 A; 
+     outer_diameter 1.09 in; 
+     conductor_gmr 0.0088 ft; 
+     conductor_diameter 0.292 in; 
+     conductor_resistance 1.38336 ohm/kft; 
+     neutral_gmr 0.0348162687755351 ft; 
+     neutral_resistance 13.5696 ohm/kft; 
+     neutral_diameter 0.0641 in; 
+     neutral_strands 6.0; 
+     shield_gmr 0.00 ft; 
+     shield_resistance 0.00 Ohm/mile; 
+} 
+
+object underground_line_conductor { 
+     name Tape_1000_AAC_1; 
+     rating.summer.continuous 775.0 A; 
+     outer_diameter 1.87 in; 
+     conductor_gmr 0.0371 ft; 
+     conductor_diameter 1.15 in; 
+     conductor_resistance 0.0222 ohm/kft; 
+     neutral_gmr 0.0732739718442675 ft; 
+     neutral_resistance 0.05 ohm/kft; 
+     neutral_diameter 0.102; 
+     neutral_strands 20.0; 
+     shield_gmr 0.00 ft; 
+     shield_resistance 0.00 Ohm/mile; 
+} 
+
+//R1-12.47-1.GLM
+object underground_line_conductor { 
+     name Conc_1_0_AAC_2; 
+     rating.summer.continuous 142.0 A; 
+     outer_diameter 1.27 in; 
+     conductor_gmr 0.01142 ft; 
+     conductor_diameter 0.362 in; 
+     conductor_resistance 0.88704 ohm/kft; 
+     neutral_gmr 0.0489686771417213 ft; 
+     neutral_resistance 13.86528 ohm/kft; 
+     neutral_diameter 0.0641; 
+     neutral_strands 16.0; 
+     shield_gmr 0.00 ft; 
+     shield_resistance 0.00 Ohm/mile; 
+} 
+
+object underground_line_conductor { 
+     name Conc_4_0_AAC_2; 
+     rating.summer.continuous 214.0 A; 
+     outer_diameter 1.32 in; 
+     conductor_gmr 0.0177 ft; 
+     conductor_diameter 0.528 in; 
+     conductor_resistance 0.433488 ohm/kft; 
+     neutral_gmr 0.0485380344339232 ft; 
+     neutral_resistance 13.5696 ohm/kft; 
+     neutral_diameter 0.0641 in; 
+     neutral_strands 11.0; 
+     shield_gmr 0.00 ft; 
+     shield_resistance 0.00 Ohm/mile; 
+} 
+
+object underground_line_conductor { 
+     name Conc_1000_CU_2; 
+     rating.summer.continuous 662.0 A; 
+     outer_diameter 2.291 in; 
+     conductor_gmr 0.03592 ft; 
+     conductor_diameter 1.117 in; 
+     conductor_resistance 0.057024 ohm/kft; 
+     neutral_gmr 0.0897563211395267 ft; 
+     neutral_resistance 3.44784 ohm/kft; 
+     neutral_diameter 0.1285 in; 
+     neutral_strands 20.0; 
+     shield_gmr 0.00 ft; 
+     shield_resistance 0.00 Ohm/mile; 
+} 
+
+//R1-12.47-2.glm
+object underground_line_conductor { 
+     name R1_12_47_2_Tape_1000_AAC; 
+     rating.summer.continuous 775.0 A; 
+     outer_diameter 1.87 in; 
+     conductor_gmr 0.0371 ft; 
+     conductor_diameter 1.15 in; 
+     conductor_resistance 0.0222 ohm/kft; 
+     neutral_gmr 0.0732739718442675 ft; 
+     neutral_resistance 0.05 ohm/kft; 
+     neutral_diameter 0.102 in; 
+     neutral_strands 20.0; 
+     shield_gmr 0.00 ft; 
+     shield_resistance 0.00 Ohm/mile; 
+} 
+
+object underground_line_conductor { 
+     name R1_12_47_2_Conc_1_0_AAC; 
+     rating.summer.continuous 142.0 A; 
+     outer_diameter 1.27 in; 
+     conductor_gmr 0.01142 ft; 
+     conductor_diameter 0.362; 
+     conductor_resistance 0.88704 ohm/kft; 
+     neutral_gmr 0.0489686771417213 ft; 
+     neutral_resistance 13.86528 ohm/kft; 
+     neutral_diameter 0.0641 in; 
+     neutral_strands 16.0; 
+     shield_gmr 0.00 ft; 
+}
+    
+
+//more tape-shielded based on Kersting's
+object underground_line_conductor {
+	name tape_1_0;
+	outer_diameter 1.06 in;
+	conductor_gmr 0.0111 ft;
+	conductor_diameter 0.368 in;
+	conductor_resistance 0.97 ohm/mile;
+	neutral_gmr 0.01113 ft;
+	neutral_resistance 0.607 ohm/mile;
+	neutral_diameter 0.368 in;
+	neutral_strands 7;
+	shield_gmr 0.0365 ft;
+	shield_resistance 4.2786 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name tape_2_0;
+	outer_diameter 1.10 in;
+	conductor_gmr 0.0125 ft;
+	conductor_diameter 0.414 in;
+	conductor_resistance 0.769 ohm/mile;
+	neutral_gmr 0.01252 ft;
+	neutral_resistance 0.481 ohm/mile;
+	neutral_diameter 0.414 in;
+	neutral_strands 7;
+	shield_gmr 0.0385 ft;
+	shield_resistance 4.0486 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name tape_3_0;
+	outer_diameter 1.16 in;
+	conductor_gmr 0.014 ft;
+	conductor_diameter 0.464 in;
+	conductor_resistance 0.611 ohm/mile;
+	neutral_gmr 0.01404 ft;
+	neutral_resistance 0.382 ohm/mile;
+	neutral_diameter 0.464 in;
+	neutral_strands 7;
+	shield_gmr 0.0402 ft;
+	shield_resistance 3.8816 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name tape_4_0;
+	outer_diameter 1.21 in;
+	conductor_gmr 0.0158 ft;
+	conductor_diameter 0.522 in;
+	conductor_resistance 0.484 ohm/mile;
+	neutral_gmr 0.01579 ft;
+	neutral_resistance 0.303 ohm/mile;
+	neutral_diameter 0.522 in;
+	neutral_strands 7;
+	shield_gmr 0.0423 ft;
+	shield_resistance 3.6914 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name tape_250;
+	outer_diameter 1.27 in;
+	conductor_gmr 0.0171 ft;
+	conductor_diameter 0.567 in;
+	conductor_resistance 0.41 ohm/mile;
+	neutral_gmr 0.01813 ft;
+	neutral_resistance 0.257 ohm/mile;
+	neutral_diameter 0.574 in;
+	neutral_strands 19;
+	shield_gmr 0.0448 ft;
+	shield_resistance 3.4863 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name tape_350;
+	outer_diameter 1.37 in;
+	conductor_gmr 0.0214 ft;
+	conductor_diameter 0.679 in;
+	conductor_resistance 0.294 ohm/mile;
+	neutral_gmr 0.0214 ft;
+	neutral_resistance 0.1845 ohm/mile;
+	neutral_diameter 0.679 in;
+	neutral_strands 19;
+	shield_gmr 0.0490 ft;
+	shield_resistance 3.1908 Ohm/mile;
+}
+
+object underground_line_conductor {
+	name tape_500;
+	outer_diameter 1.49 in;
+	conductor_gmr 0.026 ft;
+	conductor_diameter 0.813 in;
+	conductor_resistance 0.206 ohm/mile;
+	neutral_gmr 0.026 ft;
+	neutral_resistance 0.1303 ohm/mile;
+	neutral_diameter 0.814 in;
+	neutral_strands 37;
+	shield_gmr 0.0540 ft;
+	shield_resistance 2.8963 Ohm/mile;
+}

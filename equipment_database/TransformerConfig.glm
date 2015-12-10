@@ -1,0 +1,2891 @@
+// List of standardized transformer configurations.  Use at your
+// own discretion -- may not agree with some published
+// values.
+
+// Note:  This file will not do anything on its own.
+//        Use it only as a reference or an "include" file.
+
+module powerflow;
+
+//GC-12.47-1.GLM
+object transformer_configuration { 
+	 name GC_12_47_1;
+     connect_type WYE_WYE; 
+     install_type PADMOUNT; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 3000.0 kVA; 
+     powerA_rating 1000.0 kVA; 
+     powerB_rating 1000.0 kVA; 
+     powerC_rating 1000.0 kVA; 
+     resistance 0.00003 Ohm; 
+     reactance 0.00017 Ohm; 
+     shunt_impedance 6545.460+6655.949j;
+} 
+
+//R1-12.47-1.GLM
+object transformer_configuration { 
+	 name R1_12_47_1_3083;
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerA_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+287.181j;
+} 
+
+object transformer_configuration { 
+	name R1_12_47_1_3084;	
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerA_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+295.721j;
+} 
+
+object transformer_configuration { 
+	 name R1_12_47_1_3085;
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 37.5 kVA; 
+     powerA_rating 37.5 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.00267 Ohm; 
+      shunt_impedance 365.685+397.393j;
+} 
+
+object transformer_configuration { 
+	 name R1_12_47_1_3086;
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 62.5 kVA; 
+     powerA_rating 62.5 kVA; 
+     resistance 0.00240 Ohm; 
+     reactance 0.00160 Ohm; 
+      shunt_impedance 417.835+411.761j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3087; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerA_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+326.493j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3088; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerA_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+360.704j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3089; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerA_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+274.164j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3090; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerA_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+301.925j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3091; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerA_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+332.068j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3092; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5.0 kVA; 
+     powerA_rating 5.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+322.313j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3093; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 37.5 kVA; 
+     powerA_rating 37.5 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.00267 Ohm; 
+      shunt_impedance 365.685+334.443j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3094; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerA_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+362.548j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3095; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 10.0 kVA; 
+     powerA_rating 10.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 308.320+393.061j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3096; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerA_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+332.488j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3097; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 10.0 kVA; 
+     powerA_rating 10.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 308.320+321.700j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3098; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerA_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+382.759j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3099; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5.0 kVA; 
+     powerA_rating 5.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+273.252j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3100; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5.0 kVA; 
+     powerB_rating 5.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+273.106j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3101; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerB_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+334.621j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3102; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerB_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+418.251j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3103; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerB_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+312.651j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3104; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerB_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+368.976j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3105; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 37.5 kVA; 
+     powerB_rating 37.5 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.00267 Ohm; 
+      shunt_impedance 365.685+345.241j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3106; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerB_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+381.753j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3107; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 37.5 kVA; 
+     powerB_rating 37.5 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.00267 Ohm; 
+      shunt_impedance 365.685+385.602j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3108; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerB_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+345.213j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3109; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 10.0 kVA; 
+     powerB_rating 10.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 308.320+327.432j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3110; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerB_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+391.541j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3111; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 10.0 kVA; 
+     powerB_rating 10.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 308.320+342.457j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3112; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5.0 kVA; 
+     powerB_rating 5.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+292.361j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3113; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerB_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+347.827j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3114; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerB_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+305.231j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3115; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerC_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+344.392j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3116; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerC_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+262.244j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3117; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerC_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+331.380j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3118; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 62.5 kVA; 
+     powerC_rating 62.5 kVA; 
+     resistance 0.00240 Ohm; 
+     reactance 0.00160 Ohm; 
+      shunt_impedance 417.835+459.820j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3119; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 37.5 kVA; 
+     powerC_rating 37.5 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.00267 Ohm; 
+      shunt_impedance 365.685+295.469j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3120; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerC_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+360.851j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3121; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerC_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+342.751j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3122; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerC_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+357.513j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3123; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerC_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+294.199j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3124; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 10.0 kVA; 
+     powerC_rating 10.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 308.320+308.100j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3125; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5.0 kVA; 
+     powerC_rating 5.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+300.666j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3126; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 10.0 kVA; 
+     powerC_rating 10.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 308.320+337.156j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3127; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerC_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+417.754j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3128; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 37.5 kVA; 
+     powerC_rating 37.5 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.00267 Ohm; 
+      shunt_impedance 365.685+352.878j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3129; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerC_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+455.220j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3130; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerC_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+348.261j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3131; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5.0 kVA; 
+     powerC_rating 5.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+273.681j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3730; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 75.0 kVA; 
+     powerC_rating 75.0 kVA; 
+     resistance 0.00133 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 443.910+424.448j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3731; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 50.0 kVA; 
+     powerA_rating 50.0 kVA; 
+     resistance 0.00200 Ohm; 
+     reactance 0.01000 Ohm; 
+      shunt_impedance 391.760+425.397j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3732; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 37.5 kVA; 
+     powerC_rating 37.5 kVA; 
+     resistance 0.00267 Ohm; 
+     reactance 0.01333 Ohm; 
+      shunt_impedance 365.685+372.824j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3733; 
+     connect_type WYE_WYE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 15.0 kVA; 
+     powerA_rating 0.0 kVA; 
+     powerB_rating 15.0 kVA; 
+     powerC_rating 0.0 kVA; 
+     resistance 0.00667 Ohm; 
+     reactance 0.03333 Ohm; 
+      shunt_impedance 318.750+347.082j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3734; 
+     connect_type WYE_WYE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 30.0 kVA; 
+     powerA_rating 0.0 kVA; 
+     powerB_rating 30.0 kVA; 
+     powerC_rating 0.0 kVA; 
+     resistance 0.00333 Ohm; 
+     reactance 0.01667 Ohm; 
+      shunt_impedance 350.040+352.463j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3735; 
+     connect_type WYE_WYE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 25.0 kVA; 
+     powerA_rating 0.0 kVA; 
+     powerB_rating 25.0 kVA; 
+     powerC_rating 0.0 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.02000 Ohm; 
+      shunt_impedance 339.610+424.065j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3736; 
+     connect_type WYE_WYE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 150.0 kVA; 
+     powerA_rating 50.0 kVA; 
+     powerB_rating 50.0 kVA; 
+     powerC_rating 50.0 kVA; 
+     resistance 0.00067 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 600.360+500.361j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3737; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 37.5 kVA; 
+     powerA_rating 37.5 kVA; 
+     resistance 0.00267 Ohm; 
+     reactance 0.01333 Ohm; 
+      shunt_impedance 365.685+350.475j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3738; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 62.5 kVA; 
+     powerC_rating 62.5 kVA; 
+     resistance 0.00160 Ohm; 
+     reactance 0.00800 Ohm; 
+      shunt_impedance 417.835+414.316j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3739; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 15.0 kVA; 
+     powerC_rating 15.0 kVA; 
+     resistance 0.00667 Ohm; 
+     reactance 0.03333 Ohm; 
+      shunt_impedance 318.750+321.595j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3740; 
+     connect_type WYE_WYE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 15.0 kVA; 
+     powerA_rating 0.0 kVA; 
+     powerB_rating 15.0 kVA; 
+     powerC_rating 0.0 kVA; 
+     resistance 0.00667 Ohm; 
+     reactance 0.03333 Ohm; 
+      shunt_impedance 318.750+365.165j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3741; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 30.0 kVA; 
+     powerC_rating 30.0 kVA; 
+     resistance 0.00333 Ohm; 
+     reactance 0.01667 Ohm; 
+      shunt_impedance 350.040+357.722j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3742; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 25.0 kVA; 
+     powerA_rating 25.0 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.02000 Ohm; 
+      shunt_impedance 339.610+335.709j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3743; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 10.0 kVA; 
+     powerA_rating 10.0 kVA; 
+     resistance 0.01 Ohm; 
+     reactance 0.05 Ohm; 
+      shunt_impedance 308.320+310.435j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_1_3744; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12500.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 25.0 kVA; 
+     powerA_rating 25.0 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.02000 Ohm; 
+      shunt_impedance 339.610+365.132j;
+} 
+
+//R1-12.47-2.GLM
+object transformer_configuration {
+    name R1_12_47_2_1417; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 37.5 kVA; 
+     powerA_rating 37.5 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.00267 Ohm; 
+      shunt_impedance 365.685+340.474j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1418; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 75.0 kVA; 
+     powerA_rating 75.0 kVA; 
+     resistance 0.00200 Ohm; 
+     reactance 0.00133 Ohm; 
+      shunt_impedance 443.910+463.922j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1419; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerA_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+330.449j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1420; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerA_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+336.934j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1421; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 150.0 kVA; 
+     powerA_rating 150.0 kVA; 
+     resistance 0.00100 Ohm; 
+     reactance 0.00067 Ohm; 
+      shunt_impedance 600.360+543.819j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1422; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerA_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+278.442j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1423; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 62.5 kVA; 
+     powerA_rating 62.5 kVA; 
+     resistance 0.00240 Ohm; 
+     reactance 0.00160 Ohm; 
+      shunt_impedance 417.835+429.640j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1424; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 10.0 kVA; 
+     powerA_rating 10.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 308.320+273.632j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1425; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerA_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+268.429j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1426; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerA_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+288.130j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1427; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerA_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+272.033j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1428; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerA_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+313.920j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1429; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerA_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+437.312j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1430; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type PADMOUNT; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 125.0 kVA; 
+     powerA_rating 125.0 kVA; 
+     resistance 0.00120 Ohm; 
+     reactance 0.00080 Ohm; 
+      shunt_impedance 548.210+538.236j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1431; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 75.0 kVA; 
+     powerA_rating 75.0 kVA; 
+     resistance 0.00200 Ohm; 
+     reactance 0.00133 Ohm; 
+      shunt_impedance 443.910+433.525j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1432; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerA_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+285.385j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1433; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerA_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+405.462j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1434; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type PADMOUNT; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 187.5 kVA; 
+     powerA_rating 187.5 kVA; 
+     resistance 0.00080 Ohm; 
+     reactance 0.00053 Ohm; 
+      shunt_impedance 678.585+661.660j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1435; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerB_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+383.556j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1436; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerB_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+330.288j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1437; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 37.5 kVA; 
+     powerB_rating 37.5 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.00267 Ohm; 
+      shunt_impedance 365.685+356.066j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1438; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerB_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+330.126j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1439; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerB_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+372.974j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1440; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 10.0 kVA; 
+     powerB_rating 10.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 308.320+304.884j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1441; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerB_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+395.403j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1442; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerB_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+375.529j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1443; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerB_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+389.189j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1444; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 75.0 kVA; 
+     powerB_rating 75.0 kVA; 
+     resistance 0.00200 Ohm; 
+     reactance 0.00133 Ohm; 
+      shunt_impedance 443.910+432.560j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1445; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerB_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+407.612j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1446; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerB_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+308.368j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1447; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type PADMOUNT; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 100.0 kVA; 
+     powerB_rating 100.0 kVA; 
+     resistance 0.00150 Ohm; 
+     reactance 0.00100 Ohm; 
+      shunt_impedance 496.060+536.117j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1448; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 37.5 kVA; 
+     powerB_rating 37.5 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.00267 Ohm; 
+      shunt_impedance 365.685+356.338j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1449; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type PADMOUNT; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 200.0 kVA; 
+     powerB_rating 200.0 kVA; 
+     resistance 0.00075 Ohm; 
+     reactance 0.00050 Ohm; 
+      shunt_impedance 704.660+755.051j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1450; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type PADMOUNT; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 112.5 kVA; 
+     powerB_rating 112.5 kVA; 
+     resistance 0.00133 Ohm; 
+     reactance 0.00089 Ohm; 
+      shunt_impedance 522.135+576.886j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1451; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 10.0 kVA; 
+     powerB_rating 10.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 308.320+313.794j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1452; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerC_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+302.457j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1453; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 5 kVA; 
+     powerC_rating 5 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 297.890+260.525j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1454; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerC_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+299.781j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1455; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerC_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+334.507j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1456; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerC_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+279.088j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1457; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 37.5 kVA; 
+     powerC_rating 37.5 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.00267 Ohm; 
+      shunt_impedance 365.685+360.013j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1458; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 25.0 kVA; 
+     powerC_rating 25.0 kVA; 
+     resistance 0.00600 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 339.610+284.766j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1459; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 15.0 kVA; 
+     powerC_rating 15.0 kVA; 
+     resistance 0.01000 Ohm; 
+     reactance 0.00667 Ohm; 
+      shunt_impedance 318.750+390.343j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1460; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerC_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+375.918j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1461; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 10.0 kVA; 
+     powerC_rating 10.0 kVA; 
+     resistance 0.015 Ohm; 
+     reactance 0.01 Ohm; 
+      shunt_impedance 308.320+244.570j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1462; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 50.0 kVA; 
+     powerC_rating 50.0 kVA; 
+     resistance 0.00300 Ohm; 
+     reactance 0.00200 Ohm; 
+      shunt_impedance 391.760+346.529j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1463; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 30.0 kVA; 
+     powerC_rating 30.0 kVA; 
+     resistance 0.00500 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 350.040+346.288j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1464; 
+     connect_type SINGLE_PHASE_CENTER_TAPPED; 
+     install_type POLETOP; 
+     primary_voltage 7200 V; 
+     secondary_voltage 120 V; 
+     power_rating 62.5 kVA; 
+     powerC_rating 62.5 kVA; 
+     resistance 0.00240 Ohm; 
+     reactance 0.00160 Ohm; 
+      shunt_impedance 417.835+346.265j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1716; 
+     connect_type WYE_WYE; 
+     install_type POLETOP; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 15.0 kVA; 
+     powerA_rating 0.0 kVA; 
+     powerB_rating 0.0 kVA; 
+     powerC_rating 15.0 kVA; 
+     resistance 0.00667 Ohm; 
+     reactance 0.03333 Ohm; 
+      shunt_impedance 318.750+304.091j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1717; 
+     connect_type WYE_WYE; 
+     install_type PADMOUNT; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 300.0 kVA; 
+     powerA_rating 100.0 kVA; 
+     powerB_rating 100.0 kVA; 
+     powerC_rating 100.0 kVA; 
+     resistance 0.00033 Ohm; 
+     reactance 0.00167 Ohm; 
+      shunt_impedance 913.260+1012.897j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1718; 
+     connect_type WYE_WYE; 
+     install_type PADMOUNT; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 150.0 kVA; 
+     powerA_rating 50.0 kVA; 
+     powerB_rating 50.0 kVA; 
+     powerC_rating 50.0 kVA; 
+     resistance 0.00067 Ohm; 
+     reactance 0.00333 Ohm; 
+      shunt_impedance 600.360+590.521j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1719; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 50.0 kVA; 
+     powerA_rating 50.0 kVA; 
+     resistance 0.00200 Ohm; 
+     reactance 0.01000 Ohm; 
+      shunt_impedance 391.760+389.126j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1720; 
+     connect_type SINGLE_PHASE; 
+     install_type PADMOUNT; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 125.0 kVA; 
+     powerA_rating 125.0 kVA; 
+     resistance 0.00080 Ohm; 
+     reactance 0.00400 Ohm; 
+      shunt_impedance 548.210+493.302j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1721; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 37.5 kVA; 
+     powerA_rating 37.5 kVA; 
+     resistance 0.00267 Ohm; 
+     reactance 0.01333 Ohm; 
+      shunt_impedance 365.685+345.365j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1722; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 15.0 kVA; 
+     powerB_rating 15.0 kVA; 
+     resistance 0.00667 Ohm; 
+     reactance 0.03333 Ohm; 
+      shunt_impedance 318.750+275.669j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1723; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 50.0 kVA; 
+     powerB_rating 50.0 kVA; 
+     resistance 0.00200 Ohm; 
+     reactance 0.01000 Ohm; 
+      shunt_impedance 391.760+406.028j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1724; 
+     connect_type WYE_WYE; 
+     install_type POLETOP; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 30.0 kVA; 
+     powerA_rating 15.0 kVA; 
+     powerB_rating 15.0 kVA; 
+     powerC_rating 0.0 kVA; 
+     resistance 0.00333 Ohm; 
+     reactance 0.01667 Ohm; 
+      shunt_impedance 350.040+334.211j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1725; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 15.0 kVA; 
+     powerA_rating 15.0 kVA; 
+     resistance 0.00667 Ohm; 
+     reactance 0.03333 Ohm; 
+      shunt_impedance 318.750+343.720j;
+} 
+
+object transformer_configuration {
+    name R1_12_47_2_1726; 
+     connect_type SINGLE_PHASE; 
+     install_type POLETOP; 
+     primary_voltage 12470.000 V; 
+     secondary_voltage 480 V; 
+     power_rating 25.0 kVA; 
+     powerA_rating 25.0 kVA; 
+     resistance 0.00400 Ohm; 
+     reactance 0.02000 Ohm; 
+      shunt_impedance 339.610+381.628j;
+}
+
+//AV_SP_one2three_GLM-208 secondary
+object transformer_configuration {
+	name transformer_configuration_7500_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 75 kVA;
+	powerA_rating 75 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_7500;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 75 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_75000_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 750 kVA;
+	powerA_rating 750 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_75000;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 750 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_5000_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 50 kVA;
+	powerA_rating 50 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_5000;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 50 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_1500_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 15 kVA;
+	powerA_rating 15 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_1500;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 15 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_2500_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 25 kVA;
+	powerA_rating 25 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_2500;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 25 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_100_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 1 kVA;
+	powerA_rating 1 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_100;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 1 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_3750_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 37.5 kVA;
+	powerA_rating 37.5 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_3750;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 37.5 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_10000_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 100 kVA;
+	powerA_rating 100 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_10000;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 100 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_1000_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 10 kVA;
+	powerA_rating 10 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_1000;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 10 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_22500_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 225 kVA;
+	powerA_rating 225 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_22500;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 225 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_50000_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 500 kVA;
+	powerA_rating 500 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_50000;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 500 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_30000_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 300 kVA;
+	powerA_rating 300 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_30000;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 300 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_11250_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 112.5 kVA;
+	powerA_rating 112.5 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_11250;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 112.5 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_16700_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 167 kVA;
+	powerA_rating 167 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_16700;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 167 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_15000_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 150 kVA;
+	powerA_rating 150 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_15000;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 150 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_4500_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 45 kVA;
+	powerA_rating 45 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_4500;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 45 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_100000_A;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 1000 kVA;
+	powerA_rating 1000 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_100000;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 1000 kVA;
+}
+
+//AV_SP_one2three_GLM-120 secondary
+object transformer_configuration {
+	name transformer_configuration_7500_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 75 kVA;
+	powerA_rating 75 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_7500_120;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 75 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_75000_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 750 kVA;
+	powerA_rating 750 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_75000_120;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 750 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_5000_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 50 kVA;
+	powerA_rating 50 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_5000_120;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 50 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_1500_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 15 kVA;
+	powerA_rating 15 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_1500_120;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 15 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_2500_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 25 kVA;
+	powerA_rating 25 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_2500_120;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 25 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_100_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 1 kVA;
+	powerA_rating 1 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_100_120;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 1 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_3750_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 37.5 kVA;
+	powerA_rating 37.5 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_3750_120;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 37.5 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_10000_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 100 kVA;
+	powerA_rating 100 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_10000_120;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 100 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_1000_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 10 kVA;
+	powerA_rating 10 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_1000_120;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 10 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_22500_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 225 kVA;
+	powerA_rating 225 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_22500_120;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 225 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_50000_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 500 kVA;
+	powerA_rating 500 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_50000_120;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 500 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_30000_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 208 V;
+	power_rating 300 kVA;
+	powerA_rating 300 kVA;
+}
+
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_30000_120;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 300 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_11250_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 112.5 kVA;
+	powerA_rating 112.5 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_11250_120;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 112.5 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_16700_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 167 kVA;
+	powerA_rating 167 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_16700_120;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 167 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_15000_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 150 kVA;
+	powerA_rating 150 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_15000_120;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 150 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_4500_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type POLETOP;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 45 kVA;
+	powerA_rating 45 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_4500_120;
+	connect_type WYE_WYE;
+	install_type POLETOP;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 45 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_100000_A_120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	install_type PADMOUNT;
+	resistance 0.00600 Ohm;
+	reactance 0.00400 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 1000 kVA;
+	powerA_rating 1000 kVA;
+}
+
+object transformer_configuration {
+	name transformer_configuration_nonTP_100000_120;
+	connect_type WYE_WYE;
+	install_type PADMOUNT;
+	resistance 0.011 Ohm;
+	reactance 0.02 Ohm;
+	primary_voltage 7200 V;
+	secondary_voltage 120 V;
+	power_rating 1000 kVA;
+}
+
+//DG_GLM
+object transformer_configuration {
+    name "DG_1500_23_9_13_8_kV_YYT_0277";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 277.0 V;
+    power_rating 1500 kVA;
+    impedance 0.006+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_1_23_9_13_8_kV_YY1";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 1 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_150_23_9_13_8_kV_YYT";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 150 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_300_23_9_13_8_kV_YYT";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 300 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_10_23_9_13_8_kV_YYB";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 10 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_15_23_9_13_8_kV_YY1";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 15 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_1000_23_9_13_8_kV_YYT_0277";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 277.0 V;
+    power_rating 1000 kVA;
+    impedance 0.006+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_5_23_9_13_8_kV_YY1";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 5 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_75_23_9_13_8_kV_YYT";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 75 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_15_23_9_13_8_kV_YY1_120";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 15 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_50_23_9_13_8_kV_YYB";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 50 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_45_23_9_13_8_kV_YYT";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 45 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_2500_23_9_13_8_kV_YYT_0277";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 277.0 V;
+    power_rating 2500 kVA;
+    impedance 0.006+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_100_23_9_13_8_kV_YY1";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 100 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_25_23_9_13_8_kV_YYB";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 25 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_75_23_9_13_8_kV_YYB";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 75 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_150_23_9_13_8_kV_YY1";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 150 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_37_5_23_9_13_8_kV_YYB";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 37.5 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_225_23_9_13_8_kV_YYT";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 225 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_167_23_9_13_8_kV_YY1";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 167 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_50_23_9_13_8_kV_YY1";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 50 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_300_23_9_13_8_kV_YYT_0277";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 277.0 V;
+    power_rating 300 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_750_23_9_13_8_kV_YYT_0277";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 277.0 V;
+    power_rating 750 kVA;
+    impedance 0.006+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_75_23_9_13_8_kV_YYT_120";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 75 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_500_23_9_13_8_kV_YYT_0277";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 277.0 V;
+    power_rating 500 kVA;
+    impedance 0.006+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_500_23_9_13_8_kV_YYT";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 500 kVA;
+    impedance 0.0168+0.0504j;
+}
+
+object transformer_configuration {
+    name "DG_37_5_23_9_13_8_kV_YY1_120";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 37.5 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_50_23_9_13_8_kV_YYB_120";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 100 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_30_23_9_13_8_kV_YYT";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 30 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_15_23_9_13_8_kV_YYB";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 15 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_50_23_9_13_8_kV_YY1_120";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 50 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_75_23_9_13_8_kV_YY1";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 75 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_25_23_9_13_8_kV_YY1";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 25 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_225_23_9_13_8_kV_YYT_120";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 225 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_150_23_9_13_8_kV_YYT_120";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 150 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_10_23_9_13_8_kV_YY1";
+    connect_type WYE_WYE;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 10 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_2000_23_9_13_8_kV_YYT_0277";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 277.0 V;
+    power_rating 2000 kVA;
+    impedance 0.0168+0.0504j;
+}
+
+object transformer_configuration {
+    name "DG_500_23_9_13_8_kV_YYT_0240";
+    connect_type WYE_WYE;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 240.0 V;
+    power_rating 500 kVA;
+    impedance 0.0168+0.0504j;
+}
+
+object transformer_configuration {
+    name "DG_100_23_9_13_8_kV_YY1_120";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type PADMOUNT;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 100 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_25_23_9_13_8_kV_YY1_120";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 25 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_75_23_9_13_8_kV_YY1_120";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 75 kVA;
+    impedance 0.009+0.018j;
+}
+
+object transformer_configuration {
+    name "DG_10_23_9_13_8_kV_YY1_120";
+    connect_type SINGLE_PHASE_CENTER_TAPPED;
+    install_type POLETOP;
+    primary_voltage 13800.0 V;
+    secondary_voltage 120.0 V;
+    power_rating 10 kVA;
+    impedance 0.018+0.018j;
+}
+
+object transformer_configuration {
+    name "substation_transf__conf";
+    connect_type DELTA_GWYE;
+    install_type PADMOUNT;
+    primary_voltage 57735.0 V;
+    secondary_voltage 13800.0 V;
+    power_rating 20000 kVA;
+    impedance 0.051+0.1230j;
+}
+
+object transformer_configuration {
+    name "substation_transf__conf_3";
+    connect_type DELTA_GWYE;
+    install_type PADMOUNT;
+    primary_voltage 57735.0 V;
+    secondary_voltage 13800.0 V;
+    power_rating 20000 kVA;
+    impedance 0.051+0.1209j;
+}
