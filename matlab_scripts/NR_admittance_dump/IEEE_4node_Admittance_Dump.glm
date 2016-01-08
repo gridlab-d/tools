@@ -1,0 +1,123 @@
+//Simple IEEE 4-node test system, with matrix admittance dump enabled
+
+clock {
+	timezone EST+5EDT;
+	starttime '2000-01-01 0:00:00';
+	stoptime '2000-01-01 0:01:00';
+}
+
+module powerflow {
+	line_capacitance true;
+	solver_method NR;
+	line_limits false;
+	NR_matrix_file admittance_dump.txt;		//Specifies the export file name
+	NR_matrix_output_interval ONCE;			//Specifies how many times to do the export
+	NR_matrix_output_references true;		//Includes "matrix location" information for the nodes
+}
+
+object voltdump {
+	file volt_output.csv;
+	mode polar;
+}
+
+object overhead_line_conductor {
+	name olc100;
+	geometric_mean_radius 0.0244 ft;
+	resistance 0.306 Ohm/mile;
+	diameter 0.721 in;
+}
+
+object overhead_line_conductor {
+	name olc101;
+	geometric_mean_radius 0.00814 ft;
+	resistance 0.592 Ohm/mile;
+	diameter 0.563 in;
+}
+
+object line_spacing {
+	name ls200;
+	distance_AB 2.5 ft;
+	distance_BC 4.5 ft;
+	distance_AC 7.0 ft;
+	distance_AN 5.656854 ft; 
+	distance_BN 4.272002 ft;
+	distance_CN 5.0 ft;
+	distance_AE 28.0 ft;
+	distance_BE 28.0 ft;
+	distance_CE 28.0 ft;
+	distance_NE 24.0 ft;
+}
+
+object line_configuration {
+	name lc300;
+	conductor_A olc100;
+	conductor_B olc100;
+	conductor_C olc100;
+	conductor_N olc101;
+	spacing ls200;
+}
+
+object transformer_configuration {
+	name tc400;
+	connect_type WYE_WYE;
+	power_rating 6000;
+	primary_voltage 12470;
+	secondary_voltage 4160;
+	resistance 0.01;
+	reactance 0.06;
+}
+
+//IEEE System
+object node {
+	name node1;
+	phases "ABCN";
+	bustype SWING;
+	nominal_voltage 7199.558;
+}
+
+object overhead_line {
+	name ol12;
+	phases "ABCN";
+	from node1;
+	to node2;
+	length 2000;
+	configuration lc300;
+}
+
+object node {
+	name node2;
+	phases "ABCN";
+	nominal_voltage 7199.558;
+}
+
+object transformer {
+	name tran23;
+	phases "ABCN";
+	from node2;
+	to node3;
+	configuration tc400;
+}
+
+object node {
+	name node3;
+	phases "ABCN";
+	nominal_voltage 2401.777;
+}
+
+object overhead_line {
+	name ol34;
+	phases "ABCN";
+	from node3;
+	to load4;
+	length 2500;
+	configuration lc300;
+}
+
+object load {
+	name load4;
+	phases "ABCN";
+	constant_power_A +1275000.000+790174.031j;
+	constant_power_B +1800000.000+871779.789j;
+	constant_power_C +2375000.000+780624.750j;
+	nominal_voltage 2401.777;
+}
