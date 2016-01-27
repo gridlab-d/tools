@@ -1,0 +1,308 @@
+// Examples of generator models as of v3.2 of GridLAB-D
+//  NOTE: This is not a "working" example, but rather a representative model
+//   for each of the different configurations.
+
+// Meters for connecting the inverters to power flow
+object meter {
+	name three_phase_meter;
+	phases ABC;
+	nominal_voltage 7200;
+}
+
+object meter {
+	name single_phase_meter;
+	phases A;
+	nominal_voltage 7200;
+}
+
+object triplex_meter {
+	name split_phase_meter;
+	phases AS;
+	nominal_voltage 240;
+}
+
+///////////////////  INVERTERS   ///////////////////
+// NOTE: While this example shows multiple DC devices connected to a single inverter, GridLAB-D does not handle this
+// -- Please use a single inverter per DC device (solar, battery, wind turbine)
+
+// inverter simple model (no losses, controls, etc.)
+object inverter {
+	name simple_inverter;
+	phases ABC;
+	parent three_phase_meter;
+	rated_power 25000;
+}
+
+// Inverter used for local volt-var control; three-phase
+object inverter {
+	name volt_var_inv;
+	parent three_phase_meter;
+	inverter_type FOUR_QUADRANT;
+	four_quadrant_control_mode VOLT_VAR;
+	generator_status ONLINE;
+	generator_mode SUPPLY_DRIVEN;
+	phases ABC;
+	rated_power 70 kVA;
+	inverter_efficiency 0.95;
+	volt_var_control_lockout 60s;
+	V_base 7200;
+	V1 0.90;
+	Q1 0.7;
+	V2 0.95;
+	Q2 0.0;
+	V3 1.05;
+	Q3 0.0;
+	V4 1.10;
+	Q4 -0.8;
+}
+
+// Inverter used for fixed/scheduled power factor; split-phase
+object inverter {
+	name pf_inv;
+	inverter_type FOUR_QUADRANT;
+	four_quadrant_control_mode CONSTANT_PF;
+	parent split_phase_meter;
+	rated_power 3000;
+	inverter_efficiency 0.87;
+	power_factor 0.95;  // This could also be a schedule.
+	phases AS;
+}
+
+// Inverter used for load following (in combination with a battery)
+object inverter {
+	name load_following_inv;
+	inverter_type FOUR_QUADRANT;
+	four_quadrant_control_mode LOAD_FOLLOWING;
+	parent split_phase_meter;
+
+	// the object that you want the load flow to be controlled on
+	sense_object triptransformer;
+	rated_power 3000.0;
+	inverter_efficiency 0.87;
+	charge_on_threshold 5.0 kW;
+	charge_off_threshold 7.0 kW;
+	discharge_off_threshold 7.5 kW;
+	discharge_on_threshold 9.0 kW;
+	max_discharge_rate 1.0 kW;
+	max_charge_rate 0.80 kW;
+	charge_lockout_time 60s;
+	discharge_lockout_time 60s;
+	phases AS;
+}
+
+// Inverter used for load following (in combination with a battery) with power factor regulation
+object inverter {
+	name load_following_inv_pf;
+	inverter_type FOUR_QUADRANT;
+	four_quadrant_control_mode LOAD_FOLLOWING;
+	parent split_phase_meter;
+
+	// the object that you want the load flow to be controlled on
+	sense_object triptransformer;
+	rated_power 3000.0;
+	inverter_efficiency 0.87;
+	charge_on_threshold 5.0 kW;
+	charge_off_threshold 7.0 kW;
+	discharge_off_threshold 7.5 kW;
+	discharge_on_threshold 9.0 kW;
+	max_discharge_rate 1.0 kW;
+	max_charge_rate 0.80 kW;
+	charge_lockout_time 60s;
+	discharge_lockout_time 60s;
+	
+	// controlling PF
+	pf_reg_activate 0.7;
+	pf_reg_deactivate 0.9;
+	pf_reg_activate_lockout_time 60s;
+	
+	phases AS;
+}
+
+// Inverter used for fixed/scheduled power factor; with manufacturer specific multi-point efficiency
+object inverter {
+	name pf_inv_manufacturer_multipoint;
+	inverter_type FOUR_QUADRANT;
+	four_quadrant_control_mode CONSTANT_PF;
+	parent split_phase_meter;
+	rated_power 3000;
+	inverter_efficiency 0.87;
+	power_factor 0.95;
+	phases AS;
+	use_multipoint_efficiency true;
+	inverter_manufacturer SMA; // XANTREX, SMA, FRONIUS
+}
+
+// Inverter used for fixed/scheduled power factor; with generic multi-point efficiency
+object inverter {
+	name pf_inv_generic_multipoint;
+	inverter_type FOUR_QUADRANT;
+	four_quadrant_control_mode CONSTANT_PF;
+	parent split_phase_meter;
+	rated_power 3000;
+	inverter_efficiency 0.99;
+	power_factor 0.95;
+	phases AS;
+	use_multipoint_efficiency true;
+	inverter_manufacturer NONE;
+	maximum_dc_power 3000;
+	maximum_dc_voltage 277;
+	minimum_dc_power 27.9;
+	c_0 -0.00001009;
+	c_1 -0.00001367;
+	c_2 -0.00003587;
+	c_3 -0.00342100;
+}
+
+// Group load following
+object inverter {
+      name battery_inverter_684;
+      parent battery_meter_684;
+      inverter_type FOUR_QUADRANT;
+      four_quadrant_control_mode GROUP_LOAD_FOLLOWING;
+      generator_mode CONSTANT_PQ;
+      generator_status ONLINE;
+	  sense_object Node630;
+	  charge_lockout_time 1;
+	  discharge_lockout_time 1;
+      rated_power 150 kW;		//Per phase rating
+      inverter_efficiency .95;
+      charge_threshold 4000 kW;			//As measured at sense object
+	  discharge_threshold 4500 kW;
+	  max_discharge_rate 300 kW;		//This battery all-phase power rating
+	  max_charge_rate 300 kW;
+	  group_rated_power 1200 kW;		//Group all-phase inverter power rating
+	  group_max_charge_rate 1200 kW;	//Group all-phase battery power rating
+	  group_max_discharge_rate 1200 kW;
+	  pf_reg INCLUDED;
+	  pf_reg_activate 0.9;
+	  pf_reg_deactivate 0.95;
+	  pf_reg_activate_lockout_time 60;
+}
+
+///////////////////  BATTERIES   ///////////////////
+// Tied to an inverter in four quadrant control - using defaults - inverter is providing the control commands
+object battery {
+	name batt_simple;
+	parent load_following_inv_pf;
+	use_internal_battery_model true;
+	battery_type LI_ION;
+	generator_mode SUPPLY_DRIVEN;
+	// HOUSEHOLD, SMALL, MED_COMMERCIAL, MED_HIGH_ENERGY, LARGE
+	rfb_size HOUSEHOLD;
+}
+
+// Tied to an inverter in four quadrant control - with a bit more specified
+object battery {
+	name batt_defined;
+	parent load_following_inv_pf;
+	// Always set this to true; switches between legacy and new modes
+	use_internal_battery_model true;
+	battery_type LI_ION;  //LEAD_ACID, LI_ION
+	battery_capacity 20 kWh;
+	round_trip_efficiency 0.95;
+	state_of_charge 0.5;
+	generator_mode SUPPLY_DRIVEN;
+}
+
+// Tied to an inverter in four quadrant control - with additional requirements
+object battery {
+	name batt_additional;
+	parent load_following_inv_pf;
+	use_internal_battery_model true;
+	battery_type LI_ION;
+	battery_capacity 20 kWh;
+	round_trip_efficiency 0.95;
+	state_of_charge 0.5;
+	generator_mode SUPPLY_DRIVEN;
+	reserve_state_of_charge 0.1;
+	rated_power 2 kW;
+}
+
+///////////////////  SOLAR PANELS  ///////////////////
+// Simple solar model, which assumes two-axis tracking
+object solar {
+	name solar_simple;
+	phases AS;
+	parent pf_inv;
+	area 323;
+	//CONCENTRATOR, THIN_FILM_GA_AS, AMORPHOUS_SILICON, MULTI_CRYSTAL_SILICON, SINGLE_CRYSTAL_SILICON
+	panel_type SINGLE_CRYSTAL_SILICON;
+}
+
+// Including a fixed orientation model
+object solar {
+	name solar_fixed;
+	phases AS;
+	parent pf_inv;
+	rated_power 4.0 kW;
+	area 29.6296 m^2;
+	latitude_angle_fix true;
+	efficiency 0.135;
+	orientation_azimuth 25.0;
+	orientation FIXED_AXIS;
+}
+
+// Including an alternate solar position model (same as SAM)
+object solar {
+	name solar_solpos;
+	phases AS;
+	parent pf_inv;
+	weather "WA-Yakima";
+	rated_power 4.0 kW;
+	area 29.6296 m^2;
+	tilt_angle 45.0;
+	efficiency 0.135;
+	orientation_azimuth 180.0;
+	orientation FIXED_AXIS;
+	SOLAR_TILT_MODEL SOLPOS;
+	SOLAR_POWER_MODEL FLATPLATE;
+}
+
+// Including a shading factor that can be used to represents trees, clouds, etc.
+object solar {
+	name solar_shading;
+	phases AS;
+	parent pf_inv;
+	weather "WA-Yakima";
+	rated_power 4.0 kW;
+	area 29.6296 m^2;
+	tilt_angle 45.0;
+	efficiency 0.135;
+	shading_factor 0.8; //use daily shading schedule 
+	orientation_azimuth 180.0;
+	orientation FIXED_AXIS;
+	SOLAR_TILT_MODEL SOLPOS;
+	SOLAR_POWER_MODEL FLATPLATE;
+}
+
+///////////////////  WIND TURBINES   ///////////////////
+// Synchronous and/or DFIG
+object windturb_dg {
+	parent three_phase_meter;
+	phases ABCN;
+	name windturb2;
+	Gen_status ONLINE;
+	Gen_type SYNCHRONOUS;
+	Gen_mode CONSTANTP; 
+	//VESTAS_V82, BERGEY_10kW, GE_25MW, GENERIC_IND_LARGE, GENERIC_IND_MID, GENERIC_IND_SMALL, GENERIC_SYNCH_LARGE, GENERIC_SYNCH_MEDIUM, GENERIC_SYNCH_SMALL
+	Turbine_Model GE_25MW; 
+}
+	
+// Fully rectified PMSG (requires both a WT and rectifier object)
+object rectifier {
+	name rect1;
+	parent simple_inverter;
+	phases "ABCN";
+	rectifier_type SIX_PULSE;
+	generator_mode SUPPLY_DRIVEN;
+}
+
+object windturb_dg {
+	parent rect1;
+	phases "ABCN";
+	name windturb1;
+	Gen_status ONLINE;
+	Gen_mode CONSTANTP;
+	Turbine_Model BERGEY_10kW;
+}
+
