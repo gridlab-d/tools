@@ -19,7 +19,8 @@
 #Acknowledgements: This tool is developed using a base script provided by Philip Douglass, Technical University of Denmark in 2013
 
 #Version and Patch Notes:
-    ##5/20/2016: Added:: line spacing; object names; object color coding
+    ##05/20/2016: Added    :: line spacing; object names; object color coding
+	##06/02/2016: Bug Fix  :: If the node names has ':' in it, grapgviz errors out. replaced ':' with '_' as well
 
 import sys;
 import re;
@@ -49,12 +50,12 @@ while s < len(lines):
         if re.search("from", lines[s])!=None:
             ts = lines[s].split()
             #Graphvis format can't handle '-' characters, so they are converted to '_'
-            ns = ts[1].rstrip(';').replace('-','_')    
+            ns = ts[1].rstrip(';').replace('-','_').replace(':','_') 
             outfile.write(ns)
             state = 'after_from'
         elif state == 'after_from' and re.search("to ", lines[s])!=None:
             ts = lines[s].split()
-            ns = ts[1].rstrip(';').replace('-','_')			
+            ns = ts[1].rstrip(';').replace('-','_').replace(':','_') 			
             if edge_color == 'red':
                 outfile.write(' -> ' + ns + '[style=' + edge_style + ' color='+ edge_color + ' label="'+lengthVal+'"]\n')
                 outfile.write("node [shape=box]\n")
