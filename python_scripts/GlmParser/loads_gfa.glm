@@ -1,0 +1,140 @@
+object load {    
+	name true_load_35;
+	phases ABCD;
+	groupid true_loads;
+	constant_power_A +40000.000000+20000.000000j;
+	nominal_voltage 2401.7771;
+    
+    //--GFA--
+    frequency_measure_type PLL;
+    GFA_enable true;
+    GFA_freq_low_trip 58.5 Hz;
+    GFA_reconnect_time 1000 s;
+    GFA_freq_disconnect_time 0.05 s;
+    
+    GFA_freq_high_trip 70 Hz;
+    GFA_volt_low_trip 0.5;
+    GFA_volt_high_trip 1.5;
+    GFA_volt_disconnect_time 0.08 s;
+    }
+object load {    
+	name true_load_37;
+	phases AN;
+	groupid true_loads;
+	constant_impedance_A +115.370665+57.685332j;
+	nominal_voltage 2401.7771;
+        }
+object load {    
+	name true_load_38;
+	phases BN;
+	groupid true_loads;
+	constant_current_B -7.769353-5.129747j;
+	nominal_voltage 2401.7771;
+        }
+object load {    
+	name true_load_39;
+	phases BN;
+	groupid true_loads;
+	constant_power_B +20000.000000+10000.000000j;
+	nominal_voltage 2401.7771;
+    
+    //--GFA--
+    frequency_measure_type PLL;
+    GFA_enable true;
+    GFA_freq_low_trip 59.0 Hz;
+    GFA_reconnect_time 1000 s;
+    GFA_freq_disconnect_time 0.1 s;
+    
+    GFA_freq_high_trip 70 Hz;
+    GFA_volt_low_trip 0.5;
+    GFA_volt_high_trip 1.5;
+    GFA_volt_disconnect_time 0.08 s;
+    }
+object load {    
+	name true_load_41;
+	phases CN;
+	groupid true_loads;
+	constant_power_C +20000.000000+10000.000000j;
+	nominal_voltage 2401.7771;
+    
+    //--GFA--
+    frequency_measure_type PLL;
+    GFA_enable true;
+    GFA_freq_low_trip 58.0 Hz;
+    GFA_reconnect_time 1000 s;
+    GFA_freq_disconnect_time 0.08 s;
+    
+    GFA_freq_high_trip 70 Hz;
+    GFA_volt_low_trip 0.5;
+    GFA_volt_high_trip 1.5;
+    GFA_volt_disconnect_time 0.08 s;
+    }
+object load {    
+	name true_load_42;
+	phases ABCN;
+	groupid true_loads;
+	constant_power_A +20000.000000+10000.000000j;
+	nominal_voltage 2401.7771;
+        }
+object load {    
+	name true_load_43;
+	phases BN;
+	groupid true_loads;
+	constant_impedance_B +115.370665+57.685332j;
+	nominal_voltage 2401.7771;
+        }
+object load {    
+	name true_load_45;
+	phases AN;
+	groupid true_loads;
+	constant_current_A +8.327167-4.163584j;
+	nominal_voltage 2401.7771;
+        }
+object load {    
+	name true_load_46;
+	phases AN;
+	groupid true_loads;
+	constant_power_A +20000.000000+10000.000000j;
+	nominal_voltage 2401.7771;
+        }
+object load {    
+	name true_load_47;
+	phases ABCN;
+	groupid true_loads;
+	constant_current_A +14.572543-10.408959j;
+	constant_current_B -16.300695-7.415713j;
+	constant_current_C +1.728152+17.824672j;
+	nominal_voltage 2401.7771;
+        }
+object load {    
+	name true_load_48;
+	phases ABCN;
+	groupid true_loads;
+	constant_impedance_A +54.567206+38.976576j;
+	constant_impedance_B +54.567206+38.976576j;
+	constant_impedance_C +54.567206+38.976576j;
+	nominal_voltage 2401.7771;
+        }
+object load {    
+	name true_load_49;
+	phases ABCN;
+	groupid true_loads;
+	constant_power_A +35000.000000+25000.000000j;
+	constant_power_B +70000.000000+50000.000000j;
+	constant_power_C +35000.000000+20000.000000j;
+	nominal_voltage 2401.7771;
+        }
+object load {    
+	name true_load_50;
+	phases ABCN;
+	groupid true_loads;
+	constant_power_C +40000.000000+20000.000000j;
+	nominal_voltage 2401.7771;
+        }
+object load {    
+	name true_load_51;
+	phases ABCN;
+	groupid true_loads;
+	constant_power_A +20000.000000+10000.000000j;
+	nominal_voltage 2401.7771;
+        }

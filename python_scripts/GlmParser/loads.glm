@@ -1,0 +1,370 @@
+object node {
+	name load_35;
+	groupid nodevolts;
+	phases ABCN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_35;
+	parent load_35;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_35;
+	to true_load_35;
+	name sw_load_35;
+	phases ABCN;
+	status CLOSED;
+}
+object load {
+	name true_load_35;
+	phases ABCD;
+	groupid true_loads;
+	constant_power_A +40000.000000+20000.000000j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_37;
+	groupid nodevolts;
+	phases AN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_37;
+	parent load_37;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_37;
+	to true_load_37;
+	name sw_load_37;
+	phases AN;
+	status CLOSED;
+}
+object load {
+	name true_load_37;
+	phases AN;
+	groupid true_loads;
+	constant_impedance_A +115.370665+57.685332j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_38;
+	groupid nodevolts;
+	phases BN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_38;
+	parent load_38;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_38;
+	to true_load_38;
+	name sw_load_38;
+	phases BN;
+	status CLOSED;
+}
+object load {
+	name true_load_38;
+	phases BN;
+	groupid true_loads;
+	constant_current_B -7.769353-5.129747j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_39;
+	groupid nodevolts;
+	phases BN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_39;
+	parent load_39;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_39;
+	to true_load_39;
+	name sw_load_39;
+	phases BN;
+	status CLOSED;
+}
+object load {
+	name true_load_39;
+	phases BN;
+	groupid true_loads;
+	constant_power_B +20000.000000+10000.000000j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_41;
+	groupid nodevolts;
+	phases CN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_41;
+	parent load_41;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_41;
+	to true_load_41;
+	name sw_load_41;
+	phases CN;
+	status CLOSED;
+}
+object load {
+	name true_load_41;
+	phases CN;
+	groupid true_loads;
+	constant_power_C +20000.000000+10000.000000j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_42;
+	groupid nodevolts;
+	phases ABCN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_42;
+	parent load_42;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_42;
+	to true_load_42;
+	name sw_load_42;
+	phases ABCN;
+	status CLOSED;
+}
+object load {
+	name true_load_42;
+	phases ABCN;
+	groupid true_loads;
+	constant_power_A +20000.000000+10000.000000j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_43;
+	groupid nodevolts;
+	phases BN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_43;
+	parent load_43;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_43;
+	to true_load_43;
+	name sw_load_43;
+	phases BN;
+	status CLOSED;
+}
+object load {
+	name true_load_43;
+	phases BN;
+	groupid true_loads;
+	constant_impedance_B +115.370665+57.685332j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_45;
+	groupid nodevolts;
+	phases AN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_45;
+	parent load_45;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_45;
+	to true_load_45;
+	name sw_load_45;
+	phases AN;
+	status CLOSED;
+}
+object load {
+	name true_load_45;
+	phases AN;
+	groupid true_loads;
+	constant_current_A +8.327167-4.163584j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_46;
+	groupid nodevolts;
+	phases AN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_46;
+	parent load_46;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_46;
+	to true_load_46;
+	name sw_load_46;
+	phases AN;
+	status CLOSED;
+}
+object load {
+	name true_load_46;
+	phases AN;
+	groupid true_loads;
+	constant_power_A +20000.000000+10000.000000j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_47;
+	groupid nodevolts;
+	phases ABCN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_47;
+	parent load_47;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_47;
+	to true_load_47;
+	name sw_load_47;
+	phases ABCN;
+	status CLOSED;
+}
+object load {
+	name true_load_47;
+	phases ABCN;
+	groupid true_loads;
+	constant_current_A +14.572543-10.408959j;
+	constant_current_B -16.300695-7.415713j;
+	constant_current_C +1.728152+17.824672j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_48;
+	groupid nodevolts;
+	phases ABCN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_48;
+	parent load_48;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_48;
+	to true_load_48;
+	name sw_load_48;
+	phases ABCN;
+	status CLOSED;
+}
+object load {
+	name true_load_48;
+	phases ABCN;
+	groupid true_loads;
+	constant_impedance_A +54.567206+38.976576j;
+	constant_impedance_B +54.567206+38.976576j;
+	constant_impedance_C +54.567206+38.976576j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_49;
+	groupid nodevolts;
+	phases ABCN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_49;
+	parent load_49;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_49;
+	to true_load_49;
+	name sw_load_49;
+	phases ABCN;
+	status CLOSED;
+}
+object load {
+	name true_load_49;
+	phases ABCN;
+	groupid true_loads;
+	constant_power_A +35000.000000+25000.000000j;
+	constant_power_B +70000.000000+50000.000000j;
+	constant_power_C +35000.000000+20000.000000j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_50;
+	groupid nodevolts;
+	phases ABCN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_50;
+	parent load_50;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_50;
+	to true_load_50;
+	name sw_load_50;
+	phases ABCN;
+	status CLOSED;
+}
+object load {
+	name true_load_50;
+	phases ABCN;
+	groupid true_loads;
+	constant_power_C +40000.000000+20000.000000j;
+	nominal_voltage 2401.7771;
+}
+object node {
+	name load_51;
+	groupid nodevolts;
+	phases ABCN;
+	nominal_voltage 2401.7771;
+}
+object meter {
+	name meter_ld_51;
+	parent load_51;
+	groupid meter_MG2;
+	frequency_measure_type PLL;
+}
+object switch {
+	from meter_ld_51;
+	to true_load_51;
+	name sw_load_51;
+	phases ABCN;
+	status CLOSED;
+}
+object load {
+	name true_load_51;
+	phases ABCN;
+	groupid true_loads;
+	constant_power_A +20000.000000+10000.000000j;
+	nominal_voltage 2401.7771;
+}
