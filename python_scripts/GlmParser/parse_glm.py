@@ -1,8 +1,9 @@
 ## ***************************************
 # Author: Jing Xie
-# Updated Date: 2019-10-15
+# Created Date: 2019-10
+# Updated Date: 2019-12-16
 # Email: jing.xie@pnnl.gov
-#  ***************************************
+## ***************************************
 
 import re
 import os.path
@@ -22,6 +23,8 @@ class GlmParser:
 
         #==GLM SYN
         self.re_glm_syn_comm = '\/\/.*\n';
+        self.re_glm_syn_mty_lns = r'^(?:[\t ]*(?:\r?\n|\r))+';
+        self.re_glm_syn_obj_load = r'object\s*load.*?{.*?}\s*;*';
 
         #==GLM OBJ TPL
         self.obj_load_tpl_str = "object load {{\
@@ -51,16 +54,34 @@ class GlmParser:
         self.clean_buffer()
         self.all_loads_list = re.findall(r'object\s*load.*?{(.*?)}',lines_str,flags=re.DOTALL)
 
+        self.all_loads_p_sum = 0
+        self.all_loads_q_sum = 0
         for cur_obj_str in self.all_loads_list:
-            cur_obj_s_list = re.findall(r'.*constant_power_A\s*(.*?);',cur_obj_str,flags=re.DOTALL)
-            cur_obj_s_list += re.findall(r'.*constant_power_B\s*(.*?);',cur_obj_str,flags=re.DOTALL)
-            cur_obj_s_list += re.findall(r'.*constant_power_C\s*(.*?);',cur_obj_str,flags=re.DOTALL)
-
+            #print(cur_obj_str)
+            cur_ld_obj_sabc = ['']*3
+            cur_ld_obj_sabc[0] = re.findall(r'.*constant_power_A\s*(.*?);',cur_obj_str,flags=re.DOTALL)
+            cur_ld_obj_sabc[1] = re.findall(r'.*constant_power_B\s*(.*?);',cur_obj_str,flags=re.DOTALL)
+            cur_ld_obj_sabc[2] = re.findall(r'.*constant_power_C\s*(.*?);',cur_obj_str,flags=re.DOTALL)
+            #print(cur_ld_obj_sabc)
+            cur_ld_obj_pabc = [0]*3;
+            cur_ld_obj_qabc = [0]*3;
+            for cur_ite in range(len(cur_ld_obj_sabc)):
+                if cur_ld_obj_sabc[cur_ite]:
+                    cur_ld_obj_pabc[cur_ite] = complex(cur_ld_obj_sabc[cur_ite][0]).real
+                    cur_ld_obj_qabc[cur_ite] = complex(cur_ld_obj_sabc[cur_ite][0]).imag
+            
             cur_obj_p_sum = 0
-            for cur_ph_s_str in cur_obj_s_list:
-                cur_obj_p_sum += complex(cur_ph_s_str).real
+            for cur_ph_p in cur_ld_obj_pabc:
+                cur_obj_p_sum += cur_ph_p
+
+            cur_obj_q_sum = 0
+            for cur_ph_q in cur_ld_obj_qabc:
+                cur_obj_q_sum += cur_ph_q
 
             self.all_loads_p_list.append(cur_obj_p_sum)
+            self.all_loads_p_sum += cur_obj_p_sum
+
+            self.all_loads_q_sum += cur_obj_q_sum
 
     def parse_triload(self, lines_str):
         """Parse and Package All Load Objects
@@ -77,18 +98,32 @@ class GlmParser:
 
             self.all_loads_p_list.append(cur_obj_p_sum)
 
+    def del_cmts(self,ori_str):
+        return re.sub(self.re_glm_syn_comm,'',ori_str)
+
+    def del_mty_lns(self,ori_str):
+        return re.sub(self.re_glm_syn_mty_lns,'',ori_str,flags=re.MULTILINE)
+
+    def del_glm_objs(self,ori_str,re_glm_syn_obj):
+        return re.sub(re_glm_syn_obj,'',ori_str,flags=re.DOTALL)
+
     def import_file(self, filename):
         o_file = open(filename,'r')
         str_file = o_file.read()
         o_file.close()
         
-        str_file_woc = re.sub(self.re_glm_syn_comm,'',str_file)
+        str_file_woc = self.del_cmts(str_file)
+        self.str_file_woc_copy = str_file_woc
         return str_file_woc
+
+    def disp_load_info(self):
+        print(f'Total Load: {self.all_loads_p_sum/1e3} (kW), {self.all_loads_q_sum/1e3} (kVAR)')
         
     def read_content_load(self, filename):
         """This func is added as an extra layer for flexible extension"""
         str_file_woc = self.import_file(filename);
         self.parse_load(str_file_woc)
+        self.disp_load_info()
 
     def read_content_triload(self, filename):
         str_file_woc = self.import_file(filename);
@@ -132,7 +167,9 @@ class GlmParser:
         print('Assigned UFLS in %: {}'.format([x/total_loads_p*100 for x in ufls_p_asg]))
         print('Number of GFA devices: {}'.format(ufls_gfa_num))
         
-        self.export_glm_with_gfas(output_glm_path_fn,all_loads_ufls_tag,gfa_extra_str,flag_triload)
+        self.export_glm_with_gfas(output_glm_path_fn,
+                                  all_loads_ufls_tag,ufls_th,ufls_dly,gfa_rc_time,
+                                  gfa_extra_str,flag_triload)
 
     def prepare_export_file(self,file_pn):
         if os.path.exists(file_pn):
@@ -143,7 +180,9 @@ class GlmParser:
         print("The new '{}' file is created!".format(file_pn))
         return hf_output
 
-    def export_glm_with_gfas(self, output_glm_path_fn, all_loads_ufls_tag,gfa_extra_str,flag_triload):
+    def export_glm_with_gfas(self, output_glm_path_fn,
+                             all_loads_ufls_tag, ufls_th, ufls_dly, gfa_rc_time,
+                             gfa_extra_str,flag_triload):
         hf_output = self.prepare_export_file(output_glm_path_fn)
         for ld_str, gp in zip(self.all_loads_list,all_loads_ufls_tag):
             #print(ld_str)
@@ -161,11 +200,69 @@ class GlmParser:
                 hf_output.write(self.obj_load_tpl_str.format(ld_str,cur_gfa_str))
         hf_output.close()
 
+    def export_glm(self,output_glm_path_fn,str_to_glm):
+        hf_output = self.prepare_export_file(output_glm_path_fn)
+        hf_output.write(str_to_glm)
+        hf_output.close()
 
+    def separate_load_objs(self,glm_file_path_fn,output_main_glm_path_fn,output_load_glm_path_fn):
+        self.read_content_load(glm_file_path_fn)
 
+        output_str = ''
+        for cur_str in self.all_loads_list:
+            output_str += f'object load {{{cur_str}}}\n'
+        self.export_glm(output_load_glm_path_fn,output_str)
 
+        str_main_file_noloads = self.del_glm_objs(self.str_file_woc_copy,self.re_glm_syn_obj_load)
+        str_main_file_noloads = self.del_mty_lns(str_main_file_noloads)
+        
+        self.export_glm(output_main_glm_path_fn,str_main_file_noloads)
 
-if __name__ == '__main__':
+    def adjust_load_amount(self,load_glm_path_fn,adj_load_glm_path_fn,tgt_p,tgt_pf):
+        '''tgt_p is in kW'''
+        self.read_content_load(load_glm_path_fn)
+        p_ratio = tgt_p/(self.all_loads_p_sum/1e3)
+
+        print(f'Ratio: {p_ratio}')
+        print(f'Total Load after Adjustment: {p_ratio*self.all_loads_p_sum/1e3} (kW)')
+        print(f'Power Factor: {tgt_pf}\n')
+
+        self.all_adj_loads_list = []
+        out_adj_load_str = ''
+        for cur_obj_str in self.all_loads_list:
+            cur_new_obj_str = self.update_pq(cur_obj_str,
+                                             p_ratio,tgt_pf)
+            self.all_adj_loads_list.append(cur_new_obj_str)
+
+            out_adj_load_str += self.obj_load_tpl_str.format(cur_new_obj_str,'')
+
+        self.export_glm(adj_load_glm_path_fn,out_adj_load_str)
+
+    def update_pq(self,cur_obj_str,p_ratio,tgt_pf):
+        #print(cur_obj_str)
+        power_atts_list = ['constant_power_A','constant_power_B','constant_power_C']
+        cur_new_obj_str = cur_obj_str
+        for cur_att_str in power_atts_list:
+            cur_att_re_str = fr".*{cur_att_str}\s*(.*?);"
+            cur_ph_s_lt = re.findall(cur_att_re_str,cur_new_obj_str,flags=re.DOTALL)
+            if cur_ph_s_lt:
+                cur_ph_p = complex(cur_ph_s_lt[0]).real
+                cur_ph_q = complex(cur_ph_s_lt[0]).imag
+                new_ph_p = p_ratio*cur_ph_p
+                new_ph_q = self.get_q(new_ph_p,tgt_pf)
+                new_ph_s_str = f"\t{cur_att_str} {new_ph_p}+{new_ph_q}j;"
+                #print(new_ph_s_str + '~~~~~~~')
+                cur_new_obj_str = re.sub(cur_att_re_str,
+                       new_ph_s_str,cur_new_obj_str,flags=re.MULTILINE)
+                #print(cur_new_obj_str)
+                #print('====\n')
+        return cur_new_obj_str
+
+    def get_q(self,p,pf):
+        return ((1-pf*pf)**0.5)/pf*p
+        
+
+def test_add_ufls_gfas():
     #==Parameters
     glm_file_path_fn = 'loads.glm' #Note that the filename cannot end with slash(es)
     output_glm_path_fn = 'loads_gfa.glm'
@@ -192,4 +289,45 @@ if __name__ == '__main__':
     triload_flag = True
     p.add_ufls_gfas('triplex_loads_gfa.glm',ufls_pct,ufls_th,ufls_dly,gfa_rc_time,triload_flag)
     """
+
+def test_separate_load_objs():
+    #==Parameters
+    glm_file_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\Duke_4F_Aug30.glm'
+    output_main_glm_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\Duke_Main.glm'
+    output_load_glm_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\duke_loads.glm'
+
+    #==Test & Demo
+    p = GlmParser()
+
+    p.separate_load_objs(glm_file_path_fn,
+                         output_main_glm_path_fn,
+                         output_load_glm_path_fn)
+
+def test_adjust_load_amount():
+    #==Parameters
+    load_glm_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\duke_loads.glm'
+    adj_load_glm_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\duke_loads_adj.glm'
+    utk_p = [7978, 2825, 6842, 6530] #Unit: kW
+    utk_p_sum = sum(utk_p) #Unit: kW
+    utk_pf = 0.98
     
+    #==Test & Demo
+    p = GlmParser()
+
+    p.adjust_load_amount(load_glm_path_fn,adj_load_glm_path_fn,
+                         utk_p_sum,utk_pf)
+
+def test_read_content_load():
+    #==Parameters
+    load_glm_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\duke_loads_adj.glm'
+
+    #==Test & Demo
+    p = GlmParser()
+    p.read_content_load(load_glm_path_fn)
+
+if __name__ == '__main__':
+    #test_add_ufls_gfas()
+    #test_separate_load_objs()
+    #test_adjust_load_amount()
+    test_read_content_load()
+
