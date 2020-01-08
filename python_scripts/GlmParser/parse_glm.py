@@ -1,12 +1,15 @@
 ## ***************************************
 # Author: Jing Xie
 # Created Date: 2019-10
-# Updated Date: 2019-12-16
+# Updated Date: 2020-1-2
 # Email: jing.xie@pnnl.gov
 ## ***************************************
 
 import re
 import os.path
+import csv
+
+import pickle
 
 
 class GlmParser:
@@ -21,12 +24,19 @@ class GlmParser:
         self.all_loads_list = []
         self.all_loads_p_list = []
 
-        #==GLM SYN
-        self.re_glm_syn_comm = '\/\/.*\n';
-        self.re_glm_syn_mty_lns = r'^(?:[\t ]*(?:\r?\n|\r))+';
-        self.re_glm_syn_obj_load = r'object\s*load.*?{.*?}\s*;*';
+        self.all_nodes_list = []
 
-        #==GLM OBJ TPL
+        #==GLM SYN
+        self.re_glm_syn_comm = '\/\/.*\n'
+        self.re_glm_syn_mty_lns = r'^(?:[\t ]*(?:\r?\n|\r))+'
+        
+        self.re_glm_syn_obj_load = r'object\s*load.*?{.*?}\s*;*'
+        self.re_glm_syn_obj_node = r'object\s*node.*?{.*?}\s*;*'
+        #self.re_glm_syn_obj_x = r'object\s*{}.*?{.*?}\s*;*'
+        
+        self.re_glm_attr_tpl_str = '.*{}\s*(.*?);'
+
+        #==GLM OBJ TPL for EXPORT
         self.obj_load_tpl_str = "object load {{\
     {}\
     {}\
@@ -44,22 +54,54 @@ class GlmParser:
     GFA_freq_disconnect_time {} s;\n\
     {}\n"
 
-    def clean_buffer(self):
+    def clean_load_buffer(self):
         self.all_loads_list = []
         self.all_loads_p_list = []
+
+    def extract_attr(self,attr_str,src_str):
+        '''Extract the attribute information'''
+        attr_list = re.findall(self.re_glm_attr_tpl_str.format(attr_str),src_str,flags=re.DOTALL)
+        return attr_list
+
+    def extract_obj(self,obj_str,src_str):
+        '''Extract the content of a giving type of object'''
+        obj_list = re.findall(obj_str,src_str,flags=re.DOTALL)
+        return obj_list
+
+    def parse_node(self, lines_str):
+        """Parse and Package All Node Objects
+        """
+        self.all_nodes_list = self.extract_obj(self.re_glm_syn_obj_node,lines_str)
+
+        self.all_nodes_names_list = []
+        for cur_obj_str in self.all_nodes_list:
+            #==Names
+            cur_nd_obj_name_list = self.extract_attr('name',cur_obj_str)
+            assert len(cur_nd_obj_name_list) == 1, 'Redundancy or missing on the name attribute!'
+            self.all_nodes_names_list.append(cur_nd_obj_name_list[0])
 
     def parse_load(self, lines_str):
         """Parse and Package All Load Objects
         """
-        self.clean_buffer()
-        self.all_loads_list = re.findall(r'object\s*load.*?{(.*?)}',lines_str,flags=re.DOTALL)
+        self.clean_load_buffer()
+        #self.all_loads_list = re.findall(r'object\s*load.*?{(.*?)}',lines_str,flags=re.DOTALL)
+        self.all_loads_list = re.findall(self.re_glm_syn_obj_load,lines_str,flags=re.DOTALL)
 
+        self.all_loads_names_list = []
         self.all_loads_p_sum = 0
         self.all_loads_q_sum = 0
         for cur_obj_str in self.all_loads_list:
             #print(cur_obj_str)
+
+            #==Names
+            cur_ld_obj_name_list = self.extract_attr('name',cur_obj_str)
+            assert len(cur_ld_obj_name_list) == 1, 'Redundancy or missing on the name attribute!'
+            self.all_loads_names_list.append(cur_ld_obj_name_list[0])
+
+            #==P & Q
             cur_ld_obj_sabc = ['']*3
-            cur_ld_obj_sabc[0] = re.findall(r'.*constant_power_A\s*(.*?);',cur_obj_str,flags=re.DOTALL)
+            #cur_ld_obj_sabc[0] = re.findall(r'.*constant_power_A\s*(.*?);',cur_obj_str,flags=re.DOTALL)
+            cur_ld_obj_sabc[0] = self.extract_attr('constant_power_A',cur_obj_str)
             cur_ld_obj_sabc[1] = re.findall(r'.*constant_power_B\s*(.*?);',cur_obj_str,flags=re.DOTALL)
             cur_ld_obj_sabc[2] = re.findall(r'.*constant_power_C\s*(.*?);',cur_obj_str,flags=re.DOTALL)
             #print(cur_ld_obj_sabc)
@@ -86,7 +128,7 @@ class GlmParser:
     def parse_triload(self, lines_str):
         """Parse and Package All Load Objects
         """
-        self.clean_buffer()
+        self.clean_load_buffer()
         self.all_loads_list = re.findall(r'object\s*triplex_load.*?{(.*?)}',lines_str,flags=re.DOTALL)
 
         for cur_obj_str in self.all_loads_list:
@@ -118,15 +160,19 @@ class GlmParser:
 
     def disp_load_info(self):
         print(f'Total Load: {self.all_loads_p_sum/1e3} (kW), {self.all_loads_q_sum/1e3} (kVAR)')
-        
+
+    def read_content_node(self, filename):
+        str_file_woc = self.import_file(filename)
+        self.parse_node(str_file_woc)
+    
     def read_content_load(self, filename):
         """This func is added as an extra layer for flexible extension"""
-        str_file_woc = self.import_file(filename);
+        str_file_woc = self.import_file(filename)
         self.parse_load(str_file_woc)
         self.disp_load_info()
 
     def read_content_triload(self, filename):
-        str_file_woc = self.import_file(filename);
+        str_file_woc = self.import_file(filename)
         self.parse_triload(str_file_woc)
 
     def add_ufls_gfas(self, output_glm_path_fn,
@@ -260,7 +306,26 @@ class GlmParser:
 
     def get_q(self,p,pf):
         return ((1-pf*pf)**0.5)/pf*p
-        
+
+    def read_zone_info(self,obj_zone_csv_path_fn):
+       #==Test & Demo
+        with open(obj_zone_csv_path_fn) as csvfile:
+            obj_zone_csv_reader = csv.reader(csvfile)
+            next(obj_zone_csv_reader, None)  # skip the headers
+            
+            obj_zone_dict = {}
+            obj_zone_missing_list = []
+            for cur_row in obj_zone_csv_reader:
+                cur_obj_name = cur_row[0]
+                cur_obj_zone_str = cur_row[1]
+                cur_obj_zone_int = [int(x) for x in cur_obj_zone_str.split() if x.isdigit()]
+                if not cur_obj_zone_int:
+                    obj_zone_dict[cur_obj_name] = 'NONE'
+                    obj_zone_missing_list.append(cur_obj_name)
+                else:
+                    assert len(cur_obj_zone_int) == 1, 'Redundancy of Segment Info'
+                    obj_zone_dict[cur_obj_name] = cur_obj_zone_int[0]
+            return obj_zone_dict, obj_zone_missing_list
 
 def test_add_ufls_gfas():
     #==Parameters
@@ -324,10 +389,117 @@ def test_read_content_load():
     #==Test & Demo
     p = GlmParser()
     p.read_content_load(load_glm_path_fn)
+    
+    print(p.all_loads_names_list[0:5])
+
+def test_read_content_node():
+    #==Parameters
+    main_glm_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\Duke_Main.glm'
+    
+    #==Test & Demo
+    p = GlmParser()
+    p.read_content_node(main_glm_path_fn)
+    
+    print(p.all_nodes_names_list[0:2])
+
+def test_read_zone_info():
+    #==Parameters
+    node_zone_csv_path_fn = r'D:\Duke\Zone ID\Base Case - Nodes Report.csv'
+    load_zone_csv_path_fn = r'D:\Duke\Zone ID\Base Case - Loads Report.csv'
+    
+    #==Test & Demo
+    p = GlmParser()
+
+    #--nodes
+    node_zone_dict, node_zone_missing_list = \
+                   p.read_zone_info(node_zone_csv_path_fn)
+
+    #print(node_zone_dict['256824001'])
+    #print(node_zone_dict['260440608'])
+    #print(node_zone_dict['256892070'])
+    print(node_zone_missing_list)
+
+    #--loads
+    load_zone_dict, load_zone_missing_list = \
+                    p.read_zone_info(load_zone_csv_path_fn)
+    #print(load_zone_dict)
+    print(load_zone_missing_list)
+
+    #==
+    return p, node_zone_dict, load_zone_dict
+
+def test_mapping_zone_info():
+    p, node_zone_dict, load_zone_dict = test_read_zone_info()
+
+    #==Parameters
+    main_glm_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\Duke_Main.glm'
+    load_glm_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\duke_loads_adj.glm'
+
+    zone_info_dicts_pickle_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\zone_info'
+    
+    #==Test & Demo
+    new_node_zone_dict = {}
+    new_node_zone_missing_list = []
+    new_load_zone_dict = {}
+    new_load_zone_missing_list = []
+    
+    #--node mapping
+    p.read_content_node(main_glm_path_fn)
+
+    for cur_node_name_str in p.all_nodes_names_list:
+        cur_node_name_feeder_list = re.findall('\d+',cur_node_name_str)
+        #@TODO: assert & check
+        cur_node_name_key = cur_node_name_feeder_list[0]
+        if cur_node_name_key in node_zone_dict.keys():
+            new_node_zone_dict[cur_node_name_str] = node_zone_dict[cur_node_name_key]
+        else:
+            new_node_zone_missing_list.append(cur_node_name_str)
+            #print(cur_node_name_key)
+            #print(cur_node_name_str)
+    
+    print(new_node_zone_missing_list)
+
+    #--load mapping
+    p.read_content_load(load_glm_path_fn)
+    
+    for cur_load_name_str in p.all_loads_names_list:
+        cur_load_name_feeder_list = re.findall('\d+',cur_load_name_str)
+        cur_load_name_key = cur_load_name_feeder_list[0]
+        if cur_load_name_key in load_zone_dict.keys():
+            new_load_zone_dict[cur_load_name_str] = load_zone_dict[cur_load_name_key]
+        else:
+            new_load_zone_missing_list.append(cur_load_name_str)
+
+    print(new_load_zone_missing_list)
+    #print(new_load_zone_dict['39693222_1207'])
+    #print(new_load_zone_dict['39695307_1207'])
+
+    #==Save
+    hf_zone_info = open(zone_info_dicts_pickle_path_fn,'wb')
+    pickle.dump(new_node_zone_dict, hf_zone_info)
+    pickle.dump(new_load_zone_dict, hf_zone_info)
+    hf_zone_info.close()
+
+    print(len(new_node_zone_dict))
+    print(len(new_load_zone_dict))
+
+def test_load_zone_info():
+    zone_info_dicts_pickle_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\zone_info'
+    hf_zone_info = open(zone_info_dicts_pickle_path_fn,'rb')
+    new_node_zone_dict = pickle.load(hf_zone_info)
+    print(len(new_node_zone_dict))
+    new_load_zone_dict = pickle.load(hf_zone_info)
+    print(len(new_load_zone_dict))
+    hf_zone_info.close()
 
 if __name__ == '__main__':
     #test_add_ufls_gfas()
     #test_separate_load_objs()
     #test_adjust_load_amount()
-    test_read_content_load()
+    #test_read_content_load()
+    #test_read_content_node()
+    #test_read_zone_info()
 
+    test_mapping_zone_info()
+
+    #test_load_zone_info()
