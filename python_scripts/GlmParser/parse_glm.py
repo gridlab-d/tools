@@ -1,7 +1,7 @@
 ## ***************************************
 # Author: Jing Xie
 # Created Date: 2019-10
-# Updated Date: 2020-1-2
+# Updated Date: 2020-1-22
 # Email: jing.xie@pnnl.gov
 ## ***************************************
 
@@ -74,11 +74,18 @@ class GlmParser:
         self.all_nodes_list = self.extract_obj(self.re_glm_syn_obj_node,lines_str)
 
         self.all_nodes_names_list = []
+        self.all_nodes_phases_dict = {}
         for cur_obj_str in self.all_nodes_list:
             #==Names
             cur_nd_obj_name_list = self.extract_attr('name',cur_obj_str)
             assert len(cur_nd_obj_name_list) == 1, 'Redundancy or missing on the name attribute!'
             self.all_nodes_names_list.append(cur_nd_obj_name_list[0])
+
+            #==Phases
+            cur_nd_obj_phases_list = self.extract_attr('phases',cur_obj_str)
+            #print(cur_nd_obj_phase_list)
+            assert len(cur_nd_obj_phases_list) == 1, 'Redundancy or missing on the phase attribute!'
+            self.all_nodes_phases_dict[cur_nd_obj_name_list[0]] = cur_nd_obj_phases_list[0]
 
     def parse_load(self, lines_str):
         """Parse and Package All Load Objects
@@ -88,6 +95,7 @@ class GlmParser:
         self.all_loads_list = re.findall(self.re_glm_syn_obj_load,lines_str,flags=re.DOTALL)
 
         self.all_loads_names_list = []
+        self.all_loads_phases_dict = {}
         self.all_loads_p_sum = 0
         self.all_loads_q_sum = 0
         for cur_obj_str in self.all_loads_list:
@@ -97,6 +105,11 @@ class GlmParser:
             cur_ld_obj_name_list = self.extract_attr('name',cur_obj_str)
             assert len(cur_ld_obj_name_list) == 1, 'Redundancy or missing on the name attribute!'
             self.all_loads_names_list.append(cur_ld_obj_name_list[0])
+
+            #==Phases
+            cur_ld_obj_phases_list = self.extract_attr('phases',cur_obj_str)
+            assert len(cur_ld_obj_phases_list) == 1, 'Redundancy or missing on the phase attribute!'
+            self.all_loads_phases_dict[cur_ld_obj_name_list[0]] = cur_ld_obj_phases_list[0]
 
             #==P & Q
             cur_ld_obj_sabc = ['']*3
@@ -402,6 +415,9 @@ def test_read_content_node():
     
     print(p.all_nodes_names_list[0:2])
 
+def test_read_phase_info():
+    pass
+
 def test_read_zone_info():
     #==Parameters
     node_zone_csv_path_fn = r'D:\Duke\Zone ID\Base Case - Nodes Report.csv'
@@ -442,6 +458,9 @@ def test_mapping_zone_info():
     new_node_zone_missing_list = []
     new_load_zone_dict = {}
     new_load_zone_missing_list = []
+
+    new_node_zone_phase_dict = {}
+    new_load_zone_phase_dict = {}
     
     #--node mapping
     p.read_content_node(main_glm_path_fn)
@@ -451,13 +470,22 @@ def test_mapping_zone_info():
         #@TODO: assert & check
         cur_node_name_key = cur_node_name_feeder_list[0]
         if cur_node_name_key in node_zone_dict.keys():
-            new_node_zone_dict[cur_node_name_str] = node_zone_dict[cur_node_name_key]
+            cur_zone_info = node_zone_dict[cur_node_name_key]
+            new_node_zone_dict[cur_node_name_str] = cur_zone_info
+            cur_phase_str = p.all_nodes_phases_dict[cur_node_name_str]
+            new_node_zone_phase_dict[cur_node_name_str] = [cur_zone_info,cur_phase_str]
         else:
             new_node_zone_missing_list.append(cur_node_name_str)
             #print(cur_node_name_key)
             #print(cur_node_name_str)
     
     print(new_node_zone_missing_list)
+    
+    #print(p.all_nodes_phases_dict)
+    #print(new_node_zone_dict)
+    #print(new_node_zone_phase_dict)
+
+    print(new_node_zone_phase_dict['n256851437_1207'])
 
     #--load mapping
     p.read_content_load(load_glm_path_fn)
@@ -466,18 +494,25 @@ def test_mapping_zone_info():
         cur_load_name_feeder_list = re.findall('\d+',cur_load_name_str)
         cur_load_name_key = cur_load_name_feeder_list[0]
         if cur_load_name_key in load_zone_dict.keys():
-            new_load_zone_dict[cur_load_name_str] = load_zone_dict[cur_load_name_key]
+            cur_zone_info = load_zone_dict[cur_load_name_key]
+            new_load_zone_dict[cur_load_name_str] = cur_zone_info
+            cur_phase_str = p.all_loads_phases_dict[cur_load_name_str]
+            new_load_zone_phase_dict[cur_load_name_str] = [cur_zone_info,cur_phase_str]
         else:
             new_load_zone_missing_list.append(cur_load_name_str)
 
     print(new_load_zone_missing_list)
-    #print(new_load_zone_dict['39693222_1207'])
-    #print(new_load_zone_dict['39695307_1207'])
+    #print(new_load_zone_phase_dict)
+
+    print(new_load_zone_phase_dict['39693222_1207'])
+    print(new_load_zone_phase_dict['39695307_1207'])
 
     #==Save
     hf_zone_info = open(zone_info_dicts_pickle_path_fn,'wb')
-    pickle.dump(new_node_zone_dict, hf_zone_info)
-    pickle.dump(new_load_zone_dict, hf_zone_info)
+    #pickle.dump(new_node_zone_dict, hf_zone_info)
+    #pickle.dump(new_load_zone_dict, hf_zone_info)
+    pickle.dump(new_node_zone_phase_dict, hf_zone_info)
+    pickle.dump(new_load_zone_phase_dict, hf_zone_info)
     hf_zone_info.close()
 
     print(len(new_node_zone_dict))
