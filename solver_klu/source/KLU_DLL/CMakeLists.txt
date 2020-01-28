@@ -16,7 +16,7 @@ else ()
     set(KLU_LIB_PREFIX "lib_")
 endif ()
 set_target_properties(${PROJECT_NAME}
-        PROPERTIES PREFIX ${KLU_LIB_PREFIX}
+        PROPERTIES PREFIX "${KLU_LIB_PREFIX}"
         )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${KLU_INCLUDES})
@@ -29,6 +29,7 @@ set(FILE_PERMISSIONS PERMISSIONS
 
 install(TARGETS ${PROJECT_NAME}
         ${FILE_PERMISSIONS}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/gridlabd
         LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/gridlabd
         ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/gridlabd
         COMPONENT library)
