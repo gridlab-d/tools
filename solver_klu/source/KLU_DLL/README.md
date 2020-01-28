@@ -29,7 +29,7 @@ following:
 3. Move into directory (e.g. `cd build`)
 3. Invoke CMake, and set installation directory to GridLAB-D install 
 prefix (e.g. 
-`cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/gridlabd ../`)
+`cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/gridlabd ../` \[note: it is recommended for Windows builds to include `-G"CodeBlocks - Unix Makefiles"` in the `cmake` command, as MSVC compiler support is not guaranteed\])
 4. Build and install the library (e.g. `cmake --build . --target install` 
 \[note: `sudo` may be required depending on installation target\])
 
