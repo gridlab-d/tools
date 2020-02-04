@@ -5,12 +5,12 @@
 The KLU External Solver requires an installation of KLU, now included in 
 the SuiteSparse Library package. 
 
-SuiteSparse is available in Ubuntu as `suitesparse` and MinGW/MSYS2 as 
+SuiteSparse is available in Ubuntu as `libsuitesparse-dev` and MinGW/MSYS2 as 
 `mingw-w64-x86_64-suitesparse` 
 
 #### Ubuntu installation
 to install SuiteSparse on Ubuntu run the following command:
-`sudo apt install suitesparse`
+`sudo apt install libsuitesparse-dev`
 
 #### MSYS2 installation
 to install SuiteSparse on MSYS2 run the following command:
@@ -25,13 +25,16 @@ following:
 
 ## Building KLU External Solver
 1. Open KLU_DLL directory in terminal
-2. Create build directory (e.g. `mkdir build`)
-3. Move into directory (e.g. `cd build`)
-3. Invoke CMake, and set installation directory to GridLAB-D install 
-prefix (e.g. 
-`cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/gridlabd ../` \[note: it is recommended for Windows builds to include `-G"CodeBlocks - Unix Makefiles"` in the `cmake` command, as MSVC compiler support is not guaranteed\])
-4. Build and install the library (e.g. `cmake --build . --target install` 
-\[note: `sudo` may be required depending on installation target\])
+2. Create build directory 
+    * e.g., `mkdir build`
+3. Move into directory 
+    * e.g., `cd build`
+3. Invoke CMake, and set installation directory to GridLAB-D install prefix 
+    * e.g., `cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/gridlabd ../`
+    * **note**: it is recommended for Windows builds to include `-G"CodeBlocks - Unix Makefiles"` in the `cmake` command, as MSVC compiler support is not guaranteed
+4. Build and install the library 
+    * e.g., `cmake --build . --target install` 
+    * **note**: `sudo` may be required depending on installation target
 
 The KLU External Solver will be compiled and installed in your GridLAB-D 
 install directory.
