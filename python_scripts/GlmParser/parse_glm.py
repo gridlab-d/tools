@@ -9,6 +9,8 @@ import re
 import os.path
 import csv
 
+import random
+
 import pickle
 
 
@@ -461,6 +463,9 @@ def test_mapping_zone_info():
 
     new_node_zone_phase_dict = {}
     new_load_zone_phase_dict = {}
+
+    #--new zone nodes
+    new_zone_node_3ph_dict = {}
     
     #--node mapping
     p.read_content_node(main_glm_path_fn)
@@ -474,6 +479,13 @@ def test_mapping_zone_info():
             new_node_zone_dict[cur_node_name_str] = cur_zone_info
             cur_phase_str = p.all_nodes_phases_dict[cur_node_name_str]
             new_node_zone_phase_dict[cur_node_name_str] = [cur_zone_info,cur_phase_str]
+
+            #--new_zone_node_3ph_dict
+            if ('A' in cur_phase_str) and ('B' in cur_phase_str) and ('C' in cur_phase_str):
+                if cur_zone_info in new_zone_node_3ph_dict.keys():
+                    new_zone_node_3ph_dict[cur_zone_info].append([cur_node_name_str,cur_phase_str])
+                else:
+                    new_zone_node_3ph_dict[cur_zone_info] = [[cur_node_name_str,cur_phase_str]]
         else:
             new_node_zone_missing_list.append(cur_node_name_str)
             #print(cur_node_name_key)
@@ -518,6 +530,8 @@ def test_mapping_zone_info():
     print(len(new_node_zone_dict))
     print(len(new_load_zone_dict))
 
+    return new_zone_node_3ph_dict
+
 def test_load_zone_info():
     zone_info_dicts_pickle_path_fn = r'D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\zone_info'
     hf_zone_info = open(zone_info_dicts_pickle_path_fn,'rb')
@@ -527,6 +541,28 @@ def test_load_zone_info():
     print(len(new_load_zone_dict))
     hf_zone_info.close()
 
+def test_pick_node_from_segments():
+    #==Parameters
+    num_selected_pv_nodes_per_zone = 5;
+    random_seed = 2;
+
+    random.seed(random_seed)
+
+    #==Test & Demo
+    new_zone_node_3ph_dict = test_mapping_zone_info()
+
+    #print(new_zone_node_3ph_dict)
+    #print(len(new_zone_node_3ph_dict))
+
+    for cur_zone_key, cur_zone_value in new_zone_node_3ph_dict.items():
+        #print(len(cur_zone_value))
+        cur_selected_lists = random.choices(cur_zone_value, k=num_selected_pv_nodes_per_zone)
+        #print(cur_selected_lists)
+        for cur_node in cur_selected_lists:
+            cur_node_name_str = cur_node[0]
+            cur_node_phase_str = cur_node[1]
+            print(f'{cur_zone_key},{cur_node_name_str},{cur_node_phase_str}')
+
 if __name__ == '__main__':
     #test_add_ufls_gfas()
     #test_separate_load_objs()
@@ -535,6 +571,7 @@ if __name__ == '__main__':
     #test_read_content_node()
     #test_read_zone_info()
 
-    test_mapping_zone_info()
+    #test_mapping_zone_info()
+    test_pick_node_from_segments()
 
     #test_load_zone_info()
