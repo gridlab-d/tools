@@ -556,7 +556,8 @@ def test_pick_node_from_segments():
 
     for cur_zone_key, cur_zone_value in new_zone_node_3ph_dict.items():
         #print(len(cur_zone_value))
-        cur_selected_lists = random.choices(cur_zone_value, k=num_selected_pv_nodes_per_zone)
+        #cur_selected_lists = random.choices(cur_zone_value, k=num_selected_pv_nodes_per_zone)
+        cur_selected_lists = random.sample(cur_zone_value, num_selected_pv_nodes_per_zone)
         #print(cur_selected_lists)
         for cur_node in cur_selected_lists:
             cur_node_name_str = cur_node[0]
