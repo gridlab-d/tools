@@ -1,7 +1,7 @@
 # ***************************************
 # Author: Jing Xie
 # Created Date: 2019-10
-# Updated Date: 2020-1-22
+# Updated Date: 2020-4-19
 # Email: jing.xie@pnnl.gov
 # ***************************************
 
@@ -36,7 +36,6 @@ class GlmParser:
 
         self.re_glm_syn_obj_load = r"object\s*load.*?{.*?}\s*;*"
         self.re_glm_syn_obj_node = r"object\s*node.*?{.*?}\s*;*"
-        # self.re_glm_syn_obj_x = r'object\s*{}.*?{.*?}\s*;*'
         self.re_glm_syn_obj_inv = r"object\s*inverter.*?{.*?}\s*;*"
 
         self.re_glm_attr_tpl_str = ".*{}\s*(.*?);"
@@ -77,6 +76,40 @@ class GlmParser:
         """Extract the content of a giving type of object"""
         obj_list = re.findall(obj_str, src_str, flags=re.DOTALL)
         return obj_list
+
+    def find_obj_via_attr(self, obj_str, attr_tag_str, attr_val_str, src_str):
+        """ Find the content of an object using its type & attribute
+        """
+        re_tpl_obj_attr = (
+            r"object\s*"
+            + obj_str
+            # + r"\s*{.*?"
+            + r"\s*{[^}]*?"
+            + attr_tag_str
+            + r"\s*"
+            + attr_val_str
+            + r"\s*;.*?}"
+        )
+
+        extr_obj_list = self.extract_obj(re_tpl_obj_attr, src_str)
+        return extr_obj_list, re_tpl_obj_attr
+
+    def modify_attr(self, attr_tag_str, attr_val_str, cur_inv_glm_lines_str):
+        cur_inv_glm_lines_mod_str = re.sub(
+            r".*?" + attr_tag_str + r".*?;.*?",
+            "\t" + attr_tag_str + " %s;" % attr_val_str,
+            cur_inv_glm_lines_str,
+        )
+        return cur_inv_glm_lines_mod_str
+
+    def replace_obj(self, re_tpl, src_str, rep_str):
+        cur_q_inv_glm_str = re.sub(
+            re_tpl,
+            rep_str,
+            src_str,
+            flags=re.DOTALL,
+        )
+        return cur_q_inv_glm_str
 
     def parse_inv(self, lines_str):
         """Parse and Package All Inverter Objects
@@ -240,6 +273,7 @@ class GlmParser:
     def read_inv_names(self, filename):
         str_file_woc = self.import_file(filename)
         self.parse_inv(str_file_woc)
+        return self.all_invs_names_list
 
     def add_ufls_gfas(
         self,
