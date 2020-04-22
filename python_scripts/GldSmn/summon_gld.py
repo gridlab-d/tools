@@ -348,6 +348,12 @@ def test_GldSmn():
     mr_prop_str = (
         "VA_Out.imag, meter_n256824166_1212:measured_voltage_A, q_player:value"
     )
+    """
+    RCL2	n264462735_1209	n256860543_1207	Open
+    RCL7	n259333341_1212	n617197553_1209	Open
+    RCL9	n439934984_1210	n256904390_1209	Open
+    RCL11	n256834423_1212	n616009828_1210	Open
+    """
 
     # --2) prep & run
     p.prep_multi_recorder(mr_prop_str)
