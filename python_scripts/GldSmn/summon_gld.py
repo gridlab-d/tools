@@ -1,7 +1,7 @@
 # ***************************************
 # Author: Jing Xie
 # Created Date: 2020-4-13
-# Updated Date: 2020-4-20
+# Updated Date: 2020-5-8
 # Email: jing.xie@pnnl.gov
 # ***************************************
 
@@ -20,6 +20,14 @@ from parse_glm import GlmParser
 
 class GldSmn:
     """Run GLD and save results"""
+
+    @staticmethod
+    def create_prop_str(list_measured_nodes, list_measured_properties):
+        mr_sub_str = ""
+        for cur_nd in list_measured_nodes:
+            for cur_prop in list_measured_properties:
+                mr_sub_str += f"{cur_nd}:{cur_prop}, "
+        return mr_sub_str
 
     def __init__(
         self,
@@ -345,15 +353,27 @@ def test_GldSmn():
     # ==Demo 02 (modify Q_Out via player)
     # --1) params
     player_file_str = "inv_q.player"
-    mr_prop_str = (
-        "VA_Out.imag, meter_n256824166_1212:measured_voltage_A, q_player:value"
-    )
+
     """
     RCL2	n264462735_1209	n256860543_1207	Open
     RCL7	n259333341_1212	n617197553_1209	Open
     RCL9	n439934984_1210	n256904390_1209	Open
     RCL11	n256834423_1212	n616009828_1210	Open
     """
+    list_measured_nodes = [
+        "n264462735_1209", #RCL2
+        "n256860543_1207",
+        "n259333341_1212", #RCL7
+        "n617197553_1209",
+        "n439934984_1210", #RCL9
+        "n256904390_1209",
+        "n256834423_1212", #RCL11
+        "n616009828_1210"
+    ]
+    list_measured_properties = ["voltage_A", "voltage_B", "voltage_C"]
+
+    mr_sub_str = GldSmn.create_prop_str(list_measured_nodes, list_measured_properties)
+    mr_prop_str = "VA_Out.imag, " + mr_sub_str + "q_player:value"
 
     # --2) prep & run
     p.prep_multi_recorder(mr_prop_str)
