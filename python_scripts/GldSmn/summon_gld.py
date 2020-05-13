@@ -1,7 +1,7 @@
 # ***************************************
 # Author: Jing Xie
 # Created Date: 2020-4-13
-# Updated Date: 2020-5-8
+# Updated Date: 2020-5-13
 # Email: jing.xie@pnnl.gov
 # ***************************************
 
@@ -9,6 +9,8 @@ import os.path
 import subprocess
 import shutil
 import pathlib
+import datetime
+import time
 
 # @TODO: It is not good to modify the path. Two options (the 2nd one is better): 1) __init__.py; 2) package, then install via pip
 import sys
@@ -28,6 +30,41 @@ class GldSmn:
             for cur_prop in list_measured_properties:
                 mr_sub_str += f"{cur_nd}:{cur_prop}, "
         return mr_sub_str
+
+    @staticmethod
+    def export_player_file(file_pn, file_str):
+        # Check and delete if a file with the same name exists
+        if os.path.exists(file_pn):
+            os.remove(file_pn)
+            print("The old '{}' file is deleted!".format(file_pn))
+
+        # Open file, write contents into it, and close
+        hf_player = open(file_pn, "w")
+        print("The new '{}' file is created!".format(file_pn))
+
+        hf_player.write(file_str)
+        hf_player.close()
+
+    @staticmethod
+    def gen_player_str(
+        st_datetime_str,
+        num,
+        v0,
+        dv=1e-2,
+        dt_sec=1,
+        tz="EST",
+        datetime_mask=r"%Y-%m-%d %H:%M:%S",
+    ):
+        # @TODO: use pytz for timezone information
+        t0 = datetime.datetime.strptime(st_datetime_str, datetime_mask)
+
+        player_str = ''
+        for cur_ite in range(num):
+            cur_t = t0 + datetime.timedelta(0, cur_ite * dt_sec)
+            cur_t_str = f"{cur_t.strftime(datetime_mask)} {tz}"
+            cur_val = round(v0 + cur_ite*dv, len(str(abs(dv))))
+            player_str += f"{cur_t_str},{cur_val}\n"
+        return player_str
 
     def __init__(
         self,
@@ -352,7 +389,7 @@ def test_GldSmn():
 
     # ==Demo 02 (modify Q_Out via player)
     # --1) params
-    player_file_str = "inv_q.player"
+    player_file_str = "inv_q_all.player"
 
     """
     RCL2	n264462735_1209	n256860543_1207	Open
@@ -361,14 +398,14 @@ def test_GldSmn():
     RCL11	n256834423_1212	n616009828_1210	Open
     """
     list_measured_nodes = [
-        "n264462735_1209", #RCL2
+        "n264462735_1209",  # RCL2
         "n256860543_1207",
-        "n259333341_1212", #RCL7
+        "n259333341_1212",  # RCL7
         "n617197553_1209",
-        "n439934984_1210", #RCL9
+        "n439934984_1210",  # RCL9
         "n256904390_1209",
-        "n256834423_1212", #RCL11
-        "n616009828_1210"
+        "n256834423_1212",  # RCL11
+        "n616009828_1210",
     ]
     list_measured_properties = ["voltage_A", "voltage_B", "voltage_C"]
 
@@ -388,5 +425,14 @@ def test_GldSmn():
     # p.save_results()
 
 
+def test_export_player_file():
+    a = GldSmn.gen_player_str("2019-07-29 12:00:00", 201, -1.0)
+    GldSmn.export_player_file("luan.player", a)
+
 if __name__ == "__main__":
+    # test_export_player_file()
+
+    start_time = time.time()
     test_GldSmn()
+    end_time = time.time()
+    print(f"Time elapsed: {end_time - start_time} (secs)\n") # Time elapsed: 1472.4258217811584 (secs)
