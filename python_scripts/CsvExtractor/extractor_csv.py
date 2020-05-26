@@ -1,7 +1,7 @@
 # ***************************************
 # Author: Jing Xie
 # Created Date: 2020-5-1
-# Updated Date: 2020-5-20
+# Updated Date: 2020-5-25
 # Email: jing.xie@pnnl.gov
 # ***************************************
 
@@ -71,16 +71,24 @@ class CsvExt:
             self.nd_volt_mag_v_df[cur_col] = self.nd_volt_v_df[cur_col].apply(lambda x: abs(x))
             self.nd_delta_volt_mag_v_df[cur_col] = self.nd_volt_mag_v_df[cur_col].apply(lambda x: x - self.nd_volt_mag_v_df.loc[ind_q_zero,cur_col])
         
-    def plot_dq_dv(self):
-        plt.figure(figsize=(16,6))
+    def plot_dq_dv(self, fig_fmt_str='.svg', fmt_dic = {'fontname':'Times New Roman','size': 16}):
+        # plt.figure(figsize=(16,6))
         plt.plot(self.pv_q_var_ser, self.nd_delta_volt_mag_v_df)        
         
-        plt.title(self.csv_file_name)
-        plt.xlabel(r"Delta Q (var)")
-        plt.ylabel(r"Delta V (V)")
+        plt.title(self.csv_file_name, **fmt_dic)
+        plt.xlabel(r"Delta Q (var)", **fmt_dic)
+        plt.ylabel(r"Delta V (V)", **fmt_dic)
         plt.grid()
-        # plt.legend(list(self.nd_delta_volt_mag_v_df.columns))
+        lgd = plt.legend(list(self.nd_delta_volt_mag_v_df.columns),
+                   loc='upper left',bbox_to_anchor= (0.0, -0.22),
+                   ncol=2)
+        
+        fig_fn = os.path.splitext(self.csv_file_name)[0] + fig_fmt_str
+        fig_fpn = os.path.join(self.csv_folder_path, fig_fn)
+        plt.savefig(fig_fpn,
+                    bbox_extra_artists=(lgd,),bbox_inches='tight')
         plt.show()
+
 
     @staticmethod
     def parse_volt_phasor(volt_ph_str):
