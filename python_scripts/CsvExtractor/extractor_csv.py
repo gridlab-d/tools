@@ -89,6 +89,10 @@ class CsvExt:
                     bbox_extra_artists=(lgd,),bbox_inches='tight')
         plt.show()
 
+    def read_prop_plot(self):
+        self.read_csv()
+        self.pre_process()
+        self.plot_dq_dv()
 
     @staticmethod
     def parse_volt_phasor(volt_ph_str):
@@ -142,10 +146,19 @@ def test_CsvExt():
     Demos
     """
     # ==Demo 01 (extract & plot deltaQ-deltaV curves)
-    p.read_csv()
-    p.pre_process()
+    # p.read_csv()
+    # p.pre_process()
 
-    p.plot_dq_dv()
+    # p.plot_dq_dv()
+
+    # ==Demo 02 (run all .csv files in a given folder)
+    import glob
+    
+    csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
+    for cur_csv_fpn in csv_fpn_list:
+        # _, cur_csv_fn = os.path.split(cur_csv_fpn)
+        cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
+        cur_p.read_prop_plot()
 
 
 if __name__ == "__main__":
