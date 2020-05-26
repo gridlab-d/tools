@@ -34,6 +34,7 @@ class CsvExt:
         # ==Series
         self.pv_q_pu_ser = None
         self.pv_q_var_ser = None
+        self.pv_price_dollar_ser = None
 
         # ==Preprocess
         self.csv_pfn = os.path.join(csv_folder_path, csv_file_name)
@@ -94,6 +95,35 @@ class CsvExt:
         self.pre_process()
         self.plot_dq_dv()
 
+    def get_price_q_curve(self, coef_rt = 0.1, plot_flag = False, saved_fig_pref_str = 'p_q_', fig_fmt_str='.svg', fmt_dic = {'fontname':'Times New Roman','size': 16}):
+        """
+        Supply curve equation: Price = C_RT * [ (S_Inv^2 – Q^2) – ( S_Inv^2 – (Q+Q_Ofr)^2 ) ]
+        where S_Inv is the rating of the inverter, Q = initial operating point (Q) of the inverter that is taken as 0 for now,
+        and Q_Ofr = offered reactive power which is basically the one you vary. For now, please C_RT = 0.1 . This equation should give Price-reactive curve for the inverter which should be converted to voltage-reactive power using the sensitivity you obtained.
+        """
+        self.pv_price_dollar_ser = coef_rt * self.pv_q_var_ser.pow(2)
+
+        if plot_flag:
+            plt.plot(self.pv_q_var_ser, self.pv_price_dollar_ser)        
+            
+            plt.title(self.csv_file_name, **fmt_dic)
+            plt.xlabel(r"Delta Q (var)", **fmt_dic)
+            plt.ylabel(r"Price ($/var)", **fmt_dic)
+            
+            plt.grid()
+            plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+            
+            ax = plt.gca()
+            for tick in ax.xaxis.get_major_ticks():
+                tick.label1.set_fontweight('bold')
+            for tick in ax.yaxis.get_major_ticks():
+                tick.label1.set_fontweight('bold')
+            
+            fig_fn = saved_fig_pref_str + os.path.splitext(self.csv_file_name)[0] + fig_fmt_str
+            fig_fpn = os.path.join(self.csv_folder_path, fig_fn)
+            plt.savefig(fig_fpn)
+            plt.show()
+
     @staticmethod
     def parse_volt_phasor(volt_ph_str):
         def get_float_list(ori_str):
@@ -145,21 +175,26 @@ def test_CsvExt():
     """
     Demos
     """
-    # ==Demo 01 (extract & plot deltaQ-deltaV curves)
+    # ==Demo 01 (extract & plot deltaQ-deltaV curve)
     # p.read_csv()
     # p.pre_process()
 
     # p.plot_dq_dv()
 
     # ==Demo 02 (run all .csv files in a given folder)
-    import glob
+    # import glob
     
-    csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
-    for cur_csv_fpn in csv_fpn_list:
-        # _, cur_csv_fn = os.path.split(cur_csv_fpn)
-        cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
-        cur_p.read_prop_plot()
+    # csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
+    # for cur_csv_fpn in csv_fpn_list:
+    #     # _, cur_csv_fn = os.path.split(cur_csv_fpn)
+    #     cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
+    #     cur_p.read_prop_plot()
 
+    # ==Demo 03 (get the price-Q curve)
+    p.read_csv()
+    p.pre_process()
+    p.get_price_q_curve(plot_flag = True)
+        
 
 if __name__ == "__main__":
     test_CsvExt()
