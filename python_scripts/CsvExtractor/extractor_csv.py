@@ -37,6 +37,9 @@ class CsvExt:
         self.pv_q_pu_ser = None
         self.pv_q_var_ser = None
         self.pv_price_dollar_ser = None
+        
+        # ==Others
+        self.pv_rating = 0
 
         # ==Preprocess
         self.csv_pfn = os.path.join(csv_folder_path, csv_file_name)
@@ -91,38 +94,53 @@ class CsvExt:
                     bbox_extra_artists=(lgd,),bbox_inches='tight')
         plt.show()
 
-    def read_prop_plot(self):
+    def eval_dq_dv(self):
         self.read_csv()
         self.pre_process()
         self.plot_dq_dv()
 
-    def get_price_q_curve(self, coef_rt = 0.1, plot_flag = False, saved_fig_pref_str = 'p_q_', fig_fmt_str='.svg', fmt_dic = {'fontname':'Times New Roman','size': 16}):
-        """ 
-        1) $/h or $? 
-        2) coef_rt is with the unit of $/kWh
+    def get_price_q(self, coef_rt = 0.1/1e3):
         """
-        self.pv_price_dollar_ser = coef_rt * self.pv_q_var_ser.pow(2)
+        pv_price_dollar_per_h = coef_rt*(sqrt(pv_rating^2-pv_q_init^2) - pv_p_init) 
+                                    - coef_rt*(sqrt(pv_rating^2-(pv_q_init+pv_q)^2) - pv_p_init)
+        which can be simplified as follows, when pv_p_init = pv_q_init = 0
+        pv_price_dollar_per_h = coef_rt*(pv_rating - sqrt(pv_rating^2-pv_q^2))
+        1) price is with the unit of $/h
+        2) coef_rt is with the unit of $/Wh
+        """
+        ind_q_one = pd.Index(self.pv_q_pu_ser).get_loc(1)
+        self.pv_rating = self.pv_q_var_ser[ind_q_one]        
+        
+        self.pv_price_dollar_ser = coef_rt * (self.pv_rating - 
+                        (self.pv_rating**2 - self.pv_q_var_ser.pow(2)).pow(0.5))
+        
 
-        if plot_flag:
-            plt.plot(self.pv_q_var_ser, self.pv_price_dollar_ser)        
-            
-            plt.title(self.csv_file_name, **fmt_dic)
-            plt.xlabel(r"Delta Q (var)", **fmt_dic)
-            plt.ylabel(r"Price ($/var)", **fmt_dic)
-            
-            plt.grid()
-            plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-            
-            ax = plt.gca()
-            for tick in ax.xaxis.get_major_ticks():
-                tick.label1.set_fontweight('bold')
-            for tick in ax.yaxis.get_major_ticks():
-                tick.label1.set_fontweight('bold')
-            
-            fig_fn = saved_fig_pref_str + os.path.splitext(self.csv_file_name)[0] + fig_fmt_str
-            fig_fpn = os.path.join(self.csv_folder_path, fig_fn)
-            plt.savefig(fig_fpn)
-            plt.show()
+    def plot_price_q_curve(self, saved_fig_pref_str = 'p_q_', fig_fmt_str='.svg', fmt_dic = {'fontname':'Times New Roman','size': 16}):
+        plt.plot(self.pv_q_var_ser/1e3, self.pv_price_dollar_ser)   
+        
+        plt.title(self.csv_file_name, **fmt_dic)
+        plt.xlabel(r"Delta Q (kVar)", **fmt_dic)
+        plt.ylabel(r"Price ($/h)", **fmt_dic)
+        
+        plt.grid()
+        # plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+        
+        ax = plt.gca()
+        for tick in ax.xaxis.get_major_ticks():
+            tick.label1.set_fontweight('bold')
+        for tick in ax.yaxis.get_major_ticks():
+            tick.label1.set_fontweight('bold')
+        
+        fig_fn = saved_fig_pref_str + os.path.splitext(self.csv_file_name)[0] + fig_fmt_str
+        fig_fpn = os.path.join(self.csv_folder_path, fig_fn)
+        plt.savefig(fig_fpn)
+        plt.show()
+
+    def eval_price_q(self):
+        self.read_csv()
+        self.pre_process()
+        self.get_price_q()
+        self.plot_price_q_curve()
 
     def get_dv_swt(self, dict_swt, list_ph_str=['voltage_A','voltage_B','voltage_C'], delim_str=':'):
         self.swt_dv_df = pd.DataFrame()
@@ -190,7 +208,7 @@ class CsvExt:
             raise
 
 def test_parse_volt_phasor():
-    aa = "+2+22j-2"
+    # aa = "+2+22j-2"
     bb = "-10.0-60d"
     
     # float_reg = re.compile(r"[-+]?\d+\.?\d*")
@@ -211,48 +229,62 @@ def test_CsvExt():
     p = CsvExt(csv_folder_path, csv_file_name)
 
     """
-    Demos
+    Demo 01 (extract & plot deltaQ-deltaV curve)
     """
-    # ==Demo 01 (extract & plot deltaQ-deltaV curve)
-    # p.read_csv()
-    # p.pre_process()
-
-    # p.plot_dq_dv()
-
-    # ==Demo 02 (run all .csv files in a given folder)
+    # ==Option 0 (run all .csv files in a given folder)
     # import glob
     
     # csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
     # for cur_csv_fpn in csv_fpn_list:
     #     # _, cur_csv_fn = os.path.split(cur_csv_fpn)
     #     cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
-    #     cur_p.read_prop_plot()
+    #     cur_p.eval_dq_dv()
 
-    # ==Demo 03 (get the price-Q curve)
+    # ==Option 1
+    # p.eval_dq_dv()
+    
+    # ==Option 2
     # p.read_csv()
     # p.pre_process()
-    # p.get_price_q_curve(plot_flag = True)
-    
-    # ==Demo 04 (deltaV of a switch)
-    dict_swt = {
-        "RCL2": ["n264462735_1209", "n256860543_1207"],
-        "RCL7": ["n259333341_1212", "n617197553_1209"],
-        "RCL9": ["n439934984_1210", "n256904390_1209"],
-        "RCL11": ["n256834423_1212", "n616009828_1210"]
-    }
-    
-    # --Option 0 (run all .csv files in a given folder)
-    import glob
-    
-    csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
-    for cur_csv_fpn in csv_fpn_list:
-        cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
-        cur_p.eval_swt_dv(dict_swt)    
+    # p.plot_dq_dv()
 
-    # --Option 1
+    """
+    Demo 02 (get the price-Q curve)
+    """
+    # ==Option 0
+    
+    # ==Option 1
+    p.eval_price_q()
+    
+    # ==Option 2
+    # p.read_csv()
+    # p.pre_process()
+    # p.get_price_q()
+    # p.plot_price_q_curve()
+
+    """
+    Demo 02 (deltaV of a switch)
+    """    
+    # ==Param
+    # dict_swt = {
+    #     "RCL2": ["n264462735_1209", "n256860543_1207"],
+    #     "RCL7": ["n259333341_1212", "n617197553_1209"],
+    #     "RCL9": ["n439934984_1210", "n256904390_1209"],
+    #     "RCL11": ["n256834423_1212", "n616009828_1210"]
+    # }
+    
+    # ==Option 0 (run all .csv files in a given folder)
+    # import glob
+    
+    # csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
+    # for cur_csv_fpn in csv_fpn_list:
+    #     cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
+    #     cur_p.eval_swt_dv(dict_swt)    
+
+    # ==Option 1
     # p.eval_swt_dv(dict_swt)
     
-    # --Option 2
+    # ==Option 2
     # p.read_csv()
     # p.pre_process()
     # p.get_dv_swt(dict_swt)
