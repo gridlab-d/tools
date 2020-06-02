@@ -115,7 +115,7 @@ class CsvExt:
                         (self.pv_rating**2 - self.pv_q_var_ser.pow(2)).pow(0.5))
         
 
-    def plot_price_q_curve(self, saved_fig_pref_str = 'p_q_', fig_fmt_str='.svg', fmt_dic = {'fontname':'Times New Roman','size': 16}):
+    def plot_price_q_curve(self, saved_fig_pref_str = 'price_', fig_fmt_str='.svg', fmt_dic = {'fontname':'Times New Roman','size': 16}):
         plt.plot(self.pv_q_var_ser/1e3, self.pv_price_dollar_ser)   
         
         plt.title(self.csv_file_name, **fmt_dic)
@@ -252,6 +252,13 @@ def test_CsvExt():
     Demo 02 (get the price-Q curve)
     """
     # ==Option 0
+    import glob
+    
+    csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
+    for cur_csv_fpn in csv_fpn_list:
+        # _, cur_csv_fn = os.path.split(cur_csv_fpn)
+        cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
+        cur_p.eval_price_q()
     
     # ==Option 1
     p.eval_price_q()
