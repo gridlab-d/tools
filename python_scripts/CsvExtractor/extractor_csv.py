@@ -32,6 +32,8 @@ class CsvExt:
         self.nd_delta_volt_mag_v_df = None
         
         self.swt_dv_df = None
+        
+        self.pkg_df = None
 
         # ==Series
         self.pv_q_pu_ser = None
@@ -143,6 +145,8 @@ class CsvExt:
         self.plot_price_q_curve()
 
     def get_dv_swt(self, dict_swt, list_ph_str=['voltage_A','voltage_B','voltage_C'], delim_str=':'):
+        if dict_swt == None:
+            return
         self.swt_dv_df = pd.DataFrame()
         for cur_key, cur_list in dict_swt.items():
             for cur_ph in list_ph_str:
@@ -179,7 +183,17 @@ class CsvExt:
             self.filter_line_slope()
         self.plot_dv_swt()
         
+    def package_df(self):
+        self.pv_q_var_ser.name = "q_var"
+        cct_list = [self.pv_q_var_ser, self.nd_delta_volt_mag_v_df, self.swt_dv_df]
+        self.pkg_df = pd.concat(cct_list, axis = 1)
         
+    def eval_package_df(self, dict_swt = None):
+        self.read_csv()
+        self.pre_process()
+        self.get_dv_swt(dict_swt)
+        self.package_df()
+    
     @staticmethod
     def parse_volt_phasor(volt_ph_str):
         def get_float_list(ori_str):
@@ -252,16 +266,16 @@ def test_CsvExt():
     Demo 02 (get the price-Q curve)
     """
     # ==Option 0
-    import glob
+    # import glob
     
-    csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
-    for cur_csv_fpn in csv_fpn_list:
-        # _, cur_csv_fn = os.path.split(cur_csv_fpn)
-        cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
-        cur_p.eval_price_q()
+    # csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
+    # for cur_csv_fpn in csv_fpn_list:
+    #     # _, cur_csv_fn = os.path.split(cur_csv_fpn)
+    #     cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
+    #     cur_p.eval_price_q()
     
     # ==Option 1
-    p.eval_price_q()
+    # p.eval_price_q()
     
     # ==Option 2
     # p.read_csv()
@@ -270,7 +284,7 @@ def test_CsvExt():
     # p.plot_price_q_curve()
 
     """
-    Demo 02 (deltaV of a switch)
+    Demo 03 (deltaV of a switch)
     """    
     # ==Param
     # dict_swt = {
@@ -297,6 +311,49 @@ def test_CsvExt():
     # p.get_dv_swt(dict_swt)
     # p.filter_line_slope()
     # p.plot_dv_swt()
+   
+    """
+    Demo 03 (package dataframe)
+    """    
+    # ==Param
+    dict_swt = {
+        "RCL2": ["n264462735_1209", "n256860543_1207"],
+        "RCL7": ["n259333341_1212", "n617197553_1209"],
+        "RCL9": ["n439934984_1210", "n256904390_1209"],
+        "RCL11": ["n256834423_1212", "n616009828_1210"]
+    }
+    
+    pickle_fp = csv_folder_path
+    pickle_fn = r"all_pv_df.pickle"
+    
+    # ==Option 0
+    import glob
+    
+    pv_df_list = {}
+    
+    csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
+    for cur_csv_fpn in csv_fpn_list:
+        cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
+        cur_p.eval_package_df(dict_swt)
+        
+        cur_fn_nsfx = os.path.splitext(os.path.basename(cur_csv_fpn))[0]
+        pv_df_list[cur_fn_nsfx] = cur_p.pkg_df
+        
+    all_pv_df = pd.concat(pv_df_list)
+    # print(all_pv_df)
+    
+    # --Save
+    import pickle
+    
+    pickle_fpn = os.path.join(pickle_fp, pickle_fn)
+    
+    hf_pkl_all_pv_df = open(pickle_fpn, "wb")
+    pickle.dump(all_pv_df, hf_pkl_all_pv_df)
+    hf_pkl_all_pv_df.close()
+    
+    # ==Option 1
+    p.eval_package_df(dict_swt)
+    # p.eval_package_df()
     
 
 if __name__ == "__main__":
