@@ -185,13 +185,15 @@ class CsvExt:
         
     def package_df(self):
         self.pv_q_var_ser.name = "q_var"
-        cct_list = [self.pv_q_var_ser, self.nd_delta_volt_mag_v_df, self.swt_dv_df]
+        self.pv_price_dollar_ser.name = "price_dph"
+        cct_list = [self.pv_q_var_ser, self.pv_price_dollar_ser, self.nd_delta_volt_mag_v_df, self.swt_dv_df]
         self.pkg_df = pd.concat(cct_list, axis = 1)
         
     def eval_package_df(self, dict_swt = None):
         self.read_csv()
         self.pre_process()
         self.get_dv_swt(dict_swt)
+        self.get_price_q()
         self.package_df()
     
     @staticmethod
