@@ -79,14 +79,19 @@ class CsvExt:
             self.nd_volt_mag_v_df[cur_col] = self.nd_volt_v_df[cur_col].apply(lambda x: abs(x))
             self.nd_delta_volt_mag_v_df[cur_col] = self.nd_volt_mag_v_df[cur_col].apply(lambda x: x - self.nd_volt_mag_v_df.loc[ind_q_zero,cur_col])
         
-    def plot_dq_dv(self, fig_fmt_str='.svg', fmt_dic = {'fontname':'Times New Roman','size': 16}):
-        plt.plot(self.pv_q_var_ser, self.nd_delta_volt_mag_v_df)        
+    def plot_dq_dv(self, filter_flag=True, ls_th=1, fig_fmt_str='.svg', fmt_dic = {'fontname':'Times New Roman','size': 16}):        
+        if filter_flag:            
+            nd_delta_volt_mag_v_df_ff = self.nd_delta_volt_mag_v_df.loc[:, self.nd_delta_volt_mag_v_df.nunique() > ls_th]
+        else:
+            nd_delta_volt_mag_v_df_ff = self.nd_delta_volt_mag_v_df.copy()
+            
+        plt.plot(self.pv_q_var_ser, nd_delta_volt_mag_v_df_ff)
         
         plt.title(self.csv_file_name, **fmt_dic)
         plt.xlabel(r"Delta Q (var)", **fmt_dic)
         plt.ylabel(r"Delta V (V)", **fmt_dic)
         plt.grid()
-        lgd = plt.legend(list(self.nd_delta_volt_mag_v_df.columns),
+        lgd = plt.legend(list(nd_delta_volt_mag_v_df_ff.columns),
                    loc='upper left',bbox_to_anchor= (0.0, -0.22),
                    ncol=2)
         
@@ -239,7 +244,7 @@ def test_CsvExt():
     """
     # ==Parameters (.csv files)
     csv_folder_path = r"D:\csv files_all"
-    csv_file_name = r"Inv_S1_n256851477_1207.csv"
+    csv_file_name = r"Inv_S6_n865810391_1209.csv" #r"Inv_S10_n865809671_1212.csv" #r"Inv_S1_n256851477_1207.csv"
 
     # ==Create an Instance of CsvExt
     p = CsvExt(csv_folder_path, csv_file_name)
@@ -257,7 +262,7 @@ def test_CsvExt():
     #     cur_p.eval_dq_dv()
 
     # ==Option 1
-    # p.eval_dq_dv()
+    p.eval_dq_dv()
     
     # ==Option 2
     # p.read_csv()
@@ -329,32 +334,32 @@ def test_CsvExt():
     pickle_fn = r"all_pv_df.pickle"
     
     # ==Option 0
-    import glob
+    # import glob
     
-    pv_df_list = {}
+    # pv_df_list = {}
     
-    csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
-    for cur_csv_fpn in csv_fpn_list:
-        cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
-        cur_p.eval_package_df(dict_swt)
+    # csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
+    # for cur_csv_fpn in csv_fpn_list:
+    #     cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
+    #     cur_p.eval_package_df(dict_swt)
         
-        cur_fn_nsfx = os.path.splitext(os.path.basename(cur_csv_fpn))[0]
-        pv_df_list[cur_fn_nsfx] = cur_p.pkg_df
+    #     cur_fn_nsfx = os.path.splitext(os.path.basename(cur_csv_fpn))[0]
+    #     pv_df_list[cur_fn_nsfx] = cur_p.pkg_df
         
-    all_pv_df = pd.concat(pv_df_list)
-    # print(all_pv_df)
+    # all_pv_df = pd.concat(pv_df_list)
+    # # print(all_pv_df)
     
-    # --Save
-    import pickle
+    # # --Save
+    # import pickle
     
-    pickle_fpn = os.path.join(pickle_fp, pickle_fn)
+    # pickle_fpn = os.path.join(pickle_fp, pickle_fn)
     
-    hf_pkl_all_pv_df = open(pickle_fpn, "wb")
-    pickle.dump(all_pv_df, hf_pkl_all_pv_df)
-    hf_pkl_all_pv_df.close()
+    # hf_pkl_all_pv_df = open(pickle_fpn, "wb")
+    # pickle.dump(all_pv_df, hf_pkl_all_pv_df)
+    # hf_pkl_all_pv_df.close()
     
     # ==Option 1
-    p.eval_package_df(dict_swt)
+    # p.eval_package_df(dict_swt)
     # p.eval_package_df()
     
 
