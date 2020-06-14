@@ -172,7 +172,7 @@ class CsvExt:
         plt.grid()
         lgd = plt.legend(list(self.swt_dv_df.columns),
                     loc='upper left', bbox_to_anchor= (0.0, -0.22),
-                    ncol=4)
+                    ncol=3)
         
         fig_fn = fig_pref_str + os.path.splitext(self.csv_file_name)[0] + fig_fmt_str
         fig_fpn = os.path.join(self.csv_folder_path, fig_fn)
@@ -244,7 +244,9 @@ def test_CsvExt():
     """
     # ==Parameters (.csv files)
     csv_folder_path = r"D:\csv files_all"
-    csv_file_name = r"Inv_S6_n865810391_1209.csv" #r"Inv_S10_n865809671_1212.csv" #r"Inv_S1_n256851477_1207.csv"
+    # csv_file_name = r"Inv_S6_n865810391_1209.csv"
+    csv_file_name = r"Inv_S10_n865809671_1212.csv"
+    # csv_file_name = r"Inv_S1_n256851477_1207.csv"
 
     # ==Create an Instance of CsvExt
     p = CsvExt(csv_folder_path, csv_file_name)
@@ -262,7 +264,7 @@ def test_CsvExt():
     #     cur_p.eval_dq_dv()
 
     # ==Option 1
-    p.eval_dq_dv()
+    # p.eval_dq_dv()
     
     # ==Option 2
     # p.read_csv()
@@ -294,12 +296,12 @@ def test_CsvExt():
     Demo 03 (deltaV of a switch)
     """    
     # ==Param
-    # dict_swt = {
-    #     "RCL2": ["n264462735_1209", "n256860543_1207"],
-    #     "RCL7": ["n259333341_1212", "n617197553_1209"],
-    #     "RCL9": ["n439934984_1210", "n256904390_1209"],
-    #     "RCL11": ["n256834423_1212", "n616009828_1210"]
-    # }
+    dict_swt = {
+        "RCL2": ["n264462735_1209", "n256860543_1207"],
+        "RCL7": ["n259333341_1212", "n617197553_1209"],
+        "RCL9": ["n439934984_1210", "n256904390_1209"],
+        "RCL11": ["n256834423_1212", "n616009828_1210"]
+    }
     
     # ==Option 0 (run all .csv files in a given folder)
     # import glob
@@ -310,7 +312,7 @@ def test_CsvExt():
     #     cur_p.eval_swt_dv(dict_swt)    
 
     # ==Option 1
-    # p.eval_swt_dv(dict_swt)
+    p.eval_swt_dv(dict_swt)
     
     # ==Option 2
     # p.read_csv()
