@@ -337,7 +337,7 @@ def test_GldSmn():
     Params & Init
     """
     # ==Parameters (for GldSmn)
-    gld_path = r"D:\test glms"
+    gld_path = r"D:\test glms_UC1SC1_InitTopo"
     gld_exe_fn = r"gridlabd.exe"
 
     # Note that:
@@ -348,7 +348,7 @@ def test_GldSmn():
 
     gld_csv_path = gld_path
     gld_csv_suff = r".csv"
-    stor_csv_path = r"D:\csv files"
+    stor_csv_path = r"D:\csv files_UC1SC1_InitTopo"
 
     # ==Instance of GldSmn
     p = GldSmn(

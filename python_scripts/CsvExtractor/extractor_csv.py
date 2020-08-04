@@ -142,6 +142,11 @@ class CsvExt:
         fig_fpn = os.path.join(self.csv_folder_path, fig_fn)
         plt.savefig(fig_fpn)
         plt.show()
+        
+    # def plot_other_prices(self, dt_h = 1):
+    #     pv_price_dollar_by_dt_ser = self.pv_price_dollar_ser * dt_h
+    #     pv_price_dpvar = pv_price_dollar_by_dt_ser/abs(self.pv_q_var_ser)
+        
 
     def eval_price_q(self):
         self.read_csv()
@@ -243,7 +248,9 @@ def test_CsvExt():
     Params & Init
     """
     # ==Parameters (.csv files)
-    csv_folder_path = r"D:\csv files_all"
+    # csv_folder_path = r"D:\csv files_all"
+    csv_folder_path = r"D:\csv files_UC1SC1_InitTopo"
+    
     # csv_file_name = r"Inv_S6_n865810391_1209.csv"
     csv_file_name = r"Inv_S10_n865809671_1212.csv"
     # csv_file_name = r"Inv_S1_n256851477_1207.csv"
@@ -284,7 +291,7 @@ def test_CsvExt():
     #     cur_p.eval_price_q()
     
     # ==Option 1
-    # p.eval_price_q()
+    p.eval_price_q()
     
     # ==Option 2
     # p.read_csv()
@@ -312,7 +319,7 @@ def test_CsvExt():
     #     cur_p.eval_swt_dv(dict_swt)    
 
     # ==Option 1
-    p.eval_swt_dv(dict_swt)
+    # p.eval_swt_dv(dict_swt)
     
     # ==Option 2
     # p.read_csv()
@@ -336,29 +343,29 @@ def test_CsvExt():
     pickle_fn = r"all_pv_df.pickle"
     
     # ==Option 0
-    # import glob
+    import glob
     
-    # pv_df_list = {}
+    pv_df_list = {}
     
-    # csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
-    # for cur_csv_fpn in csv_fpn_list:
-    #     cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
-    #     cur_p.eval_package_df(dict_swt)
+    csv_fpn_list = glob.glob(os.path.join(csv_folder_path, '*.csv'))
+    for cur_csv_fpn in csv_fpn_list:
+        cur_p = CsvExt(csv_folder_path, os.path.basename(cur_csv_fpn))
+        cur_p.eval_package_df(dict_swt)
         
-    #     cur_fn_nsfx = os.path.splitext(os.path.basename(cur_csv_fpn))[0]
-    #     pv_df_list[cur_fn_nsfx] = cur_p.pkg_df
+        cur_fn_nsfx = os.path.splitext(os.path.basename(cur_csv_fpn))[0]
+        pv_df_list[cur_fn_nsfx] = cur_p.pkg_df
         
-    # all_pv_df = pd.concat(pv_df_list)
-    # # print(all_pv_df)
+    all_pv_df = pd.concat(pv_df_list)
+    # print(all_pv_df)
     
-    # # --Save
-    # import pickle
+    # --Save
+    import pickle
     
-    # pickle_fpn = os.path.join(pickle_fp, pickle_fn)
+    pickle_fpn = os.path.join(pickle_fp, pickle_fn)
     
-    # hf_pkl_all_pv_df = open(pickle_fpn, "wb")
-    # pickle.dump(all_pv_df, hf_pkl_all_pv_df)
-    # hf_pkl_all_pv_df.close()
+    hf_pkl_all_pv_df = open(pickle_fpn, "wb")
+    pickle.dump(all_pv_df, hf_pkl_all_pv_df)
+    hf_pkl_all_pv_df.close()
     
     # ==Option 1
     # p.eval_package_df(dict_swt)
