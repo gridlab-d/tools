@@ -1,7 +1,7 @@
 # ***************************************
 # Author: Jing Xie
 # Created Date: 2020-4-13
-# Updated Date: 2020-5-13
+# Updated Date: 2020-8-5
 # Email: jing.xie@pnnl.gov
 # ***************************************
 
@@ -424,15 +424,35 @@ def test_GldSmn():
     # --save CSV files
     # p.save_results()
 
+def test_inverters():
+    #==Params
+    csv_fp = r'D:\#Github\duke_te2\UC1SC1_InitTopo_dv_150v'
+    csv_fn = r'solution_short.csv'
+
+    csv_fpn = os.path.join(csv_fp, csv_fn)
+
+    #==Run
+    print(csv_fpn)
 
 def test_export_player_file():
     a = GldSmn.gen_player_str("2019-07-29 12:00:00", 201, -1.0)
     GldSmn.export_player_file("luan.player", a)
 
 if __name__ == "__main__":
+    """
+    01: for 'test_export_player_file()'
+    """
     # test_export_player_file()
 
-    start_time = time.time()
-    test_GldSmn()
-    end_time = time.time()
-    print(f"Time elapsed: {end_time - start_time} (secs)\n") # Time elapsed: 1472.4258217811584 (secs)
+    """
+    02: for 'test_GldSmn()'
+    """
+    # start_time = time.time()
+    # test_GldSmn()
+    # end_time = time.time()
+    # print(f"Time elapsed: {end_time - start_time} (secs)\n") # Time elapsed: 1472.4258217811584 (secs)
+
+    """
+    03: for 'test_inverters()'
+    """
+    test_inverters()
