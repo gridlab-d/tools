@@ -161,8 +161,12 @@ class CsvExt:
         for cur_key, cur_list in dict_swt.items():
             for cur_ph in list_ph_str:
                 cur_col_suff_str = delim_str + cur_ph
-                self.swt_dv_df[cur_key+cur_col_suff_str] = abs(self.nd_volt_mag_v_df[cur_list[0]+cur_col_suff_str]
+                # self.swt_dv_df[cur_key+cur_col_suff_str] = abs(self.nd_volt_mag_v_df[cur_list[0]+cur_col_suff_str]
+                #                - self.nd_volt_mag_v_df[cur_list[1]+cur_col_suff_str])
+                self.swt_dv_df[cur_key+cur_col_suff_str] = (self.nd_volt_mag_v_df[cur_list[0]+cur_col_suff_str]
                                - self.nd_volt_mag_v_df[cur_list[1]+cur_col_suff_str])
+                
+                #@TODO: swt_dv_df is only the dv of two nodes. It may need to be the dv from the 0 q injection (ref: self.nd_delta_volt_mag_v_df[cur_col] = self.nd_volt_mag_v_df[cur_col].apply(lambda x: x - self.nd_volt_mag_v_df.loc[ind_q_zero,cur_col]))
     
     def filter_line_slope(self, ls_th=1):
         self.swt_dv_df = self.swt_dv_df.loc[:, self.swt_dv_df.nunique() > ls_th]
@@ -356,6 +360,8 @@ def test_CsvExt():
         pv_df_list[cur_fn_nsfx] = cur_p.pkg_df
         
     all_pv_df = pd.concat(pv_df_list)
+    
+    # all_pv_df.to_csv("validate.csv")
     # print(all_pv_df)
     
     # --Save
