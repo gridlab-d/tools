@@ -275,6 +275,57 @@ class GlmParser:
         self.parse_inv(str_file_woc)
         return self.all_invs_names_list
 
+    def set_inverters(self, csv_qout_fpn, glm_inv_src_fp, glm_inv_src_fn, glm_inv_dst_fp, glm_inv_dst_fn):
+        #==Step 01: Read csv file
+        with open(csv_qout_fpn) as csvfile:
+            qout_csv_reader = csv.reader(csvfile)
+            next(qout_csv_reader, None) # skip the headers
+
+            inv_qout_dict = {}
+            for cur_row in qout_csv_reader:
+                # print(cur_row)
+                cur_inv_name = cur_row[0]
+                cur_inv_qout_var = cur_row[1]
+
+                inv_qout_dict[cur_inv_name] = cur_inv_qout_var
+
+        #==Step 02: Update the glm file with inverters
+        glm_inv_src_fpn = os.path.join(glm_inv_src_fp, glm_inv_src_fn)
+        glm_inv_dst_fpn = os.path.join(glm_inv_dst_fp, glm_inv_dst_fn)
+
+        # --read contents of the inv glm file
+        glm_inv_src_str = self.import_file(glm_inv_src_fpn)
+        glm_inv_dst_str = glm_inv_src_str
+
+        # --search the inverters
+        for cur_inv_name, cur_inv_qout in inv_qout_dict.items():
+            cur_inv_glm_lines_list, cur_inv_re_tpl = self.find_obj_via_attr(
+                "inverter", "name", cur_inv_name, glm_inv_src_str)
+
+            if len(cur_inv_glm_lines_list) == 1:
+                cur_inv_glm_lines_str = cur_inv_glm_lines_list[0]
+            else:
+                raise ValueError("The source glm is problematic")
+
+            # ~~update Q_Out
+            cur_q_var_str = f"{cur_inv_qout}"
+            cur_inv_glm_lines_mod_str = self.modify_attr(
+                "Q_Out", cur_q_var_str, cur_inv_glm_lines_str)
+
+            # ~~replace the obj portion in the source string
+            glm_inv_dst_str = self.replace_obj(
+                cur_inv_re_tpl, glm_inv_dst_str, cur_inv_glm_lines_mod_str)
+
+        # --export glm
+        self.export_glm(glm_inv_dst_fpn, glm_inv_dst_str)
+        
+        # --run GLD, and save csv files
+        # self.run_gld()
+
+        # # ~~put under one folder
+        # cur_results_flr_pfn = self.stor_csv_path
+        # self.move_csv_files(cur_results_flr_pfn)
+
     def add_ufls_gfas(
         self,
         output_glm_path_fn,
@@ -745,7 +796,6 @@ def calc_segment_loading():
         f"Total load of all segments: {total_load_p/1e3}(kW), {total_load_q/1e3}(kVAR)"
     )
 
-
 def test_read_inv_names():
     # ==Parameters
     inv_glm_path_fn = r"D:\Duke_UC3_S1_Tap12_[with MG][Clean][LessLoad]\SolarPV.glm"
@@ -756,6 +806,21 @@ def test_read_inv_names():
 
     print(p.all_invs_names_list)
 
+def test_set_inverters():
+    #==Parameters
+    csv_qout_fp = r'D:\#Github\duke_te2\UC1SC1_InitTopo_dv_150v'
+    csv_qout_fn = r'solution_short.csv'
+    csv_qout_fpn = os.path.join(csv_qout_fp, csv_qout_fn)
+
+    glm_inv_src_fp = r'D:\test glms_UC1SC1_InitTopo'
+    glm_inv_src_fn = r'Copy_SolarPV.glm'
+
+    glm_inv_dst_fp = r'D:\test glms_UC1SC1_InitTopo'
+    glm_inv_dst_fn = r'SolarPV_AfterSwtOpt.glm'
+
+    #==Test & Demo
+    p = GlmParser()
+    p.set_inverters(csv_qout_fpn, glm_inv_src_fp, glm_inv_src_fn, glm_inv_dst_fp, glm_inv_dst_fn)
 
 if __name__ == "__main__":
     # test_add_ufls_gfas()
@@ -770,4 +835,5 @@ if __name__ == "__main__":
     # test_pick_node_from_segments()
     # test_load_zone_info()
 
-    test_read_inv_names()
+    # test_read_inv_names()
+    test_set_inverters()
