@@ -4,9 +4,9 @@
 
 //********************************************* 
 clock{ 
-	 timestamp '2000-01-01 0:00:00';
-	 stoptime '2000-01-02 0:00:00';
-	 timezone EST+8EDT;
+	timezone EST+5EDT;
+	timestamp '2000-01-01 0:00:00';
+	stoptime '2000-01-02 0:00:00';
 }
 
 //********************************************* 
@@ -24,42 +24,42 @@ object voltdump
 {
 	 filename output_voltage_1.csv;
 	 runtime '2000-01-01 00:01:00';
-	 mode polar;
+	 mode POLAR;
 }
 
 object currdump
 {
 	 filename output_current_1.csv;
 	 runtime '2000-01-01 00:01:00';
-	 mode polar;
+	 mode POLAR;
 }
 
 object voltdump 
 {
 	 filename output_voltage_566.csv;
 	 runtime '2000-01-01 09:26:00';
-	 mode polar;
+	 mode POLAR;
 }
 
 object currdump
 {
 	 filename output_current_566.csv;
 	 runtime '2000-01-01 09:26:00';
-	 mode polar;
+	 mode POLAR;
 }
 
 object voltdump 
 {
 	 filename output_voltage_1440.csv;
 	 runtime '2000-01-02 00:00:00';
-	 mode polar;
+	 mode POLAR;
 }
 
 object currdump
 {
 	 filename output_current_1440.csv;
 	 runtime '2000-01-02 00:00:00';
-	 mode polar;
+	 mode POLAR;
 }
 
 // Time series results
