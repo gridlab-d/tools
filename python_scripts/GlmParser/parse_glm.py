@@ -808,15 +808,19 @@ def test_read_inv_names():
 
 def test_set_inverters():
     #==Parameters
-    csv_qout_fp = r'D:\#Github\duke_te2\UC1SC1_InitTopo_dv_150v'
+    # csv_qout_fp = r'D:\#Github\duke_te2\UC1SC1_InitTopo_dv_150v'
+    csv_qout_fp = r'D:\#Github\duke_te2\UC1SC1_MidTopo_dv_5v'
     csv_qout_fn = r'solution_short.csv'
     csv_qout_fpn = os.path.join(csv_qout_fp, csv_qout_fn)
 
-    glm_inv_src_fp = r'D:\test glms_UC1SC1_InitTopo'
+    # glm_inv_src_fp = r'D:\test glms_UC1SC1_InitTopo'
+    glm_inv_src_fp = r'D:\test glms_UC1SC1_MidTopo'
     glm_inv_src_fn = r'Copy_SolarPV.glm'
 
-    glm_inv_dst_fp = r'D:\test glms_UC1SC1_InitTopo'
-    glm_inv_dst_fn = r'SolarPV_AfterSwtOpt.glm'
+    # glm_inv_dst_fp = r'D:\test glms_UC1SC1_InitTopo'
+    glm_inv_dst_fp = r'D:\test glms_UC1SC1_MidTopo'
+    # glm_inv_dst_fn = r'SolarPV_AfterSwtOpt.glm'
+    glm_inv_dst_fn = r'SolarPV_AfterSwtOpt_MidTopo.glm'
 
     #==Test & Demo
     p = GlmParser()

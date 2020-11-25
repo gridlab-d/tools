@@ -253,7 +253,8 @@ def test_CsvExt():
     """
     # ==Parameters (.csv files)
     # csv_folder_path = r"D:\csv files_all"
-    csv_folder_path = r"D:\csv files_UC1SC1_InitTopo"
+    # csv_folder_path = r"D:\csv files_UC1SC1_InitTopo"
+    csv_folder_path = r"D:\csv files_UC1SC1_MidTopo"
     
     # csv_file_name = r"Inv_S6_n865810391_1209.csv"
     csv_file_name = r"Inv_S10_n865809671_1212.csv"

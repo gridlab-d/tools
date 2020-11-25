@@ -61,9 +61,11 @@ class GldSmn:
         player_str = ''
         for cur_ite in range(num):
             cur_t = t0 + datetime.timedelta(0, cur_ite * dt_sec)
+            #print(cur_t)
             cur_t_str = f"{cur_t.strftime(datetime_mask)} {tz}"
+            #print(cur_t_str)
             cur_val = round(v0 + cur_ite*dv, len(str(abs(dv))))
-            player_str += f"{cur_t_str},{cur_val}\n"
+            player_str += f"{cur_t} {tz},{cur_val}\n"
         return player_str
 
     def __init__(
@@ -337,7 +339,8 @@ def test_GldSmn():
     Params & Init
     """
     # ==Parameters (for GldSmn)
-    gld_path = r"D:\test glms_UC1SC1_InitTopo"
+    # gld_path = r"D:\test glms_UC1SC1_InitTopo"
+    gld_path = r"D:\test glms_UC1SC1_MidTopo"
     gld_exe_fn = r"gridlabd.exe"
 
     # Note that:
@@ -348,7 +351,8 @@ def test_GldSmn():
 
     gld_csv_path = gld_path
     gld_csv_suff = r".csv"
-    stor_csv_path = r"D:\csv files_UC1SC1_InitTopo"
+    # stor_csv_path = r"D:\csv files_UC1SC1_InitTopo"
+    stor_csv_path = r"D:\csv files_UC1SC1_MidTopo"
 
     # ==Instance of GldSmn
     p = GldSmn(
@@ -435,14 +439,17 @@ def test_inverters():
     print(csv_fpn)
 
 def test_export_player_file():
-    a = GldSmn.gen_player_str("2019-07-29 12:00:00", 201, -1.0)
+    #a = GldSmn.gen_player_str("2019-07-29 12:00:00", 201, -1.0)
+    #GldSmn.export_player_file("luan.player", a)
+
+    a = GldSmn.gen_player_str("2000-01-01 00:00:00", 600003, -1.0, dt_sec = 40e-6,datetime_mask=r"%Y-%m-%d %H:%M:%S")
     GldSmn.export_player_file("luan.player", a)
 
 if __name__ == "__main__":
     """
     01: for 'test_export_player_file()'
     """
-    # test_export_player_file()
+    test_export_player_file()
 
     """
     02: for 'test_GldSmn()'
@@ -450,9 +457,9 @@ if __name__ == "__main__":
     # start_time = time.time()
     # test_GldSmn()
     # end_time = time.time()
-    # print(f"Time elapsed: {end_time - start_time} (secs)\n") # Time elapsed: 1472.4258217811584 (secs)
+    # print(f"Time elapsed: {end_time - start_time} (secs)\n") # Time elapsed: 1472.4258217811584 (secs) # Time elapsed: 633.6171481609344 (secs) 2020-8-10
 
     """
     03: for 'test_inverters()'
     """
-    test_inverters()
+    # test_inverters()
