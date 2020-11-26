@@ -1,13 +1,14 @@
 # ***************************************
 # Author: Jing Xie
 # Created Date: 2019-10
-# Updated Date: 2020-4-19
+# Updated Date: 2020-11-25
 # Email: jing.xie@pnnl.gov
 # ***************************************
 
 import re
 import os.path
 import csv
+import math
 
 import random
 
@@ -24,11 +25,25 @@ class GlmParser:
         self.master_file_noext, _ = os.path.splitext(master_file)
 
         # ==Store
+        # -- load
         self.all_loads_list = []
         self.all_loads_p_list = []
         self.all_loads_q_list = []
 
+        # -- node
         self.all_nodes_list = []
+
+        # -- triplex node
+        self.all_triplex_nodes_list = []
+        self.all_adj_triplex_nodes_list = None
+
+        self.all_triplex_nodes_p_list = []
+        self.all_triplex_nodes_q_list = []
+
+        self.all_triplex_nodes_p1_list = []
+        self.all_triplex_nodes_q1_list = []
+        self.all_triplex_nodes_p2_list = []
+        self.all_triplex_nodes_q2_list = []
 
         # ==GLM SYN
         self.re_glm_syn_comm = "\/\/.*\n"
@@ -51,6 +66,11 @@ class GlmParser:
     {}\
     }}\n"
 
+        self.obj_triplex_node_tpl_str = "object triplex_node {{\
+    {}\
+    {}\
+    }}\n"
+
         self.sobj_gfa_tpl_str = "\n\
     //--GFA--\n\
     frequency_measure_type PLL;\n\
@@ -64,6 +84,18 @@ class GlmParser:
         self.all_loads_list = []
         self.all_loads_p_list = []
         self.all_loads_q_list = []
+
+    def clean_triplex_node_buffer(self):
+        self.all_triplex_nodes_list = []
+        self.all_adj_triplex_nodes_list = None
+
+        self.all_triplex_nodes_p_list = []
+        self.all_triplex_nodes_q_list = []
+
+        self.all_triplex_nodes_p1_list = []
+        self.all_triplex_nodes_q1_list = []
+        self.all_triplex_nodes_p2_list = []
+        self.all_triplex_nodes_q2_list = []
 
     def extract_attr(self, attr_str, src_str):
         """Extract the attribute information"""
@@ -81,14 +113,14 @@ class GlmParser:
         """ Find the content of an object using its type & attribute
         """
         re_tpl_obj_attr = (
-            r"object\s*"
-            + obj_str
-            # + r"\s*{.*?"
-            + r"\s*{[^}]*?"
-            + attr_tag_str
-            + r"\s*"
-            + attr_val_str
-            + r"\s*;.*?}"
+                r"object\s*"
+                + obj_str
+                # + r"\s*{.*?"
+                + r"\s*{[^}]*?"
+                + attr_tag_str
+                + r"\s*"
+                + attr_val_str
+                + r"\s*;.*?}"
         )
 
         extr_obj_list = self.extract_obj(re_tpl_obj_attr, src_str)
@@ -121,7 +153,7 @@ class GlmParser:
             # ==Names
             cur_inv_obj_name_list = self.extract_attr("name", cur_obj_str)
             assert (
-                len(cur_inv_obj_name_list) == 1
+                    len(cur_inv_obj_name_list) == 1
             ), "Redundancy or missing on the name attribute!"
             self.all_invs_names_list.append(cur_inv_obj_name_list[0])
 
@@ -136,7 +168,7 @@ class GlmParser:
             # ==Names
             cur_nd_obj_name_list = self.extract_attr("name", cur_obj_str)
             assert (
-                len(cur_nd_obj_name_list) == 1
+                    len(cur_nd_obj_name_list) == 1
             ), "Redundancy or missing on the name attribute!"
             self.all_nodes_names_list.append(cur_nd_obj_name_list[0])
 
@@ -144,7 +176,7 @@ class GlmParser:
             cur_nd_obj_phases_list = self.extract_attr("phases", cur_obj_str)
             # print(cur_nd_obj_phase_list)
             assert (
-                len(cur_nd_obj_phases_list) == 1
+                    len(cur_nd_obj_phases_list) == 1
             ), "Redundancy or missing on the phase attribute!"
             self.all_nodes_phases_dict[
                 cur_nd_obj_name_list[0]
@@ -169,14 +201,14 @@ class GlmParser:
             # ==Names
             cur_ld_obj_name_list = self.extract_attr("name", cur_obj_str)
             assert (
-                len(cur_ld_obj_name_list) == 1
+                    len(cur_ld_obj_name_list) == 1
             ), "Redundancy or missing on the name attribute!"
             self.all_loads_names_list.append(cur_ld_obj_name_list[0])
 
             # ==Phases
             cur_ld_obj_phases_list = self.extract_attr("phases", cur_obj_str)
             assert (
-                len(cur_ld_obj_phases_list) == 1
+                    len(cur_ld_obj_phases_list) == 1
             ), "Redundancy or missing on the phase attribute!"
             self.all_loads_phases_dict[
                 cur_ld_obj_name_list[0]
@@ -233,6 +265,36 @@ class GlmParser:
 
             self.all_loads_p_list.append(cur_obj_p_sum)
 
+    def parse_triplex_node(self, lines_str):
+        """
+        Note that this function takes the deprecated properties (e.g., power_1 & power_2) of the triplex_node object.
+        The formal way is to define the load by using the triplex_load object, e.g., with constant power on phase 1 (120V).
+        """
+        self.clean_triplex_node_buffer()
+        self.all_triplex_nodes_list = re.findall(
+            r"object\s*triplex_node.*?{(.*?)}", lines_str, flags=re.DOTALL
+        )
+
+        # p1_w_sum = p2_w_sum = 0
+        # q1_var_sum = q2_var_sum = 0
+        for cur_obj_str in self.all_triplex_nodes_list:
+            cur_obj_s1_list = re.findall(r".*power_1\s*(.*?);", cur_obj_str, flags=re.DOTALL)
+            cur_obj_s2_list = re.findall(r".*power_2\s*(.*?);", cur_obj_str, flags=re.DOTALL)
+
+            if cur_obj_s1_list:  # A triplex_node may not have loading defined
+                if len(cur_obj_s1_list) == 1:
+                    self.all_triplex_nodes_p1_list.append(complex(cur_obj_s1_list[0]).real)
+                    self.all_triplex_nodes_q1_list.append(complex(cur_obj_s1_list[0]).imag)
+                else:
+                    raise ('Multiple power_1 values defined!')
+
+            if cur_obj_s2_list:  # A triplex_node may not have loading defined
+                if len(cur_obj_s2_list) == 1:
+                    self.all_triplex_nodes_p2_list.append(complex(cur_obj_s2_list[0]).real)
+                    self.all_triplex_nodes_q2_list.append(complex(cur_obj_s2_list[0]).imag)
+                else:
+                    raise ('Multiple power_2 values defined!')
+
     def del_cmts(self, ori_str):
         return re.sub(self.re_glm_syn_comm, "", ori_str)
 
@@ -251,9 +313,15 @@ class GlmParser:
         self.str_file_woc_copy = str_file_woc
         return str_file_woc
 
+    def disp_triplex_node_info(self):
+        total_p_w = sum(self.all_triplex_nodes_p1_list) + sum(self.all_triplex_nodes_p2_list)
+        total_q_var = sum(self.all_triplex_nodes_q1_list) + sum(self.all_triplex_nodes_q2_list)
+
+        print(f"Total Load on Triplex Nodes: {total_p_w / 1e3} (kW), {total_q_var / 1e3} (kVAR)")
+
     def disp_load_info(self):
         print(
-            f"Total Load: {self.all_loads_p_sum/1e3} (kW), {self.all_loads_q_sum/1e3} (kVAR)"
+            f"Total Load: {self.all_loads_p_sum / 1e3} (kW), {self.all_loads_q_sum / 1e3} (kVAR)"
         )
 
     def read_content_node(self, filename):
@@ -270,16 +338,21 @@ class GlmParser:
         str_file_woc = self.import_file(filename)
         self.parse_triload(str_file_woc)
 
+    def read_content_triplex_node(self, filename):
+        str_file_woc = self.import_file(filename)
+        self.parse_triplex_node(str_file_woc)
+        self.disp_triplex_node_info()
+
     def read_inv_names(self, filename):
         str_file_woc = self.import_file(filename)
         self.parse_inv(str_file_woc)
         return self.all_invs_names_list
 
     def set_inverters(self, csv_qout_fpn, glm_inv_src_fp, glm_inv_src_fn, glm_inv_dst_fp, glm_inv_dst_fn):
-        #==Step 01: Read csv file
+        # ==Step 01: Read csv file
         with open(csv_qout_fpn) as csvfile:
             qout_csv_reader = csv.reader(csvfile)
-            next(qout_csv_reader, None) # skip the headers
+            next(qout_csv_reader, None)  # skip the headers
 
             inv_qout_dict = {}
             for cur_row in qout_csv_reader:
@@ -289,7 +362,7 @@ class GlmParser:
 
                 inv_qout_dict[cur_inv_name] = cur_inv_qout_var
 
-        #==Step 02: Update the glm file with inverters
+        # ==Step 02: Update the glm file with inverters
         glm_inv_src_fpn = os.path.join(glm_inv_src_fp, glm_inv_src_fn)
         glm_inv_dst_fpn = os.path.join(glm_inv_dst_fp, glm_inv_dst_fn)
 
@@ -318,7 +391,7 @@ class GlmParser:
 
         # --export glm
         self.export_glm(glm_inv_dst_fpn, glm_inv_dst_str)
-        
+
         # --run GLD, and save csv files
         # self.run_gld()
 
@@ -327,15 +400,15 @@ class GlmParser:
         # self.move_csv_files(cur_results_flr_pfn)
 
     def add_ufls_gfas(
-        self,
-        output_glm_path_fn,
-        ufls_pct,
-        ufls_th,
-        ufls_dly,
-        gfa_rc_time,
-        gfa_extra_str="",
-        flag_triload=False,
-        flag_des=True,
+            self,
+            output_glm_path_fn,
+            ufls_pct,
+            ufls_th,
+            ufls_dly,
+            gfa_rc_time,
+            gfa_extra_str="",
+            flag_triload=False,
+            flag_des=True,
     ):
         """ flag_des is reserved for extension
         """
@@ -398,14 +471,14 @@ class GlmParser:
         return hf_output
 
     def export_glm_with_gfas(
-        self,
-        output_glm_path_fn,
-        all_loads_ufls_tag,
-        ufls_th,
-        ufls_dly,
-        gfa_rc_time,
-        gfa_extra_str,
-        flag_triload,
+            self,
+            output_glm_path_fn,
+            all_loads_ufls_tag,
+            ufls_th,
+            ufls_dly,
+            gfa_rc_time,
+            gfa_extra_str,
+            flag_triload,
     ):
         hf_output = self.prepare_export_file(output_glm_path_fn)
         for ld_str, gp in zip(self.all_loads_list, all_loads_ufls_tag):
@@ -429,7 +502,7 @@ class GlmParser:
         hf_output.close()
 
     def separate_load_objs(
-        self, glm_file_path_fn, output_main_glm_path_fn, output_load_glm_path_fn
+            self, glm_file_path_fn, output_main_glm_path_fn, output_load_glm_path_fn
     ):
         self.read_content_load(glm_file_path_fn)
 
@@ -451,7 +524,7 @@ class GlmParser:
         p_ratio = tgt_p / (self.all_loads_p_sum / 1e3)
 
         print(f"Ratio: {p_ratio}")
-        print(f"Total Load after Adjustment: {p_ratio*self.all_loads_p_sum/1e3} (kW)")
+        print(f"Total Load after Adjustment: {p_ratio * self.all_loads_p_sum / 1e3} (kW)")
         print(f"Power Factor: {tgt_pf}\n")
 
         self.all_adj_loads_list = []
@@ -463,6 +536,47 @@ class GlmParser:
             out_adj_load_str += self.obj_load_tpl_str.format(cur_new_obj_str, "")
 
         self.export_glm(adj_load_glm_path_fn, out_adj_load_str)
+
+    def update_pq_type(self, cur_triplex_node_str, ld_mult, ld_type):
+        # == Step 01: Check the load conversion type
+        if ld_type == 'p_to_z':
+            ori_power_atts_list = ['power_1', 'power_2']
+            new_power_atts_list = ['impedance_1', 'impedance_2']
+        else:
+            raise (f"The load type defined in 'ld_type' is not supported yet!")
+
+        # == Step 02: Update/Adjust
+        cur_new_triplex_node_str = cur_triplex_node_str
+
+        for cur_ori_power_att_str, cur_new_power_att_str in zip(ori_power_atts_list, new_power_atts_list):
+            cur_att_re_str = fr".*{cur_ori_power_att_str}\s*(.*?);"
+            cur_ph_s_lt = re.findall(cur_att_re_str, cur_new_triplex_node_str, flags=re.DOTALL)
+            if cur_ph_s_lt:
+                cur_ph_p_w = complex(cur_ph_s_lt[0]).real
+                cur_ph_q_var = complex(cur_ph_s_lt[0]).imag
+
+                new_ph_p_w = ld_mult * cur_ph_p_w
+                new_ph_q_var = ld_mult * cur_ph_q_var
+
+                cur_nominal_volt_list = self.extract_attr('nominal_voltage', cur_triplex_node_str)
+                if len(cur_nominal_volt_list) != 1:
+                    raise ("Nomianl voltage is not defined well.")
+                else:
+                    cur_nominal_volt_v = float(cur_nominal_volt_list[0])
+
+                new_s_abs_w = math.sqrt(new_ph_p_w ** 2 + new_ph_q_var ** 2)
+                new_z_abs_ohm = cur_nominal_volt_v ** 2 / new_s_abs_w
+                new_pf_theta_rad = math.asin(new_ph_q_var/new_s_abs_w)
+                new_ph_r_ohm = new_z_abs_ohm * math.cos(new_pf_theta_rad)
+                new_ph_x_ohm = new_z_abs_ohm * math.sin(new_pf_theta_rad)
+
+                new_ph_s_str = f"\t{cur_new_power_att_str} {new_ph_r_ohm}+{new_ph_x_ohm}j;"
+
+                cur_new_triplex_node_str = re.sub(
+                    cur_att_re_str, new_ph_s_str, cur_new_triplex_node_str, flags=re.MULTILINE
+                )
+
+        return cur_new_triplex_node_str
 
     def update_pq(self, cur_obj_str, p_ratio, tgt_pf):
         # print(cur_obj_str)
@@ -509,6 +623,36 @@ class GlmParser:
                     assert len(cur_obj_zone_int) == 1, "Redundancy of Segment Info"
                     obj_zone_dict[cur_obj_name] = cur_obj_zone_int[0]
             return obj_zone_dict, obj_zone_missing_list
+
+    def adjust_triplex_nodes(self, triplex_node_glm_path_fn, adj_triplex_node_glm_path_fn, ld_mult, ld_type):
+        # == Step 01: Read the contents of triplex node from a glm file
+        self.read_content_triplex_node(triplex_node_glm_path_fn)
+
+        # == Step 02: Display loading info
+        info_ratio_str = f"Ratio (of new to original loading): {ld_mult}"
+        print(info_ratio_str)
+
+        total_p_w = sum(self.all_triplex_nodes_p1_list) + sum(self.all_triplex_nodes_p2_list)
+        total_q_var = sum(self.all_triplex_nodes_q1_list) + sum(self.all_triplex_nodes_q2_list)
+        info_total_adj_load_str = f"Total Load (adjusted): {ld_mult * total_p_w / 1e3} (kW), {ld_mult * total_q_var / 1e3} (kVAR)"
+        info_total_ori_load_str = f"Total Load (original): {total_p_w / 1e3} (kW), {total_q_var / 1e3} (kVAR)"
+        print(info_total_adj_load_str)
+        print(info_total_ori_load_str)
+
+        # == Step 03: Adjust the load type and amount
+        self.all_adj_triplex_nodes_list = []
+        output_adj_triplex_nodes_str = f"// Triplex_node objects with adjusted loads\n" \
+                                       f"// {info_ratio_str}\n" \
+                                       f"// {info_total_adj_load_str}\n" \
+                                       f"// {info_total_ori_load_str}\n\n"
+        for cur_obj_str in self.all_triplex_nodes_list:
+            cur_new_triplex_node_obj_str = self.update_pq_type(cur_obj_str, ld_mult, ld_type)
+            self.all_adj_triplex_nodes_list.append(cur_new_triplex_node_obj_str)
+
+            output_adj_triplex_nodes_str += self.obj_triplex_node_tpl_str.format(cur_new_triplex_node_obj_str, "")
+
+        # == Step 04: Export & save to a file
+        self.export_glm(adj_triplex_node_glm_path_fn, output_adj_triplex_nodes_str)
 
 
 def test_add_ufls_gfas():
@@ -666,9 +810,9 @@ def test_mapping_zone_info():
 
             # --new_zone_node_3ph_dict
             if (
-                ("A" in cur_phase_str)
-                and ("B" in cur_phase_str)
-                and ("C" in cur_phase_str)
+                    ("A" in cur_phase_str)
+                    and ("B" in cur_phase_str)
+                    and ("C" in cur_phase_str)
             ):
                 if cur_zone_info in new_zone_node_3ph_dict.keys():
                     new_zone_node_3ph_dict[cur_zone_info].append(
@@ -699,7 +843,7 @@ def test_mapping_zone_info():
     p.read_content_load(load_glm_path_fn)
 
     for cur_load_name_str, cur_load_p, cur_load_q in zip(
-        p.all_loads_names_list, p.all_loads_p_list, p.all_loads_q_list
+            p.all_loads_names_list, p.all_loads_p_list, p.all_loads_q_list
     ):
         cur_load_name_feeder_list = re.findall("\d+", cur_load_name_str)
         cur_load_name_key = cur_load_name_feeder_list[0]
@@ -790,11 +934,12 @@ def calc_segment_loading():
         val_q = seg_loading_q_dict[key]
         total_load_q += val_q
 
-        print(f"Segment {key}: {val/1e3} (kW), {val_q/1e3} (kVAR)")
+        print(f"Segment {key}: {val / 1e3} (kW), {val_q / 1e3} (kVAR)")
 
     print(
-        f"Total load of all segments: {total_load_p/1e3}(kW), {total_load_q/1e3}(kVAR)"
+        f"Total load of all segments: {total_load_p / 1e3}(kW), {total_load_q / 1e3}(kVAR)"
     )
+
 
 def test_read_inv_names():
     # ==Parameters
@@ -806,8 +951,9 @@ def test_read_inv_names():
 
     print(p.all_invs_names_list)
 
+
 def test_set_inverters():
-    #==Parameters
+    # ==Parameters
     # csv_qout_fp = r'D:\#Github\duke_te2\UC1SC1_InitTopo_dv_150v'
     csv_qout_fp = r'D:\#Github\duke_te2\UC1SC1_MidTopo_dv_5v'
     csv_qout_fn = r'solution_short.csv'
@@ -822,9 +968,32 @@ def test_set_inverters():
     # glm_inv_dst_fn = r'SolarPV_AfterSwtOpt.glm'
     glm_inv_dst_fn = r'SolarPV_AfterSwtOpt_MidTopo.glm'
 
-    #==Test & Demo
+    # ==Test & Demo
     p = GlmParser()
     p.set_inverters(csv_qout_fpn, glm_inv_src_fp, glm_inv_src_fn, glm_inv_dst_fp, glm_inv_dst_fn)
+
+
+def test_adjust_triplex_nodes():
+    # ==Parameters
+    # ld_mult = 0.5 / 0.7
+    # ld_mult = 0.6 / 0.7
+    # ld_mult = 1
+    # ld_mult = 0.8 / 0.7
+    # ld_mult = 0.9 / 0.7
+    # ld_mult = 1.0 / 0.7
+    # ld_mult = 1.1 / 0.7
+    ld_mult = 1.2 / 0.7
+
+    ld_type = 'p_to_z'
+
+    triplex_node_glm_path_fn = r"triplex_nodes.glm"
+    adj_triplex_node_glm_path_fn = fr"triplex_nodes_{round(ld_mult*100)}_{ld_type}.glm"
+
+    # ==Test & Demo
+    p = GlmParser()
+
+    p.adjust_triplex_nodes(triplex_node_glm_path_fn, adj_triplex_node_glm_path_fn, ld_mult, ld_type)
+
 
 if __name__ == "__main__":
     # test_add_ufls_gfas()
@@ -840,4 +1009,6 @@ if __name__ == "__main__":
     # test_load_zone_info()
 
     # test_read_inv_names()
-    test_set_inverters()
+    # test_set_inverters()
+
+    test_adjust_triplex_nodes()
