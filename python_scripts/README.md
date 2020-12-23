@@ -4,7 +4,8 @@ Tool Scripts for GridLAB-D in Python
 ## GlmParser
 
 1) The class 'GlmParser' parses the .glm file, ignoring all comments;
-2) UFLS GFA devices can be added to 'load' and 'triplex_load' objects, using the class 'GlmParser'.
+2) UFLS GFA devices can be added to 'load' and 'triplex_load' objects, using the class 'GlmParser';
+3) A member function of the class 'GlmParser' can add parallel cables (e.g., defined in the CYME model) into the GLD model.
 
 ## JsonExporter
 Exports the .json file for running GridLAB-D with Helics and NS-3. A set of inveters is specified as the endpoints.
