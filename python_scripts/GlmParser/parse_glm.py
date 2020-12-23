@@ -566,7 +566,7 @@ class GlmParser:
 
                 new_s_abs_w = math.sqrt(new_ph_p_w ** 2 + new_ph_q_var ** 2)
                 new_z_abs_ohm = cur_nominal_volt_v ** 2 / new_s_abs_w
-                new_pf_theta_rad = math.asin(new_ph_q_var/new_s_abs_w)
+                new_pf_theta_rad = math.asin(new_ph_q_var / new_s_abs_w)
                 new_ph_r_ohm = new_z_abs_ohm * math.cos(new_pf_theta_rad)
                 new_ph_x_ohm = new_z_abs_ohm * math.sin(new_pf_theta_rad)
 
@@ -653,6 +653,63 @@ class GlmParser:
 
         # == Step 04: Export & save to a file
         self.export_glm(adj_triplex_node_glm_path_fn, output_adj_triplex_nodes_str)
+
+    def add_parallel_cables(self, scl_pcs_names_list, tar_glm_fpn, pcs_glm_fpn):
+        str_file_woc = self.import_file(tar_glm_fpn)
+        pcs_glm_str = '//== 643 PCs\n'
+        for cur_pc_name in scl_pcs_names_list:
+            cur_pc_extr_obj_list, _ = self.find_obj_via_attr('overhead_line', 'name',
+                                                             '"line_' + cur_pc_name.lower() + '"',
+                                                             str_file_woc)
+            if cur_pc_extr_obj_list:
+                if len(cur_pc_extr_obj_list) != 1:
+                    raise Exception('Duplicate Names!')
+                cur_pc_obj_str = cur_pc_extr_obj_list[0]
+
+                # == Get Length
+                cur_pc_length_str = self.extract_attr('length', cur_pc_obj_str)
+                if len(cur_pc_length_str) != 1:
+                    raise Exception('Length Issue!')
+                cur_pc_length = float(cur_pc_length_str[0])
+
+                # == Add Comment
+                pcs_glm_str += f'//-- {cur_pc_name}\n'
+
+                cur_pc_node_name_str = '"node_' + cur_pc_name.lower() + '_PCN"'
+
+                # == Add PC_01
+                cur_pc_01_obj_str = self.modify_attr('length', str(cur_pc_length / 2), cur_pc_obj_str)
+                cur_pc_01_obj_str = self.modify_attr('name', '"line_' + cur_pc_name.lower() + '_PC_01"',
+                                                     cur_pc_01_obj_str)
+                cur_pc_01_obj_str = self.modify_attr('to', cur_pc_node_name_str, cur_pc_01_obj_str)
+
+                pcs_glm_str += cur_pc_01_obj_str + '\n'
+
+                # == Add PC_02
+                cur_pc_02_obj_str = self.modify_attr('length', str(cur_pc_length / 2), cur_pc_obj_str)
+                cur_pc_02_obj_str = self.modify_attr('name', '"line_' + cur_pc_name.lower() + '_PC_02"',
+                                                     cur_pc_02_obj_str)
+                cur_pc_02_obj_str = self.modify_attr('from', cur_pc_node_name_str,
+                                                     cur_pc_02_obj_str)
+
+                pcs_glm_str += cur_pc_02_obj_str + '\n'
+
+                # == Add PC_Mid_Node
+                cur_pc_obj_from_node_name_list = self.extract_attr('from', cur_pc_obj_str)
+                if len(cur_pc_obj_from_node_name_list) != 1:
+                    raise Exception('Length Issue!')
+                cur_pc_from_node_obj_list, _ = self.find_obj_via_attr('node', 'name', cur_pc_obj_from_node_name_list[0],
+                                                                      str_file_woc)
+
+                if len(cur_pc_from_node_obj_list) != 1:
+                    raise Exception('Node Issue!')
+
+                cur_pc_from_node_obj_str = cur_pc_from_node_obj_list[0]
+                cur_pc_node_obj_str = self.modify_attr('name', cur_pc_node_name_str, cur_pc_from_node_obj_str)
+
+                pcs_glm_str += cur_pc_node_obj_str + '\n'
+
+        self.export_glm(pcs_glm_fpn, pcs_glm_str)
 
 
 def test_add_ufls_gfas():
@@ -987,12 +1044,24 @@ def test_adjust_triplex_nodes():
     ld_type = 'p_to_z'
 
     triplex_node_glm_path_fn = r"triplex_nodes.glm"
-    adj_triplex_node_glm_path_fn = fr"triplex_nodes_{round(ld_mult*100)}_{ld_type}.glm"
+    adj_triplex_node_glm_path_fn = fr"triplex_nodes_{round(ld_mult * 100)}_{ld_type}.glm"
 
     # ==Test & Demo
     p = GlmParser()
 
     p.adjust_triplex_nodes(triplex_node_glm_path_fn, adj_triplex_node_glm_path_fn, ld_mult, ld_type)
+
+
+def test_add_parallel_cables():
+    # ==Parameters
+    from scl_pcs import scl_pcs_names_list
+
+    tar_glm_fpn = r'D:\#Temp\635.glm'
+    pcs_glm_fpn = r'D:\#Temp\635_pcs.glm'
+
+    # ==Test & Typical Usage Example
+    p = GlmParser()
+    p.add_parallel_cables(scl_pcs_names_list, tar_glm_fpn, pcs_glm_fpn)
 
 
 if __name__ == "__main__":
@@ -1011,4 +1080,6 @@ if __name__ == "__main__":
     # test_read_inv_names()
     # test_set_inverters()
 
-    test_adjust_triplex_nodes()
+    # test_adjust_triplex_nodes()
+
+    test_add_parallel_cables()
