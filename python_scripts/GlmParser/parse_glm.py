@@ -656,7 +656,8 @@ class GlmParser:
 
     def add_parallel_cables(self, scl_pcs_names_list, tar_glm_fpn, pcs_glm_fpn):
         str_file_woc = self.import_file(tar_glm_fpn)
-        pcs_glm_str = '//== 643 PCs\n'
+        pcs_glm_str = ''
+        counter_pcs = 0
         for cur_pc_name in scl_pcs_names_list:
             cur_pc_extr_obj_list, _ = self.find_obj_via_attr('overhead_line', 'name',
                                                              '"line_' + cur_pc_name.lower() + '"',
@@ -673,7 +674,8 @@ class GlmParser:
                 cur_pc_length = float(cur_pc_length_str[0])
 
                 # == Add Comment
-                pcs_glm_str += f'//-- {cur_pc_name}\n'
+                counter_pcs += 1
+                pcs_glm_str += f'//-- PC_{counter_pcs}: {cur_pc_name}\n'
 
                 cur_pc_node_name_str = '"node_' + cur_pc_name.lower() + '_PCN"'
 
@@ -709,6 +711,7 @@ class GlmParser:
 
                 pcs_glm_str += cur_pc_node_obj_str + '\n'
 
+        pcs_glm_str = f'//== {pcs_glm_fpn} PCs (Number: {counter_pcs})\n' + pcs_glm_str
         self.export_glm(pcs_glm_fpn, pcs_glm_str)
 
 
@@ -1056,8 +1059,8 @@ def test_add_parallel_cables():
     # ==Parameters
     from scl_pcs import scl_pcs_names_list
 
-    tar_glm_fpn = r'D:\#Temp\635.glm'
-    pcs_glm_fpn = r'D:\#Temp\635_pcs.glm'
+    tar_glm_fpn = r'D:\#Temp\643.glm'
+    pcs_glm_fpn = r'D:\#Temp\643_pcs.glm'
 
     # ==Test & Typical Usage Example
     p = GlmParser()
