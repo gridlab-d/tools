@@ -56,6 +56,10 @@ class GlmParser:
         self.re_glm_attr_tpl_str = ".*{}\s*(.*?);"
 
         # ==GLM OBJ TPL for EXPORT
+        self.obj_tpl_str = "object {} {{\n" \
+                           "{} {}" \
+                           "}}\n"
+
         self.obj_load_tpl_str = "object load {{\
     {}\
     {}\
@@ -537,7 +541,7 @@ class GlmParser:
 
         self.export_glm(adj_load_glm_path_fn, out_adj_load_str)
 
-    def update_pq_type(self, cur_triplex_node_str, ld_mult, ld_type):
+    def update_pq_type(self, cur_triplex_node_str, ld_mult, ld_type):  # TODO: to be deleted
         # == Step 01: Check the load conversion type
         if ld_type == 'p_to_z':
             ori_power_atts_list = ['power_1', 'power_2']
@@ -624,6 +628,88 @@ class GlmParser:
                     obj_zone_dict[cur_obj_name] = cur_obj_zone_int[0]
             return obj_zone_dict, obj_zone_missing_list
 
+    def update_zip_type(self, cur_triplex_node_str, ld_mult, ld_type,
+                        p_pf=0.9, i_pf=0.9, z_pf=0.9, p_pct=1.0, i_pct=0, z_pct=0,
+                        prefix_triplex_load_obj_str='tpld_'):
+        # == Step 01: Check the load conversion type
+        if ld_type == 'p_to_z':
+            ori_power_atts_list = ['power_1', 'power_2']
+            new_power_atts_list = ['impedance_1', 'impedance_2']
+        elif ld_type == 'p_to_zip':
+            ori_power_atts_list = ['power_1', 'power_2']  # @TODO: power_12 is omitted in this version
+            new_power_atts_list = ['_1', '_2']
+        else:
+            raise (f"The load type defined in 'ld_type' is not supported yet!")
+
+        # == Step 02: Update/Adjust
+        cur_new_triplex_node_str = cur_triplex_node_str
+        cur_new_triplex_load_str = ""
+
+        for cur_ori_power_att_str, cur_new_power_att_str in zip(ori_power_atts_list, new_power_atts_list):
+            cur_att_re_str = fr".*{cur_ori_power_att_str}\s*(.*?);"
+            cur_ph_s_lt = re.findall(cur_att_re_str, cur_new_triplex_node_str, flags=re.DOTALL)
+            if cur_ph_s_lt:
+                cur_ph_p_w = complex(cur_ph_s_lt[0]).real
+                cur_ph_q_var = complex(cur_ph_s_lt[0]).imag
+
+                new_ph_p_w = ld_mult * cur_ph_p_w
+                new_ph_q_var = ld_mult * cur_ph_q_var
+
+                cur_nominal_volt_list = self.extract_attr('nominal_voltage', cur_triplex_node_str)
+                if len(cur_nominal_volt_list) != 1:
+                    raise ("Nomianl voltage is not defined well.")
+                else:
+                    cur_nominal_volt_v = float(cur_nominal_volt_list[0])
+
+                new_s_abs_w = math.sqrt(new_ph_p_w ** 2 + new_ph_q_var ** 2)
+
+                if ld_type == 'p_to_z':
+                    new_z_abs_ohm = cur_nominal_volt_v ** 2 / new_s_abs_w
+                    new_pf_theta_rad = math.asin(new_ph_q_var / new_s_abs_w)
+                    new_ph_r_ohm = new_z_abs_ohm * math.cos(new_pf_theta_rad)
+                    new_ph_x_ohm = new_z_abs_ohm * math.sin(new_pf_theta_rad)
+
+                    new_ph_s_str = f"\t{cur_new_power_att_str} {new_ph_r_ohm}+{new_ph_x_ohm}j;"
+                elif ld_type == 'p_to_zip':
+                    new_ph_s_str = ""
+
+                    # -- name, phases, parent
+                    if not cur_new_triplex_load_str:
+                        cur_name_list = self.extract_attr('name', cur_triplex_node_str)
+                        if len(cur_name_list) != 1:
+                            raise ("Name is not defined well.")
+                        else:
+                            cur_name_str = cur_name_list[0]
+
+                        cur_phases_list = self.extract_attr('phases', cur_triplex_node_str)
+                        if len(cur_phases_list) != 1:
+                            raise ("Phases attribute is not defined well.")
+                        else:
+                            cur_phases_str = cur_phases_list[0]
+
+                        cur_new_triplex_load_str += f"\tname {prefix_triplex_load_obj_str}{cur_name_str};\n" \
+                                                    f"\tparent {cur_name_str};\n" \
+                                                    f"\tnominal_voltage {cur_nominal_volt_v};\n" \
+                                                    f"\tphases {cur_phases_str};\n" \
+                                                    f"\n"
+
+                    # -- zip properties
+                    cur_new_triplex_load_str += f"\tbase_power{cur_new_power_att_str} {new_s_abs_w};\n" \
+                                                f"\n" \
+                                                f"\tpower_pf{cur_new_power_att_str} {p_pf};\n" \
+                                                f"\tcurrent_pf{cur_new_power_att_str} {i_pf};\n" \
+                                                f"\timpedance_pf{cur_new_power_att_str} {z_pf};\n" \
+                                                f"\n" \
+                                                f"\tpower_fraction{cur_new_power_att_str} {p_pct};\n" \
+                                                f"\tcurrent_fraction{cur_new_power_att_str} {i_pct};\n" \
+                                                f"\timpedance_fraction{cur_new_power_att_str} {z_pct};\n" \
+                                                f"\n"
+
+                cur_new_triplex_node_str = re.sub(cur_att_re_str, new_ph_s_str, cur_new_triplex_node_str,
+                                                  flags=re.MULTILINE)
+
+        return cur_new_triplex_node_str, cur_new_triplex_load_str
+
     def adjust_triplex_nodes(self, triplex_node_glm_path_fn, adj_triplex_node_glm_path_fn, ld_mult, ld_type):
         # == Step 01: Read the contents of triplex node from a glm file
         self.read_content_triplex_node(triplex_node_glm_path_fn)
@@ -646,7 +732,8 @@ class GlmParser:
                                        f"// {info_total_adj_load_str}\n" \
                                        f"// {info_total_ori_load_str}\n\n"
         for cur_obj_str in self.all_triplex_nodes_list:
-            cur_new_triplex_node_obj_str = self.update_pq_type(cur_obj_str, ld_mult, ld_type)
+            # cur_new_triplex_node_obj_str = self.update_pq_type(cur_obj_str, ld_mult, ld_type)
+            cur_new_triplex_node_obj_str, _ = self.update_zip_type(cur_obj_str, ld_mult, ld_type)
             self.all_adj_triplex_nodes_list.append(cur_new_triplex_node_obj_str)
 
             output_adj_triplex_nodes_str += self.obj_triplex_node_tpl_str.format(cur_new_triplex_node_obj_str, "")
@@ -713,6 +800,44 @@ class GlmParser:
 
         pcs_glm_str = f'//== {pcs_glm_fpn} PCs (Number: {counter_pcs})\n' + pcs_glm_str
         self.export_glm(pcs_glm_fpn, pcs_glm_str)
+
+    def add_triplex_loads(self, triplex_node_glm_path_fn, adj_triplex_node_glm_path_fn, ld_mult, ld_type,
+                          p_pf=0.9, i_pf=0.9, z_pf=0.9, p_pct=1.0, i_pct=0, z_pct=0):
+        # == Step 01: Read the contents of triplex node from a glm file
+        self.read_content_triplex_node(triplex_node_glm_path_fn)
+
+        # == Step 02: Display loading info
+        info_ratio_str = f"Ratio (of new to original loading): {ld_mult}"
+        print(info_ratio_str)
+
+        total_p_w = sum(self.all_triplex_nodes_p1_list) + sum(self.all_triplex_nodes_p2_list)
+        total_q_var = sum(self.all_triplex_nodes_q1_list) + sum(self.all_triplex_nodes_q2_list)
+        info_total_adj_load_str = f"Total Load (adjusted): {ld_mult * total_p_w / 1e3} (kW), {ld_mult * total_q_var / 1e3} (kVAR)"
+        info_total_ori_load_str = f"Total Load (original): {total_p_w / 1e3} (kW), {total_q_var / 1e3} (kVAR)"
+        print(info_total_adj_load_str)
+        print(info_total_ori_load_str)
+
+        # == Step 03: Adjust the load type and amount
+        self.all_adj_triplex_nodes_list = []
+        output_adj_triplex_nodes_str = f"// Triplex_node objects with adjusted loads (modeled as triplex_load objects)\n" \
+                                       f"// {info_ratio_str}\n" \
+                                       f"// {info_total_adj_load_str}\n" \
+                                       f"// {info_total_ori_load_str}\n\n"
+        for cur_obj_str in self.all_triplex_nodes_list:
+            cur_new_triplex_node_obj_str, \
+            cur_new_triplex_load_obj_str = self.update_zip_type(cur_obj_str, ld_mult, ld_type,
+                                                                p_pf, i_pf, z_pf, p_pct, i_pct, z_pct)
+
+            self.all_adj_triplex_nodes_list.append(cur_new_triplex_node_obj_str)  # @TODO: not needed
+
+            # output_adj_triplex_nodes_str += self.obj_triplex_node_tpl_str.format(cur_new_triplex_node_obj_str, "")
+            output_adj_triplex_nodes_str += self.obj_tpl_str.format("triplex_node", cur_new_triplex_node_obj_str, "")
+            if cur_new_triplex_load_obj_str:
+                output_adj_triplex_nodes_str += \
+                    self.obj_tpl_str.format("triplex_load", cur_new_triplex_load_obj_str, "")
+
+        # == Step 04: Export & save to a file
+        self.export_glm(adj_triplex_node_glm_path_fn, output_adj_triplex_nodes_str)
 
 
 def test_add_ufls_gfas():
@@ -1059,12 +1184,47 @@ def test_add_parallel_cables():
     # ==Parameters
     from scl_pcs import scl_pcs_names_list
 
-    tar_glm_fpn = r'D:\#Temp\643.glm'
-    pcs_glm_fpn = r'D:\#Temp\643_pcs.glm'
+    tar_glm_fpn = r'D:\#Temp\636.glm'
+    pcs_glm_fpn = r'D:\#Temp\636_pcs.glm'
 
     # ==Test & Typical Usage Example
     p = GlmParser()
     p.add_parallel_cables(scl_pcs_names_list, tar_glm_fpn, pcs_glm_fpn)
+
+
+def test_add_triplex_loads():
+    # ==Parameters
+    ld_type = 'p_to_zip'
+
+    # --ld_mult
+    # ld_mult = 0.5 / 0.7
+    # ld_mult = 0.6 / 0.7
+    ld_mult = 1
+    # ld_mult = 0.8 / 0.7
+    # ld_mult = 0.9 / 0.7
+    # ld_mult = 1.0 / 0.7
+    # ld_mult = 1.1 / 0.7
+    # ld_mult = 1.2 / 0.7
+
+    # --PF
+    p_pf = 0.9
+    i_pf = 0.9
+    z_pf = 0.9
+
+    # --ZIP Percentages
+    p_pct = 1 / 3
+    i_pct = 1 / 3
+    z_pct = 1.0 - p_pct - i_pct
+
+    # == Files
+    triplex_node_glm_path_fn = r"triplex_nodes.glm"
+    adj_triplex_node_glm_path_fn = fr"triplex_nodes_{round(ld_mult * 100)}_{ld_type}.glm"
+
+    # ==Test & Demo
+    p = GlmParser()
+
+    p.add_triplex_loads(triplex_node_glm_path_fn, adj_triplex_node_glm_path_fn, ld_mult, ld_type,
+                        p_pf, i_pf, z_pf, p_pct, i_pct, z_pct)
 
 
 if __name__ == "__main__":
@@ -1085,4 +1245,6 @@ if __name__ == "__main__":
 
     # test_adjust_triplex_nodes()
 
-    test_add_parallel_cables()
+    # test_add_parallel_cables()
+
+    test_add_triplex_loads()
