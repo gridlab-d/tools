@@ -680,6 +680,7 @@ class GlmParser:
                             raise ("Name is not defined well.")
                         else:
                             cur_name_str = cur_name_list[0]
+                            cur_name_no_quote_str = cur_name_str.strip('\"')
 
                         cur_phases_list = self.extract_attr('phases', cur_triplex_node_str)
                         if len(cur_phases_list) != 1:
@@ -687,7 +688,7 @@ class GlmParser:
                         else:
                             cur_phases_str = cur_phases_list[0]
 
-                        cur_new_triplex_load_str += f"\tname {prefix_triplex_load_obj_str}{cur_name_str};\n" \
+                        cur_new_triplex_load_str += f'\tname "{prefix_triplex_load_obj_str}{cur_name_no_quote_str}";\n' \
                                                     f"\tparent {cur_name_str};\n" \
                                                     f"\tnominal_voltage {cur_nominal_volt_v};\n" \
                                                     f"\tphases {cur_phases_str};\n" \
