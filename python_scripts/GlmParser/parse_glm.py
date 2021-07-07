@@ -221,12 +221,12 @@ class GlmParser:
             # ==P & Q
             cur_ld_obj_sabc = [""] * 3
             # cur_ld_obj_sabc[0] = re.findall(r'.*constant_power_A\s*(.*?);',cur_obj_str,flags=re.DOTALL)
-            cur_ld_obj_sabc[0] = self.extract_attr("constant_power_A", cur_obj_str)
+            cur_ld_obj_sabc[0] = self.extract_attr("constant_power_AN", cur_obj_str)
             cur_ld_obj_sabc[1] = re.findall(
-                r".*constant_power_B\s*(.*?);", cur_obj_str, flags=re.DOTALL
+                r".*constant_power_BN\s*(.*?);", cur_obj_str, flags=re.DOTALL
             )
             cur_ld_obj_sabc[2] = re.findall(
-                r".*constant_power_C\s*(.*?);", cur_obj_str, flags=re.DOTALL
+                r".*constant_power_CN\s*(.*?);", cur_obj_str, flags=re.DOTALL
             )
             # print(cur_ld_obj_sabc)
             cur_ld_obj_pabc = [0] * 3
@@ -909,7 +909,8 @@ def test_adjust_load_amount():
 
 def test_read_content_load():
     # ==Parameters
-    load_glm_path_fn = r"D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\duke_loads_adj.glm"
+    # load_glm_path_fn = r"D:\UC3_S1_Tap12_[with MG][Clean][LessLoad]\duke_loads_adj.glm"
+    load_glm_path_fn = r"C:\Users\xiej204\OneDrive - PNNL\Desktop\PNNL\Sid\2021-2-25_GLD Model_SC & SV\PGE_Feeder_SV.glm"
 
     # ==Test & Demo
     p = GlmParser()
@@ -1248,4 +1249,6 @@ if __name__ == "__main__":
 
     # test_add_parallel_cables()
 
-    test_add_triplex_loads()
+    # test_add_triplex_loads()
+
+    test_read_content_load()

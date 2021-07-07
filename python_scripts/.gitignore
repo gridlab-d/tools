@@ -1,0 +1,7 @@
+*.csv
+*.glm
+*.player
+
+.idea
+
+scl_pcs.py
