@@ -475,8 +475,9 @@ class GlmParser:
         glm_str += glm_info_str
 
         # --select nodes
-        node_gflw_samp_list = random.sample(node_name_list, num_gflw)
-        node_gfrm_samp_list = random.sample(node_name_list, num_gfrm)
+        node_samp_list = random.sample(node_name_list, num_inv)
+        node_gflw_samp_list = node_samp_list[0:num_gflw]
+        node_gfrm_samp_list = node_samp_list[num_gflw:num_inv]
 
         # --add inv
         # ~~gflw
@@ -1508,11 +1509,24 @@ def test_add_inverter_dyn():
                       '"L3235258"', '"L3215385"', '"L3047289"', '"E192258"', '"E182746"', '"L2916620"',
                       '"regxfmr_190-8581"', '"E182733"', '"293471"', '"L2728247"', '"E203026"', '"regxfmr_190-7361"',
                       '"L2730149"']
-    tar_glm_fpn = r'D:\Inverters\inv_dyn.glm'
+    reg_fm_to_node_list = ['"regxfmr_190-8593"', '"190-8593"', '"regxfmr_190-8581"', '"190-8581"', '"regxfmr_190-7361"',
+                           '"190-7361"']
+    cap_par_node_list = ['"R42246"', '"R42247"', '"R20185"', '"R18242"']
+    tar_glm_fpn = 'D:\Inverters\inv_dyn_{}_{}.glm'
+
+    # ==Prep
+    print(len(node_name_list))
+    for cur_node_str in reg_fm_to_node_list + cap_par_node_list:
+        if cur_node_str in node_name_list:
+            node_name_list.remove(cur_node_str)
+    print(len(node_name_list))
 
     # ==Test & Demo
-    p = GlmParser()
-    p.add_inverter_dyn(tar_glm_fpn, node_name_list, pct_gflw=0.0, num_inv=50)
+    for cur_pct_gflw in [0.0, 0.5, 1.0]:
+        for cur_num_inv in [300, 400, 500]:
+            p = GlmParser()
+            p.add_inverter_dyn(tar_glm_fpn.format(cur_num_inv, cur_pct_gflw), node_name_list,
+                               pct_gflw=cur_pct_gflw, num_inv=cur_num_inv)
 
 
 if __name__ == "__main__":
