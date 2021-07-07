@@ -32,6 +32,12 @@ class GlmParser:
 
         # -- node
         self.all_nodes_list = []
+        self.all_nodes_names_list = []
+        self.all_nodes_phases_dict = {}
+
+        self.all_nodes_3ph_list = []
+        self.all_nodes_names_3ph_list = []
+        self.all_nodes_phases_3ph_dict = []
 
         # -- triplex node
         self.all_triplex_nodes_list = []
@@ -186,6 +192,40 @@ class GlmParser:
                 cur_nd_obj_name_list[0]
             ] = cur_nd_obj_phases_list[0]
 
+    def parse_node_3ph(self, lines_str):
+        """Parse and Package All Node Objects
+        """
+        self.all_nodes_list = self.extract_obj(self.re_glm_syn_obj_node, lines_str)
+
+        self.all_nodes_names_list = []
+        self.all_nodes_phases_dict = {}
+
+        self.all_nodes_names_3ph_list = []
+        self.all_nodes_phases_3ph_dict = {}
+
+        for cur_obj_str in self.all_nodes_list:
+            # ==Names
+            cur_nd_obj_name_list = self.extract_attr("name", cur_obj_str)
+            assert (
+                    len(cur_nd_obj_name_list) == 1
+            ), "Redundancy or missing on the name attribute!"
+            self.all_nodes_names_list.append(cur_nd_obj_name_list[0])
+
+            # ==Phases
+            cur_nd_obj_phases_list = self.extract_attr("phases", cur_obj_str)
+            # print(cur_nd_obj_phase_list)
+            assert (
+                    len(cur_nd_obj_phases_list) == 1
+            ), "Redundancy or missing on the phase attribute!"
+            self.all_nodes_phases_dict[
+                cur_nd_obj_name_list[0]
+            ] = cur_nd_obj_phases_list[0]
+
+            # == 3-Ph Nodes
+            if cur_nd_obj_phases_list[0] == 'ABCN':
+                self.all_nodes_names_3ph_list.append(cur_nd_obj_name_list[0])
+                self.all_nodes_phases_3ph_dict[cur_nd_obj_name_list[0]] = cur_nd_obj_phases_list[0]
+
     def parse_load(self, lines_str):
         """Parse and Package All Load Objects
         """
@@ -332,6 +372,10 @@ class GlmParser:
         str_file_woc = self.import_file(filename)
         self.parse_node(str_file_woc)
 
+    def read_content_node_3ph(self, filename):
+        str_file_woc = self.import_file(filename)
+        self.parse_node_3ph(str_file_woc)
+
     def read_content_load(self, filename):
         """This func is added as an extra layer for flexible extension"""
         str_file_woc = self.import_file(filename)
@@ -351,6 +395,125 @@ class GlmParser:
         str_file_woc = self.import_file(filename)
         self.parse_inv(str_file_woc)
         return self.all_invs_names_list
+
+    def get_inv_glm_str(self, inv_id=1,
+                        par_name_str='""',
+                        inv_p_kw=5.0,
+                        rated_kw=10.0,
+                        inv_name_pref_str="INV",
+                        inv_type_str="GFLW",
+                        inv_ctrl_mode_str="GFL_CURRENT_SOURCE"):
+        inv_temp_f_str = f'' \
+                         f'// ////////////////////////////////// Inverter #{inv_id} M1/////////////////////////////////////////\n' \
+                         f'object inverter_dyn {{\n' \
+                         f'\tname {inv_name_pref_str}_{inv_type_str}_{inv_id};\n' \
+                         f'\tparent {par_name_str};\n' \
+                         f'\tflags DELTAMODE;\n' \
+                         f'\tcontrol_mode {inv_ctrl_mode_str};\n' \
+                         f'\t//control_mode GRID_FORMING;\n' \
+                         f'\t//control_mode GFL_CURRENT_SOURCE;\n' \
+                         f'\t//control_mode GRID_FOLLOWING;\n' \
+                         f'\t//GFL_CURRENT_SOURCE_mode Balanced_Power;\n' \
+                         f'\tgrid_following_mode POSITIVE_SEQUENCE;\n' \
+                         f'\trated_power {rated_kw} kW;	//\n' \
+                         f'\n' \
+                         f'\tPref {inv_p_kw} kW; //1270000; //300000;\n' \
+                         f'\tQref 0.0;\n' \
+                         f'\n' \
+                         f'\tRfilter 0.01;\n' \
+                         f'\tXfilter 0.1;\n' \
+                         f'\n' \
+                         f'\t// Grid-Following Parameters //\n' \
+                         f'\tfrequency_watt false;\n' \
+                         f'\tcheckRampRate_real false;\n' \
+                         f'\tvolt_var false;\n' \
+                         f'\tcheckRampRate_reactive false;\n' \
+                         f'\trampUpRate_real 1.67;  // pu/s\n' \
+                         f'\trampDownRate_real 1.67; // pu/s\n' \
+                         f'\trampUpRate_reactive 1.67; // pu/s\n' \
+                         f'\trampDownRate_reactive 1.67; // pu/s\n' \
+                         f'\tPref_max  1; // per unit\n' \
+                         f'\tkpPLL  200;  // PLL gains\n' \
+                         f'\tkiPLL  1000;\n' \
+                         f'\tkpc  0.05;  // Current loop gains\n' \
+                         f'\tkic 5;\n' \
+                         f'\tF_current 0.5;\n' \
+                         f'\t//Tpf 0.25;   // power response\n' \
+                         f'\t//Tff 0.01;  // frequency measurement filter\n' \
+                         f'\tRp 0.05;  // frequency-watt droop  1%\n' \
+                         f'\tRq 0.05; // volt-var droop 5%\n' \
+                         f'\t//Tqf 0.2;\n' \
+                         f'\t//Tvf 0.05;\n' \
+                         f'\t// End of Grid-Following Parameters //\n' \
+                         f'\n' \
+                         f'\t// Grid-Forming Parameters //\n' \
+                         f'\tmp 3.77;  // 3.77 represents 1% droop.\n' \
+                         f'\tkppmax 3;\n' \
+                         f'\tkipmax 60;\n' \
+                         f'\tPmax 1;\n' \
+                         f'\tPmin -1;\n' \
+                         f'\tmq 0.05; // 0.05 represents 5% droop\n' \
+                         f'\t// End of Grid-Forming Parameters //\n' \
+                         f'}};\n'
+        return inv_temp_f_str
+
+    def add_inverter_dyn(self, tar_glm_fpn, node_name_list,
+                         num_inv=500, pct_gflw=1.0,
+                         inv_gflw_p_kw=5.0, inv_gfrm_p_kw=5.0, rated_kw=10.0,
+                         inv_name_pref_str="INV", inv_type_gflw_str="GFLW", inv_type_gfrm_str="GFRM",
+                         inv_gflw_ctrl_mode_str="GFL_CURRENT_SOURCE", inv_gfrm_ctrl_mode_str="GRID_FORMING"):
+        glm_str = ""
+
+        # --prep
+        num_gflw = round(num_inv * pct_gflw)
+        num_gfrm = abs(num_inv - num_gflw)  # @TODO: simple sanity check
+        num_inv = num_gflw + num_gfrm
+
+        glm_info_str = f"//==Tolta number of inverters: {num_inv} " \
+                       f"(Grid-Following: {num_gflw} [{num_gflw / num_inv * 100}%]) " \
+                       f"(Grid-Forming: {num_gfrm} [{num_gfrm / num_inv * 100}%])==\n\n"
+        glm_str += glm_info_str
+
+        # --select nodes
+        node_gflw_samp_list = random.sample(node_name_list, num_gflw)
+        node_gfrm_samp_list = random.sample(node_name_list, num_gfrm)
+
+        # --add inv
+        # ~~gflw
+        glm_inv_gflw_str = ''
+
+        inv_gflw_id = 1
+        for cur_node_name_str in node_gflw_samp_list:
+            cur_inv_gflw_str = self.get_inv_glm_str(inv_id=inv_gflw_id,
+                                                    par_name_str=cur_node_name_str,
+                                                    inv_p_kw=inv_gflw_p_kw,
+                                                    inv_name_pref_str=inv_name_pref_str,
+                                                    rated_kw=rated_kw,
+                                                    inv_type_str=inv_type_gflw_str,
+                                                    inv_ctrl_mode_str=inv_gflw_ctrl_mode_str)
+            glm_inv_gflw_str += cur_inv_gflw_str
+            inv_gflw_id += 1
+
+        # ~~gfrm
+        glm_inv_gfrm_str = ''
+
+        inv_gfrm_id = 1
+        for cur_node_name_str in node_gfrm_samp_list:
+            cur_inv_gfrm_str = self.get_inv_glm_str(inv_id=inv_gfrm_id,
+                                                    par_name_str=cur_node_name_str,
+                                                    inv_p_kw=inv_gfrm_p_kw,
+                                                    inv_name_pref_str=inv_name_pref_str,
+                                                    rated_kw=rated_kw,
+                                                    inv_type_str=inv_type_gfrm_str,
+                                                    inv_ctrl_mode_str=inv_gfrm_ctrl_mode_str)
+            glm_inv_gfrm_str += cur_inv_gfrm_str
+            inv_gfrm_id += 1
+
+        # ~~merge
+        glm_str += glm_inv_gflw_str + glm_inv_gfrm_str
+
+        # --export glm
+        self.export_glm(tar_glm_fpn, glm_str)
 
     def set_inverters(self, csv_qout_fpn, glm_inv_src_fp, glm_inv_src_fn, glm_inv_dst_fp, glm_inv_dst_fn):
         # ==Step 01: Read csv file
@@ -1229,6 +1392,129 @@ def test_add_triplex_loads():
                         p_pf, i_pf, z_pf, p_pct, i_pct, z_pct)
 
 
+def test_read_content_node_3ph():
+    # ==Parameters
+    main_glm_path_fn = r"D:\Inverters\IEEE_8500node_NR.glm"
+
+    # ==Test & Demo
+    p = GlmParser()
+    p.read_content_node_3ph(main_glm_path_fn)
+
+    print(p.all_nodes_names_list[0:2])
+    print(len(p.all_nodes_list))
+
+    print(p.all_nodes_names_3ph_list[0:2])
+    print(len(p.all_nodes_phases_3ph_dict))
+
+    print(p.all_nodes_names_3ph_list)
+
+
+def test_add_inverter_dyn():
+    # ==Parameters
+    node_name_list = ['"_HVMV_Sub_LSB"', '"D6413567-3_INT"', '"221-311359"', '"221-308718"', '"P862322"',
+                      '"221-242079"', '"M1108398"', '"M1108387"', '"M1089185"', '"P850072"', '"M1089183"', '"M1209774"',
+                      '"198-5320"', '"M1108381"', '"M1186052"', '"P850080"', '"221-311905"', '"221-312488"',
+                      '"P850083"', '"221-311609"', '"M1009651"', '"L2925506"', '"M1069418"', '"L3104136"', '"M1069504"',
+                      '"M1026855"', '"M1069517"', '"M1047497"', '"L2745848"', '"N1136667"', '"L2876798"', '"L3197646"',
+                      '"M1047507"', '"M1069500"', '"M1026858"', '"L3181545"', '"L2991939"', '"N1138603"', '"M1047528"',
+                      '"M1047574"', '"M1047577"', '"M1047592"', '"M1047484"', '"L2822871"', '"L2935549"', '"Q14411"',
+                      '"M1026905"', '"M1047548"', '"L2879070"', '"M1069424"', '"L3143999"', '"N1139260"', '"L2820531"',
+                      '"N1138598"', '"M1047490"', '"L3235254"', '"N1144668"', '"L2766741"', '"M1047486"', '"L2822877"',
+                      '"M1069483"', '"L3103822"', '"M1047483"', '"Q14733"', '"M1047534"', '"N1138599"', '"190-8593"',
+                      '"M1026861"', '"M1069420"', '"L2841632"', '"M1069311"', '"L3010560"', '"196-29519"', '"M1069350"',
+                      '"N1136666"', '"M1026896"', '"M1026854"', '"L3120484"', '"N1138604"', '"N1138607"', '"M1069514"',
+                      '"M1069382"', '"L3066815"', '"M1047568"', '"L3160109"', '"Q16642_CAP"', '"N1136657"',
+                      '"M1069464"', '"M1069481"', '"M1047480"', '"M3768670"', '"N1136367"', '"L2858166"', '"L3235257"',
+                      '"M1047552"', '"M1069468"', '"M1069417"', '"L3216367"', '"M1069461"', '"L3122821"', '"M1026830"',
+                      '"M1069515"', '"L3159448"', '"M1026902"', '"M1047522"', '"Q14413"', '"L2673308"', '"M1069419"',
+                      '"L2766749"', '"N1137992"', '"196-29520"', '"M1026852"', '"M1026872"', '"L2822872"', '"L3125349"',
+                      '"M1069376"', '"M3763619"', '"L2691967"', '"M1069438"', '"M1047485"', '"N1136669"', '"R42246"',
+                      '"M1047558"', '"M1026886"', '"M1047526"', '"L3216345"', '"M4113347"', '"N1136663"', '"M1047550"',
+                      '"M4277837"', '"M1069457"', '"M1026851"', '"M1069411"', '"P827525"', '"M1069428"', '"L2726973"',
+                      '"N1138597"', '"M1047521"', '"M1186065"', '"M1026808"', '"M1026744"', '"M1026690"', '"L3139366"',
+                      '"M1026709"', '"M1026997"', '"N1140521"', '"M1026769"', '"M1026807"', '"M1026970"', '"L2879078"',
+                      '"M1027000"', '"M1026960"', '"M1026701"', '"M4362177"', '"M1026697"', '"M1026984"', '"M1089143"',
+                      '"M1026726"', '"L3048221"', '"M1026702"', '"N1140817"', '"L3254237"', '"M1026977"', '"M1026681"',
+                      '"M1026708"', '"M1089145"', '"L2851933"', '"L3254217"', '"N1140828"', '"M3763624"', '"M1026978"',
+                      '"M1026986"', '"M1026706"', '"L3207907"', '"M1186061"', '"M1026979"', '"P829977"', '"L3232902"',
+                      '"M1108490"', '"M1069549"', '"E182729"', '"M1125960"', '"L2842383"', '"M1166376"', '"M1209772"',
+                      '"N1142100"', '"L3067478"', '"M1069496"', '"R18245"', '"M1069564"', '"N1134480"', '"M1125934"',
+                      '"M1069556"', '"L2973791"', '"M1209788"', '"N1136366"', '"M1125990"', '"Q14734"', '"M1209787"',
+                      '"M1125994"', '"L3030197"', '"E206217"', '"M1069499"', '"M1142860"', '"L2786266"', '"M1089215"',
+                      '"M1209797"', '"M1069503"', '"M1069509"', '"N1142099"', '"M1125952"', '"L3081380"', '"E183493"',
+                      '"M1089203"', '"L2973833"', '"N1136363"', '"L2730163"', '"M1108534"', '"M1166373"', '"M1125962"',
+                      '"M1209791"', '"M1125917"', '"M1125914"', '"E206211"', '"M1089197"', '"L2767341"', '"M1166374"',
+                      '"M1142843"', '"R20703"', '"L2692655"', '"M1125919"', '"L3123509"', '"M1125987"', '"M1108500"',
+                      '"M1142875"', '"M1142828"', '"M1149235"', '"N1134478"', '"Q1301"', '"M1108315"', '"N1142103"',
+                      '"M1142818"', '"M1186064"', '"L2955047"', '"M1166368"', '"L3179650"', '"M1166375"', '"M1149236"',
+                      '"M1125902"', '"M1142863"', '"M1209805"', '"L3104830"', '"M1142865"', '"M3032977"', '"L3123452"',
+                      '"M1209776"', '"M1125997"', '"M1125944"', '"L2674047"', '"R20185"', '"M1125968"', '"L2748144"',
+                      '"M1125947"', '"M1186067"', '"N1136365"', '"M1089202"', '"L3030204"', '"L2992624"', '"196-31070"',
+                      '"M1069495"', '"L3179646"', '"M1069513"', '"190-8581"', '"M1142839"', '"M1149233"', '"L3214069"',
+                      '"M1108493"', '"L2823611"', '"M3032980"', '"E184626"', '"M1186063"', '"N1134476"', '"M1209775"',
+                      '"L3118855"', '"N1136354"', '"M1142869"', '"Q16483_CAP"', '"L2933135"', '"L2955074"', '"E183473"',
+                      '"L2955077"', '"N1134475"', '"M1089213"', '"M1108311"', '"M1166377"', '"M1089201"', '"M1142874"',
+                      '"L3160098"', '"L3066814"', '"M1125989"', '"M1069519"', '"M1108526"', '"M1108535"', '"E192201"',
+                      '"M1089196"', '"M1089198"', '"R42247"', '"M1125969"', '"M1186072"', '"L2859403"', '"M1142832"',
+                      '"L2917328"', '"M1209790"', '"N1142104"', '"M1069518"', '"L2861218"', '"N1134477"', '"L2879773"',
+                      '"M1166366"', '"M1142851"', '"L3142049"', '"M1089199"', '"L2730106"', '"L3231255"', '"M1069498"',
+                      '"L3030199"', '"M1069516"', '"L3160872"', '"L2766738"', '"L2692633"', '"M1125976"', '"L2955081"',
+                      '"M1108484"', '"226-23751"', '"E193509"', '"L2842384"', '"L2823592_CAP"', '"L3214071"',
+                      '"M1069497"', '"M1108298"', '"M1142819"', '"N1136356"', '"M1069533"', '"N1134479"', '"M1142868"',
+                      '"M1069505"', '"M1108529"', '"N1134474"', '"M1108532"', '"L2674027"', '"L2711226"', '"M1209800"',
+                      '"M4122658"', '"M1108505"', '"M1142871"', '"N1144663"', '"M1089207"', '"L3160865"', '"M1209807"',
+                      '"HVMV_Sub_48332"', '"M1209817"', '"L2801909"', '"M1209811"', '"E192860"', '"M1209814"',
+                      '"L3048965"', '"L2804256"', '"M1026954"', '"M1027002"', '"M1027039"', '"M1026927"', '"M1027011"',
+                      '"M1026926"', '"L2916608"', '"M1026950"', '"M1026907"', '"L2673313"', '"196-29518"', '"M1027013"',
+                      '"M1027023"', '"M1026920"', '"L3122816"', '"M1026915"', '"L3160103"', '"M1027043"', '"L3254213"',
+                      '"M1089141"', '"M1026329"', '"M1142821"', '"L2973155"', '"E183472"', '"L3784018"', '"L3139121"',
+                      '"M1047593"', '"L2841633"', '"N1136028"', '"N1136996"', '"N1137986"', '"M1047615"', '"L3216368"',
+                      '"N1136671"', '"M1069154"', '"M1069156"', '"M1026797"', '"N1145954"', '"M1047713"', '"P827580"',
+                      '"L2876814"', '"M1026800"', '"N1136670"', '"M1047325"', '"M1026724"', '"P827514"', '"N1140823"',
+                      '"M1142815"', '"L2766718"', '"M1047572"', '"M1047300"', '"M1047303"', '"M1047580"', '"R18243"',
+                      '"196-36167"', '"M1026891"', '"L2860491"', '"N1137005"', '"L3027157"', '"196-35813"',
+                      '"M1142814"', '"M1047737"', '"L3216123"', '"L2691954"', '"M1026760"', '"L2841635"', '"L3010556"',
+                      '"L2841621"', '"M1108295"', '"M1026357"', '"L3122849"', '"L3235275"', '"M1026866"', '"L2895449"',
+                      '"M1026354"', '"L2763153"', '"E182732"', '"N1136658"', '"L3254218"', '"N1140825"', '"N1139552"',
+                      '"M1026876"', '"N1140519"', '"L3085398"', '"L2689691"', '"M1047503"', '"L3029498"', '"P828362"',
+                      '"P827527"', '"M1047293"', '"M1047515"', '"M1009763"', '"L3160102"', '"L2860490"', '"M1026844"',
+                      '"M1047513"', '"M1047732"', '"L2896685"', '"M1047339"', '"M1108395"', '"M1026829"', '"N1140827"',
+                      '"M1026330"', '"L2991914"', '"F739845"', '"L2822869"', '"M1047720"', '"M1026700"', '"M1026356"',
+                      '"M1026796"', '"M1047299"', '"M1026834"', '"M1108286"', '"L3254238"', '"Q14412"', '"L2897780"',
+                      '"M1069155"', '"R18242"', '"L3027116"', '"M1009650"', '"M1009770"', '"M1089131"', '"R18241"',
+                      '"M1026795"', '"N1140818"', '"L3029502"', '"M1026695"', '"L2936271"', '"L2897777"', '"L3104125"',
+                      '"L2673346"', '"L2933164"', '"E182748"', '"M1047316"', '"M1026786"', '"M1089118"', '"L2688692"',
+                      '"L2973167"', '"E206209"', '"N1139551"', '"M1089115"', '"Q14404"', '"M1047724"', '"L2876797"',
+                      '"E182724"', '"M1026785"', '"M1089120"', '"L3179678"', '"M1069136"', '"L3048206"', '"L3216370"',
+                      '"M1047312"', '"L2936279"', '"M1069169"', '"190-7361"', '"M1089119"', '"L3235256"', '"L2688693"',
+                      '"M1047292"', '"M1069175"', '"M1047309"', '"M1026774"', '"L3160107"', '"N1144665"', '"N1139547"',
+                      '"M1026347"', '"L3235255"', '"N1139541"', '"N1137960"', '"M1047722"', '"M1026780"', '"M1026783"',
+                      '"P829965"', '"L2804249"', '"N1140819"', '"M1047324"', '"L3197630"', '"L3011298"', '"M1047649"',
+                      '"L2822866"', '"L2691952"', '"L2952003"', '"M1009784"', '"L2973162"', '"M1047346"', '"L2898495"',
+                      '"L3104134"', '"M1069184"', '"M1009807"', '"M1026333"', '"M1026670"', '"M1047345"', '"L2991922"',
+                      '"M1026655"', '"L2673319"', '"Q14414"', '"M1026331"', '"M3036170"', '"M1026662"', '"M1026658"',
+                      '"M1009805"', '"M1069189"', '"P901945"', '"M1047699"', '"L2767340"', '"M1069135"', '"L2989566"',
+                      '"L2973153"', '"M1108378"', '"M1089112"', '"M1047688"', '"L2935554"', '"M1026824"', '"M1125988"',
+                      '"M1026341"', '"N1136998"', '"M1047672"', '"M1047669"', '"L3195356"', '"M1108380"', '"M1108379"',
+                      '"D6023352-1_INT"', '"D6198039-1_INT"', '"D5534969-2_INT"', '"D6049825-1_INT"',
+                      '"D5958866-1_INT"', '"D5860423-3_INT"', '"D5513564-1_INT"', '"D6138608-3_INT"',
+                      '"D5587291-3_INT"', '"D5535139-1_INT"', '"D6290228-6_INT"', '"D6108141-1_INT"',
+                      '"D5534970-1_INT"', '"D5710794-3_INT"', '"D5799561-2_INT"', '"D5861005-2_INT"',
+                      '"D5926308-3_INT"', '"D5867591-1_INT"', '"D5563942-4_INT"', '"D5956499-2_INT"',
+                      '"D5835167-6_INT"', '"D5502543-2_INT"', '"D5686080-1_INT"', '"D5682346-3_INT"', '"M3763618"',
+                      '"M1027055"', '"M3037441"', '"M1047763"', '"M1047566"', '"Q16642"', '"L2823592"', '"M1142810"',
+                      '"M1026328"', '"M3037449"', '"Q16483"', '"L3234149"', '"L2803199"', '"L3011293"', '"L2990826"',
+                      '"L3215203"', '"L2915542"', '"regxfmr_190-8593"', '"M1069310"', '"L2814529"', '"L2729414"',
+                      '"L3235258"', '"L3215385"', '"L3047289"', '"E192258"', '"E182746"', '"L2916620"',
+                      '"regxfmr_190-8581"', '"E182733"', '"293471"', '"L2728247"', '"E203026"', '"regxfmr_190-7361"',
+                      '"L2730149"']
+    tar_glm_fpn = r'D:\Inverters\inv_dyn.glm'
+
+    # ==Test & Demo
+    p = GlmParser()
+    p.add_inverter_dyn(tar_glm_fpn, node_name_list, pct_gflw=0.0, num_inv=50)
+
+
 if __name__ == "__main__":
     # test_add_ufls_gfas()
     # test_separate_load_objs()
@@ -1251,4 +1537,8 @@ if __name__ == "__main__":
 
     # test_add_triplex_loads()
 
-    test_read_content_load()
+    # test_read_content_load()
+
+    # test_read_content_node_3ph()
+
+    test_add_inverter_dyn()
