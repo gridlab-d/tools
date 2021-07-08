@@ -1512,11 +1512,12 @@ def test_add_inverter_dyn():
     reg_fm_to_node_list = ['"regxfmr_190-8593"', '"190-8593"', '"regxfmr_190-8581"', '"190-8581"', '"regxfmr_190-7361"',
                            '"190-7361"']
     cap_par_node_list = ['"R42246"', '"R42247"', '"R20185"', '"R18242"']
+    swing_node_list = ['"_HVMV_Sub_LSB"']
     tar_glm_fpn = 'D:\Inverters\inv_dyn_{}_{}.glm'
 
     # ==Prep
     print(len(node_name_list))
-    for cur_node_str in reg_fm_to_node_list + cap_par_node_list:
+    for cur_node_str in reg_fm_to_node_list + cap_par_node_list + swing_node_list:
         if cur_node_str in node_name_list:
             node_name_list.remove(cur_node_str)
     print(len(node_name_list))
