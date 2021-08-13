@@ -5,14 +5,21 @@
 # Email: jing.xie@pnnl.gov
 # ***************************************
 
-import re
-import os.path
 import csv
+import datetime
+import json
 import math
-
-import random
-
+import os.path
+import pathlib
 import pickle
+import random
+import re
+
+# ==Constant
+PHASE_STR_LIST = ['A', 'B', 'C']
+DELTA_STR_LIST = ['B', 'C', 'A']
+PHASE_US_STR_LIST = ['_A', '_B', '_C']
+JSON_IND_LIST = [2, 4, 6]
 
 
 class GlmParser:
@@ -259,16 +266,15 @@ class GlmParser:
             ] = cur_ld_obj_phases_list[0]
 
             # ==P & Q
-            cur_ld_obj_sabc = [""] * 3
-            # cur_ld_obj_sabc[0] = re.findall(r'.*constant_power_A\s*(.*?);',cur_obj_str,flags=re.DOTALL)
-            cur_ld_obj_sabc[0] = self.extract_attr("constant_power_AN", cur_obj_str)
-            cur_ld_obj_sabc[1] = re.findall(
-                r".*constant_power_BN\s*(.*?);", cur_obj_str, flags=re.DOTALL
-            )
-            cur_ld_obj_sabc[2] = re.findall(
-                r".*constant_power_CN\s*(.*?);", cur_obj_str, flags=re.DOTALL
-            )
-            # print(cur_ld_obj_sabc)
+            cur_ld_obj_sabc = []
+            for cur_ph_str, cur_delta_str in zip(PHASE_STR_LIST, DELTA_STR_LIST):
+                cp_pha = self.extract_attr(f"constant_power_{cur_ph_str}N", cur_obj_str)
+                if not cp_pha:
+                    cp_pha = self.extract_attr(f"constant_power_{cur_ph_str}{cur_delta_str}", cur_obj_str)
+                    if not cp_pha:
+                        cp_pha = self.extract_attr(f"constant_power_{cur_ph_str}", cur_obj_str)
+                cur_ld_obj_sabc.append(cp_pha)
+
             cur_ld_obj_pabc = [0] * 3
             cur_ld_obj_qabc = [0] * 3
             for cur_ite in range(len(cur_ld_obj_sabc)):
@@ -1004,6 +1010,315 @@ class GlmParser:
         # == Step 04: Export & save to a file
         self.export_glm(adj_triplex_node_glm_path_fn, output_adj_triplex_nodes_str)
 
+    def conv_load_to_zip(self, load_glm_fp, load_glm_fn, ld_mult, ld_type,
+                         p_pf=-2.0, i_pf=-2.0, z_pf=-2.0, p_pct=1.0, i_pct=0.0, z_pct=0.0,
+                         macro_flag=False):
+
+        # == Step 00: Prep
+        zip_glm_fp = load_glm_fp
+        load_glm_fn_pl = pathlib.Path(load_glm_fn)
+        zip_glm_fn = f"{load_glm_fn_pl.stem}_Load_ZIP{load_glm_fn_pl.suffix}"
+
+        load_glm_fpn = pathlib.Path(load_glm_fp) / load_glm_fn_pl
+        zip_glm_fpn = pathlib.Path(zip_glm_fp) / zip_glm_fn
+
+        # == Step 01: Read the contents of triplex node from a glm file
+        self.read_content_load(load_glm_fpn)
+
+        # == Step 02: Display loading info
+        info_ratio_str = f"Ratio (of new to original loading): {ld_mult}"
+        print(info_ratio_str)
+
+        num_load_obj_in_glm = len(self.all_loads_list)
+        info_num_glm_str = f"Number of Load Objects in this .glm file: {num_load_obj_in_glm}"
+        print(info_num_glm_str)
+
+        total_p_w = self.all_loads_p_sum
+        total_q_var = self.all_loads_q_sum
+        info_total_adj_load_str = f"Total Load (adjusted): {ld_mult * total_p_w / 1e3} (kW), {ld_mult * total_q_var / 1e3} (kVAR)"
+        info_total_ori_load_str = f"Total Load (original): {total_p_w / 1e3} (kW), {total_q_var / 1e3} (kVAR)"
+        print(info_total_adj_load_str)
+        print(info_total_ori_load_str)
+
+        # == Step 03: Adjust the load type and amount
+        self.all_adj_ziploads_list = []
+        output_adj_ziploads_str = f"//==Converted from {load_glm_fn} (@{datetime.datetime.now()})\n\n" \
+                                  f"//==Load Objects Converted into ZIP Format\n" \
+                                  f"// {info_num_glm_str}\n" \
+                                  f"// {info_ratio_str}\n" \
+                                  f"// {info_total_adj_load_str}\n" \
+                                  f"// {info_total_ori_load_str}\n\n"
+
+        for cur_obj_str in self.all_loads_list:
+            cur_zipload_str = self.get_zipload_str(cur_obj_str, ld_mult, ld_type, p_pf, i_pf, z_pf, p_pct, i_pct, z_pct,
+                                                   macro_flag=macro_flag)
+            self.all_adj_ziploads_list.append(cur_zipload_str)  # @TODO: not needed
+            output_adj_ziploads_str += self.obj_tpl_str.format("load", cur_zipload_str, "")
+
+        # == Step 04: Export & save to a file
+        self.export_glm(zip_glm_fpn, output_adj_ziploads_str)
+
+    def get_zipload_str(self, cur_load_str, ld_mult, ld_type,
+                        p_pf=-2.0, i_pf=-2.0, z_pf=-2.0, p_pct=1.0, i_pct=0, z_pct=0,
+                        macro_flag=True):
+        # == Step 01: Check the load conversion type
+        if ld_type == 'p_to_zip':
+            ori_power_atts_list = ['constant_power_A', 'constant_power_B', 'constant_power_C']
+            new_power_atts_list = ['_A', '_B', '_C']
+        else:
+            raise (f"The load type defined in 'ld_type' is not supported yet!")
+
+        if macro_flag:
+            cur_p_pct = '${LD_Y_P_F}'  # default to be Y here
+            cur_i_pct = '${LD_Y_I_F}'
+            cur_z_pct = '${LD_Y_Z_F}'
+            cur_load_scalar = 'load_scalar.k*'
+        else:
+            cur_p_pct = p_pct
+            cur_i_pct = i_pct
+            cur_z_pct = z_pct
+            cur_load_scalar = ''
+
+        # == Step 02: Update/Adjust
+        cur_new_zipload_str = ''
+        cur_delta_flag = False
+        for cur_ori_power_att_str, cur_new_power_att_str, cur_delta_str in \
+                zip(ori_power_atts_list, new_power_atts_list, DELTA_STR_LIST):
+
+            cur_ph_s_lt = self.extract_attr(cur_ori_power_att_str + "N", cur_load_str)
+            if not cur_ph_s_lt:
+                cur_ph_s_lt = self.extract_attr(cur_ori_power_att_str + cur_delta_str, cur_load_str)
+                if not cur_ph_s_lt:
+                    cur_ph_s_lt = self.extract_attr(cur_ori_power_att_str, cur_load_str)
+                else:
+                    cur_delta_flag = True
+
+            if cur_ph_s_lt:
+                cur_ph_p_w = complex(cur_ph_s_lt[0]).real
+                cur_ph_q_var = complex(cur_ph_s_lt[0]).imag
+
+                new_ph_p_w = ld_mult * cur_ph_p_w
+                new_ph_q_var = ld_mult * cur_ph_q_var
+
+                new_s_abs_w = math.sqrt(new_ph_p_w ** 2 + new_ph_q_var ** 2)
+                if new_s_abs_w == 0:
+                    new_ph_pf = 1.0
+                else:
+                    new_ph_pf = new_ph_p_w / new_s_abs_w
+
+                # --adjust pf as needed
+                if p_pf < 0 or p_pf > 1:
+                    cur_p_pf = new_ph_pf
+                else:
+                    cur_p_pf = p_pf
+                if i_pf < 0 or i_pf > 1:
+                    cur_i_pf = new_ph_pf
+                else:
+                    cur_i_pf = i_pf
+                if z_pf < 0 or z_pf > 1:
+                    cur_z_pf = new_ph_pf
+                else:
+                    cur_z_pf = z_pf
+
+                # --zipload str
+                if ld_type == 'p_to_zip':
+                    new_ph_s_str = ""
+
+                    # -- name, phases, parent
+                    if not cur_new_zipload_str:
+                        cur_name_list = self.extract_attr('name', cur_load_str)
+                        if len(cur_name_list) != 1:
+                            raise ("Name is not defined well.")
+                        else:
+                            cur_name_str = cur_name_list[0]
+                            cur_name_no_quote_str = cur_name_str.strip('\"')
+
+                        cur_par_list = self.extract_attr('parent', cur_load_str)
+                        if len(cur_par_list) != 1:
+                            raise ("Parent is not defined well.")
+                        else:
+                            cur_par_str = cur_par_list[0]
+
+                        cur_phases_list = self.extract_attr('phases', cur_load_str)
+                        if len(cur_phases_list) != 1:
+                            raise ("Phases attribute is not defined well.")
+                        else:
+                            cur_phases_str = cur_phases_list[0]
+                        if cur_delta_flag:
+                            cur_phases_str = "ABCD"  # @TODO: this should be adjusted to be flexible
+                            if macro_flag:
+                                cur_p_pct = '${LD_D_P_F}'
+                                cur_i_pct = '${LD_D_I_F}'
+                                cur_z_pct = '${LD_D_Z_F}'
+
+                        cur_nominal_volt_list = self.extract_attr('nominal_voltage', cur_load_str)
+                        if len(cur_nominal_volt_list) != 1:
+                            # raise ("Nomianl voltage is not defined well.")
+                            cur_nominal_volt = False
+                            cur_nominal_volt_v = -1
+                        else:
+                            cur_nominal_volt = True
+                            cur_nominal_volt_v = float(cur_nominal_volt_list[0])
+
+                        if cur_nominal_volt:
+                            cur_new_zipload_str += f'\tname "{cur_name_no_quote_str}";\n' \
+                                                   f"\tparent {cur_par_str};\n" \
+                                                   f"\tnominal_voltage {cur_nominal_volt_v};\n" \
+                                                   f"\tphases {cur_phases_str};\n" \
+                                                   f"\n"
+                        else:
+                            cur_new_zipload_str += f'\tname "{cur_name_no_quote_str}";\n' \
+                                                   f"\tparent {cur_par_str};\n" \
+                                                   f"\tphases {cur_phases_str};\n" \
+                                                   f"\n"
+
+                    # -- zip properties
+                    cur_new_zipload_str += f"\tbase_power{cur_new_power_att_str} {cur_load_scalar}{new_s_abs_w};\n" \
+                                           f"\n" \
+                                           f"\tpower_pf{cur_new_power_att_str} {cur_p_pf};\n" \
+                                           f"\tcurrent_pf{cur_new_power_att_str} {cur_i_pf};\n" \
+                                           f"\timpedance_pf{cur_new_power_att_str} {cur_z_pf};\n" \
+                                           f"\n" \
+                                           f"\tpower_fraction{cur_new_power_att_str} {cur_p_pct};\n" \
+                                           f"\tcurrent_fraction{cur_new_power_att_str} {cur_i_pct};\n" \
+                                           f"\timpedance_fraction{cur_new_power_att_str} {cur_z_pct};\n" \
+                                           f"\n"
+
+        return cur_new_zipload_str
+
+    def export_ieee_load_in_zip(self, load_json_fp, load_json_fn, ld_mult, ld_type,
+                                p_pf=-2.0, i_pf=-2.0, z_pf=-2.0, p_pct=1.0, i_pct=0.0, z_pct=0.0,
+                                macro_flag=False, load_prefix_str='load_', nominal_volt_v=4.16e3 / math.sqrt(3)):
+
+        # == Step 00: Prep
+        zip_glm_fp_pl = pathlib.Path(load_json_fp)
+        load_json_fn_pl = pathlib.Path(load_json_fn)
+        zip_glm_fn = f"{load_json_fn_pl.stem}_ZIP_{ld_mult}.glm"
+
+        load_glm_fpn = pathlib.Path(load_json_fp) / pathlib.Path(f"{load_json_fn_pl.stem}.glm")
+
+        load_json_fpn = pathlib.Path(load_json_fp) / load_json_fn_pl
+        zip_glm_fpn = zip_glm_fp_pl / zip_glm_fn
+
+        # == Step 01: Read the dict of loads from the json file
+        f = open(load_json_fpn, "r")
+        json_dict = json.load(f)
+        f.close()
+
+        # == Step 02: Parse the .glm file
+        self.read_content_load(load_glm_fpn)
+        num_load_obj_in_glm = len(self.all_loads_phases_dict)
+
+        # == Step 03: Generate load object in ZIP format
+        if macro_flag:
+            cur_p_pct = '${LD_P_FRAC}'
+            cur_i_pct = '${LD_I_FRAC}'
+            cur_z_pct = '${LD_Z_FRAC}'
+        else:
+            cur_p_pct = p_pct
+            cur_i_pct = i_pct
+            cur_z_pct = z_pct
+
+        total_p_w = 0
+        total_q_var = 0
+        adj_ziploads_str = ''
+        num_load_obj_in_json = len(json_dict['data'])
+        for cur_load_list in json_dict['data']:
+            # -- Accounting
+            total_p_w += sum(cur_load_list[2::2]) * 1e3
+            total_q_var += sum(cur_load_list[3::2]) * 1e3
+
+            # -- Load Object in ZIP
+            cur_new_zipload_str = ''
+
+            cur_load_obj_name_str = f"{load_prefix_str}{cur_load_list[0]}"
+            cur_load_obj_ph_str = self.all_loads_phases_dict[cur_load_obj_name_str]
+
+            cur_new_zipload_str += f'\tname "{cur_load_obj_name_str}";\n' \
+                                   f"\tnominal_voltage {nominal_volt_v};\n" \
+                                   f"\tphases {cur_load_obj_ph_str};\n" \
+                                   f"\n"
+
+            for cur_new_power_att_str, cur_json_ind in zip(PHASE_US_STR_LIST, JSON_IND_LIST):
+                # --
+                cur_ph_p_w = cur_load_list[cur_json_ind] * 1e3
+                cur_ph_q_var = cur_load_list[cur_json_ind + 1] * 1e3
+
+                new_ph_p_w = ld_mult * cur_ph_p_w
+                new_ph_q_var = ld_mult * cur_ph_q_var
+
+                new_s_abs_w = math.sqrt(new_ph_p_w ** 2 + new_ph_q_var ** 2)
+
+                if new_s_abs_w == 0:
+                    new_ph_pf = 1.0
+                else:
+                    new_ph_pf = new_ph_p_w / new_s_abs_w
+
+                # --adjust pf as needed
+                if macro_flag:
+                    cur_p_pf = '${LD_P_PF}'
+                    cur_i_pf = '${LD_I_PF}'
+                    cur_z_pf = '${LD_Z_PF}'
+                else:
+                    if p_pf < 0 or p_pf > 1:
+                        cur_p_pf = new_ph_pf
+                    else:
+                        cur_p_pf = p_pf
+                    if i_pf < 0 or i_pf > 1:
+                        cur_i_pf = new_ph_pf
+                    else:
+                        cur_i_pf = i_pf
+                    if z_pf < 0 or z_pf > 1:
+                        cur_z_pf = new_ph_pf
+                    else:
+                        cur_z_pf = z_pf
+
+                # --
+                cur_new_zipload_str += f"\tbase_power{cur_new_power_att_str} {new_s_abs_w};\n" \
+                                       f"\n" \
+                                       f"\tpower_pf{cur_new_power_att_str} {cur_p_pf};\n" \
+                                       f"\tcurrent_pf{cur_new_power_att_str} {cur_i_pf};\n" \
+                                       f"\timpedance_pf{cur_new_power_att_str} {cur_z_pf};\n" \
+                                       f"\n" \
+                                       f"\tpower_fraction{cur_new_power_att_str} {cur_p_pct};\n" \
+                                       f"\tcurrent_fraction{cur_new_power_att_str} {cur_i_pct};\n" \
+                                       f"\timpedance_fraction{cur_new_power_att_str} {cur_z_pct};\n" \
+                                       f"\n"
+
+            adj_ziploads_str += f"object load {{\n{cur_new_zipload_str}}}\n"
+
+        # == Step 04: Display loading info
+        info_num_glm_str = f"Number of Load Objects in .glm: {num_load_obj_in_glm}"
+        info_num_json_str = f"Number of Load Objects in .json: {num_load_obj_in_json}"
+
+        info_ratio_str = f"Ratio (of new to original loading): {ld_mult}"
+        print(info_ratio_str)
+
+        info_total_adj_load_str = f"Total Load (adjusted): {ld_mult * total_p_w / 1e3} (kW), {ld_mult * total_q_var / 1e3} (kVAR)"
+        info_total_ori_load_str = f"Total Load (original): {total_p_w / 1e3} (kW), {total_q_var / 1e3} (kVAR)"
+        print(info_total_adj_load_str)
+        print(info_total_ori_load_str)
+
+        # == Step 05: Prep the string for export
+        self.all_adj_ziploads_list = []
+        output_adj_ziploads_str = f"//==Load Objects Converted into ZIP Format (@{datetime.datetime.now()})\n" \
+                                  f"// {info_num_glm_str}\n" \
+                                  f"// {info_num_json_str}\n" \
+                                  f"// {info_ratio_str}\n" \
+                                  f"// {info_total_adj_load_str}\n" \
+                                  f"// {info_total_ori_load_str}\n\n"
+        if macro_flag:
+            output_adj_ziploads_str += f'#define LD_P_PF={p_pf}\n' \
+                                       f'#define LD_I_PF={i_pf}\n' \
+                                       f'#define LD_Z_PF={z_pf}\n' \
+                                       f'#define LD_P_FRAC={p_pct}\n' \
+                                       f'#define LD_I_FRAC={i_pct}\n' \
+                                       f'#define LD_Z_FRAC={z_pct}\n\n'
+        output_adj_ziploads_str += adj_ziploads_str
+
+        # == Step 06: Export & save to a file
+        self.export_glm(zip_glm_fpn, output_adj_ziploads_str)
+
 
 def test_add_ufls_gfas():
     # ==Parameters
@@ -1524,10 +1839,70 @@ def test_add_inverter_dyn():
 
     # ==Test & Demo
     for cur_pct_gflw in [0.0, 0.5, 1.0]:
-        for cur_num_inv in [300, 400, 500]:
+        for cur_num_inv in [550]:
             p = GlmParser()
             p.add_inverter_dyn(tar_glm_fpn.format(cur_num_inv, cur_pct_gflw), node_name_list,
                                pct_gflw=cur_pct_gflw, num_inv=cur_num_inv)
+
+
+def test_conv_load_to_zip():
+    # ==Parameters
+    ld_type = 'p_to_zip'
+    ld_mult = 1
+
+    # --PF
+    p_pf = -0.9
+    i_pf = -0.9
+    z_pf = -0.9
+
+    # --ZIP Percentages
+    p_pct = 1.0
+    i_pct = 0.0
+    z_pct = 1.0 - p_pct - i_pct
+
+    # == Files
+    """ SCL """
+    load_glm_fp = r"D:\#Temp\SCL"
+
+    """ CDL """
+    # load_glm_fp = r"D:\#Temp\CDL"
+    # # load_glm_fn = r"CDL_RIV212.glm"
+
+    load_glm_fn_list = list(pathlib.Path(load_glm_fp).glob('*.glm'))
+    for cur_load_glm_fn in load_glm_fn_list:
+        # ==Test & Demo
+        p = GlmParser()
+
+        p.conv_load_to_zip(load_glm_fp, cur_load_glm_fn, ld_mult, ld_type,
+                           p_pf, i_pf, z_pf, p_pct, i_pct, z_pct,
+                           macro_flag=True)
+
+
+def test_export_ieee_load_in_zip():
+    # ==Parameters
+    ld_type = 'p_to_zip'
+    ld_mult = 1
+
+    # --PF
+    p_pf = 0.95
+    i_pf = 0.95
+    z_pf = 0.95
+
+    # --ZIP Percentages
+    p_pct = 1.0
+    i_pct = 0.0
+    z_pct = 1.0 - p_pct - i_pct
+
+    # == Files
+    load_json_fp = r"D:\GLD_IEEE123"
+    load_json_fn = r"ieee123_load.json"
+
+    # ==Test & Demo
+    p = GlmParser()
+
+    p.export_ieee_load_in_zip(load_json_fp, load_json_fn, ld_mult, ld_type,
+                              p_pf, i_pf, z_pf, p_pct, i_pct, z_pct,
+                              macro_flag=True)
 
 
 if __name__ == "__main__":
@@ -1556,4 +1931,8 @@ if __name__ == "__main__":
 
     # test_read_content_node_3ph()
 
-    test_add_inverter_dyn()
+    # test_add_inverter_dyn()
+
+    test_conv_load_to_zip()
+
+    # test_export_ieee_load_in_zip()
