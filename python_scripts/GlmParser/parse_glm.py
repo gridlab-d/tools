@@ -14,6 +14,7 @@ import pathlib
 import pickle
 import random
 import re
+import shutil
 
 # ==Constant
 PHASE_STR_LIST = ['A', 'B', 'C']
@@ -675,6 +676,16 @@ class GlmParser:
         hf_output.write(str_to_glm)
         hf_output.close()
 
+    def create_folder(self, fld_fp, fld_fn):
+        fld_fpn = pathlib.Path(fld_fp) / pathlib.Path(fld_fn)
+        if fld_fpn.is_dir():
+            shutil.rmtree(fld_fpn)
+            print(f"Folder '{fld_fpn}' existed, but has been removed!")
+
+        print(f"Folder '{fld_fpn}' is created!")
+        fld_fpn.mkdir()
+        return fld_fpn
+
     def separate_load_objs(
             self, glm_file_path_fn, output_main_glm_path_fn, output_load_glm_path_fn
     ):
@@ -1321,7 +1332,7 @@ class GlmParser:
 
     def add_dcfc(self, csv_fp, csv_fn, glm_fp, glm_fn,
                  evse_type='L1', evse_name_pref_str='', evse_player_list=[],
-                 random_seed = 22):
+                 random_seed=22):
 
         random.seed(random_seed)
 
@@ -1342,7 +1353,7 @@ class GlmParser:
             total_kw = 0
             ev_load_obj_str = ''
             cur_evse_id = 0
-            total_abc_kw_dict = {'A': 0, 'B': 0, 'C':0}
+            total_abc_kw_dict = {'A': 0, 'B': 0, 'C': 0}
             for cur_row in csv_reader:
                 print(cur_row)
 
@@ -1357,13 +1368,14 @@ class GlmParser:
 
                     total_kw += evse_kw
 
-                    cur_node_name_str = cur_row[2].replace(':', '-').replace(' ', '-').replace('|', '-').replace('.', '-')
+                    cur_node_name_str = cur_row[2].replace(':', '-').replace(' ', '-').replace('|', '-').replace('.',
+                                                                                                                 '-')
                     cur_player_str = random.choice(evse_player_list)
                     cur_phase_str = cur_row[2].split(':')[0]
                     cur_pw_str = ''
                     cur_num_ph = len(cur_phase_str)
                     for cur_ph in cur_phase_str:
-                        total_abc_kw_dict[cur_ph] += evse_kw/cur_num_ph
+                        total_abc_kw_dict[cur_ph] += evse_kw / cur_num_ph
                         cur_pw_str += f"constant_power_{cur_ph}N_real {cur_player_str}.value*{evse_kw / cur_num_ph * 1e3};\n" \
                                       f"constant_power_{cur_ph}N_reac 0.0;\n"
                     cur_pw_str += "}\n\n"
@@ -1381,11 +1393,15 @@ class GlmParser:
         print(f"Total kW of DCFCs on each phase: {total_abc_kw_dict} kW")
 
     def add_evld(self, csv_fp, csv_fn, glm_fp, glm_fn,
+                 evse_profiles_json_fp, evse_profiles_json_fn,
                  evse_type='L1', evse_name_pref_str='', evse_player_list=[],
-                 random_seed = 22):
+                 random_seed=22):
 
         random.seed(random_seed)
 
+        """
+        Part I: Generate Load Objects that Represent the EVSEs
+        """
         # == Step 00: Check EVSE Type
         evse_kw_rd_flag = False
         if evse_type == "L1":
@@ -1403,8 +1419,9 @@ class GlmParser:
             csv_reader = csv.reader(csv_fh)
             next(csv_reader, None)  # skip the headers
 
-            ev_load_obj_str = ''
+            evse_load_obj_str = ''
             cur_evse_id = 0
+            accounting_dict = {}
             for cur_row in csv_reader:
                 print(cur_row)
 
@@ -1413,6 +1430,10 @@ class GlmParser:
                     evse_kw = random.choice([7.0, 19.0])
                 cur_node_name_str = cur_row[1].replace(':', '-').replace(' ', '-').replace('|', '-').replace('.', '-')
                 cur_player_str = random.choice(evse_player_list)
+                if cur_player_str not in accounting_dict.keys():
+                    accounting_dict[cur_player_str] = 1
+                else:
+                    accounting_dict[cur_player_str] += 1
                 cur_phase_str = cur_row[3]
                 cur_pw_str = ''
                 cur_num_ph = len(cur_phase_str)
@@ -1421,15 +1442,81 @@ class GlmParser:
                                   f"constant_power_{cur_ph}N_reac 0.0;\n"
                 cur_pw_str += "}\n\n"
 
-                ev_load_obj_str += f"//--EVSE({evse_type}, {evse_kw} kW) - #{cur_evse_id} [{cur_row[2]} (ft), {cur_row[-1]}]\n" \
-                                   f"object load {{\n" \
-                                   f"name \"{evse_name_pref_str}_{cur_evse_id}\";\n" \
-                                   f"parent \"{cur_node_name_str}\";\n" \
-                                   f"phases {cur_phase_str};\n" \
-                                   f"{cur_pw_str}"
+                evse_load_obj_str += f"//--EVSE({evse_type}, {evse_kw} kW) - #{cur_evse_id} [{cur_row[2]} (ft), {cur_row[-1]}]\n" \
+                                     f"object load {{\n" \
+                                     f"name \"{evse_name_pref_str}_{cur_evse_id}\";\n" \
+                                     f"parent \"{cur_node_name_str}\";\n" \
+                                     f"phases {cur_phase_str};\n" \
+                                     f"{cur_pw_str}"
 
-        glm_fpn = pathlib.Path(glm_fp) / pathlib.Path(glm_fn)
-        self.export_glm(glm_fpn, ev_load_obj_str)
+        # == Step 03: Export .glm File
+        load_glm_fp = glm_fp
+        load_glm_fn = glm_fn.split('.')[0] + '_Load.glm'
+
+        evse_load_obj_str = f"//==Load Objects that Represents the {evse_type} Chargers\n" \
+                            f"//--  Generated from {csv_fn}\n" \
+                            f"//--  ACCOUNTING INFO: {json.dumps(accounting_dict)}\n\n" \
+                            + evse_load_obj_str
+        load_glm_fpn = pathlib.Path(load_glm_fp) / pathlib.Path(load_glm_fn)
+        self.export_glm(load_glm_fpn, evse_load_obj_str)
+
+        """
+        Part II: Generate Player Objects that Represent the Charging Profiles
+        """
+        # == Step 00: Prep
+        player_glm_fp = glm_fp
+        player_glm_fn = glm_fn.split('.')[0] + '_Player.glm'
+
+        evse_player_obj_str = f"//==Players for P & Q Scale Factors of {evse_type} Chargers\n" \
+                              f"//--  Generated for {evse_player_list}\n"
+
+        evse_player_obj_str += 'class player {\n' \
+                               '\tdouble value;\n' \
+                               '}\n'
+
+        # == Step 01: Add Players
+        cur_M_idx = 0
+        for cur_player_str in evse_player_list:
+            cur_M_idx += 1
+            evse_player_obj_str += f'//--Charging Profile #M{cur_M_idx}\n' \
+                                   f'object player {{\n' \
+                                   f'\tname "{cur_player_str}";\n' \
+                                   f'\tfile "{cur_player_str}.player";\n' \
+                                   f'\tloop 1;\n' \
+                                   f'}}\n\n'
+
+        # == Step 02: Export .glm File
+        player_glm_fpn = pathlib.Path(player_glm_fp) / pathlib.Path(player_glm_fn)
+        self.export_glm(player_glm_fpn, evse_player_obj_str)
+
+        """
+        Part III: Generate Player Files of All Charging Profiles
+        """
+        # == Step 00: Prep
+        evse_profiles_json_fpn = pathlib.Path(evse_profiles_json_fp) / pathlib.Path(evse_profiles_json_fn)
+        if not evse_profiles_json_fpn.exists():
+            return
+
+        evse_profiles_dict = json.load(open(evse_profiles_json_fpn, "r"))
+        if not evse_profiles_dict:
+            return
+
+        # == Step 01: Check the Folder
+        fld_fp = glm_fp
+        fld_fn = glm_fn.split('.')[0] + '_Players'
+        fld_fpn = self.create_folder(fld_fp, fld_fn)
+
+        # == Step 02: Export .player File
+        for cur_player_str in evse_player_list:
+            cur_player_fn = f"{cur_player_str}.player"
+            cur_player_fpn = fld_fpn / cur_player_fn
+
+            cur_player_glm_str = ''
+
+            cur_evse_profile_list = random.choice(list(evse_profiles_dict.items()))
+            print(cur_evse_profile_list)
+
+            self.export_glm(cur_player_fpn, cur_player_glm_str)
 
 
 def test_add_ufls_gfas():
@@ -2040,6 +2127,7 @@ def test_add_dcfc():
     p.add_dcfc(csv_fp, csv_fn, glm_fp, glm_fn,
                evse_type=evse_type, evse_name_pref_str=evse_name_pref_str, evse_player_list=evse_player_list)
 
+
 def test_add_evld():
     # ==Parameters
     """
@@ -2048,32 +2136,37 @@ def test_add_evld():
     """
     SV L1
     """
-    # csv_fp = r"D:\PGE EV"
-    # csv_fn = r"PGE_SV_2050_L1_df.csv"
-    # evse_type = 'L1'
-    # evse_name_pref_str = 'load_evse_pge_sv_2050_L1'
-    # evse_player_list = ['pge_sv_p_sf_2050_L1_M1']
-    #
-    # glm_fp = csv_fp
-    # glm_fn = r"PGE_SV_2050_L1.glm"
+    csv_fp = r"D:\PGE EV"
+    csv_fn = r"PGE_SV_2050_L1_df.csv"
+    evse_type = 'L1'
+    evse_name_pref_str = 'load_evse_pge_sv_2050_L1'
+    evse_player_list = [f'pge_sv_p_sf_2050_L1_M{x + 1}' for x in range(4)]
+
+    evse_profiles_json_fp = csv_fp
+    evse_profiles_json_fn = 'ev_dict.json'
+
+    glm_fp = csv_fp
+    glm_fn = r"PGE_SV_2050_L1.glm"
 
     """
     SV L2
     """
-    csv_fp = r"D:\PGE EV"
-    csv_fn = r"PGE_SV_2050_L2_df.csv"
-    evse_type = 'L2'
-    evse_name_pref_str = 'load_evse_pge_sv_2050_L2'
-    evse_player_list = ['pge_sv_p_sf_2050_L2_M1']
-
-    glm_fp = csv_fp
-    glm_fn = r"PGE_SV_2050_L2.glm"
+    # csv_fp = r"D:\PGE EV"
+    # csv_fn = r"PGE_SV_2050_L2_df.csv"
+    # evse_type = 'L2'
+    # evse_name_pref_str = 'load_evse_pge_sv_2050_L2'
+    # evse_player_list = ['pge_sv_p_sf_2050_L2_M1']
+    #
+    # glm_fp = csv_fp
+    # glm_fn = r"PGE_SV_2050_L2.glm"
 
     # ==Test & Demo
     p = GlmParser()
 
     p.add_evld(csv_fp, csv_fn, glm_fp, glm_fn,
+               evse_profiles_json_fp, evse_profiles_json_fn,
                evse_type=evse_type, evse_name_pref_str=evse_name_pref_str, evse_player_list=evse_player_list)
+
 
 if __name__ == "__main__":
     # test_add_ufls_gfas()
@@ -2107,6 +2200,6 @@ if __name__ == "__main__":
 
     # test_export_ieee_load_in_zip()
 
-    # test_add_evld()
+    test_add_evld()
 
-    test_add_dcfc()
+    # test_add_dcfc()
