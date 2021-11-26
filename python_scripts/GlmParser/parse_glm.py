@@ -1319,6 +1319,118 @@ class GlmParser:
         # == Step 06: Export & save to a file
         self.export_glm(zip_glm_fpn, output_adj_ziploads_str)
 
+    def add_dcfc(self, csv_fp, csv_fn, glm_fp, glm_fn,
+                 evse_type='L1', evse_name_pref_str='', evse_player_list=[],
+                 random_seed = 22):
+
+        random.seed(random_seed)
+
+        # == Step 00: Check EVSE Type
+        if evse_type == "DCFC":
+            pass
+        else:
+            raise ("Incorrect DCFC Type!!")
+
+        # == Step 01: Import Data CSV File
+        csv_fpn = pathlib.Path(csv_fp) / pathlib.Path(csv_fn)
+
+        # == Step 02: Generate Load Object for Each EVSE (Electric Vehicle Supply Equipment)
+        with open(csv_fpn) as csv_fh:
+            csv_reader = csv.reader(csv_fh)
+            next(csv_reader, None)  # skip the headers
+
+            total_kw = 0
+            ev_load_obj_str = ''
+            cur_evse_id = 0
+            total_abc_kw_dict = {'A': 0, 'B': 0, 'C':0}
+            for cur_row in csv_reader:
+                print(cur_row)
+
+                cur_evse_id += 1
+
+                cur_dcfc_num = int(cur_row[-1])
+                for cur_dcfc_ite in range(cur_dcfc_num):
+                    cur_dcfc_evse_id = f"{cur_evse_id}-{cur_dcfc_ite}"
+                    evse_kw = float(cur_row[-2])
+                    cur_node_ft = cur_row[-3]
+                    cur_feeder_id = cur_row[1]
+
+                    total_kw += evse_kw
+
+                    cur_node_name_str = cur_row[2].replace(':', '-').replace(' ', '-').replace('|', '-').replace('.', '-')
+                    cur_player_str = random.choice(evse_player_list)
+                    cur_phase_str = cur_row[2].split(':')[0]
+                    cur_pw_str = ''
+                    cur_num_ph = len(cur_phase_str)
+                    for cur_ph in cur_phase_str:
+                        total_abc_kw_dict[cur_ph] += evse_kw/cur_num_ph
+                        cur_pw_str += f"constant_power_{cur_ph}N_real {cur_player_str}.value*{evse_kw / cur_num_ph * 1e3};\n" \
+                                      f"constant_power_{cur_ph}N_reac 0.0;\n"
+                    cur_pw_str += "}\n\n"
+
+                    ev_load_obj_str += f"//--EVSE({cur_feeder_id}, {evse_type}, {evse_kw} kW) - #{cur_dcfc_evse_id} [{cur_node_ft} (ft)]\n" \
+                                       f"object load {{\n" \
+                                       f"name \"{evse_name_pref_str}_{cur_dcfc_evse_id}\";\n" \
+                                       f"parent \"{cur_node_name_str}\";\n" \
+                                       f"phases {cur_phase_str};\n" \
+                                       f"{cur_pw_str}"
+
+        glm_fpn = pathlib.Path(glm_fp) / pathlib.Path(glm_fn)
+        self.export_glm(glm_fpn, ev_load_obj_str)
+        print(f"Total kW of all DCFCs: {total_kw} kW")
+        print(f"Total kW of DCFCs on each phase: {total_abc_kw_dict} kW")
+
+    def add_evld(self, csv_fp, csv_fn, glm_fp, glm_fn,
+                 evse_type='L1', evse_name_pref_str='', evse_player_list=[],
+                 random_seed = 22):
+
+        random.seed(random_seed)
+
+        # == Step 00: Check EVSE Type
+        evse_kw_rd_flag = False
+        if evse_type == "L1":
+            evse_kw = 1.5
+        elif evse_type == "L2":
+            evse_kw_rd_flag = True
+        else:
+            raise ("Incorrect EVSE Type!!")
+
+        # == Step 01: Import Data CSV File
+        csv_fpn = pathlib.Path(csv_fp) / pathlib.Path(csv_fn)
+
+        # == Step 02: Generate Load Object for Each EVSE (Electric Vehicle Supply Equipment)
+        with open(csv_fpn) as csv_fh:
+            csv_reader = csv.reader(csv_fh)
+            next(csv_reader, None)  # skip the headers
+
+            ev_load_obj_str = ''
+            cur_evse_id = 0
+            for cur_row in csv_reader:
+                print(cur_row)
+
+                cur_evse_id += 1
+                if evse_kw_rd_flag:
+                    evse_kw = random.choice([7.0, 19.0])
+                cur_node_name_str = cur_row[1].replace(':', '-').replace(' ', '-').replace('|', '-').replace('.', '-')
+                cur_player_str = random.choice(evse_player_list)
+                cur_phase_str = cur_row[3]
+                cur_pw_str = ''
+                cur_num_ph = len(cur_phase_str)
+                for cur_ph in cur_phase_str:
+                    cur_pw_str += f"constant_power_{cur_ph}N_real {cur_player_str}.value*{evse_kw / cur_num_ph * 1e3};\n" \
+                                  f"constant_power_{cur_ph}N_reac 0.0;\n"
+                cur_pw_str += "}\n\n"
+
+                ev_load_obj_str += f"//--EVSE({evse_type}, {evse_kw} kW) - #{cur_evse_id} [{cur_row[2]} (ft), {cur_row[-1]}]\n" \
+                                   f"object load {{\n" \
+                                   f"name \"{evse_name_pref_str}_{cur_evse_id}\";\n" \
+                                   f"parent \"{cur_node_name_str}\";\n" \
+                                   f"phases {cur_phase_str};\n" \
+                                   f"{cur_pw_str}"
+
+        glm_fpn = pathlib.Path(glm_fp) / pathlib.Path(glm_fn)
+        self.export_glm(glm_fpn, ev_load_obj_str)
+
 
 def test_add_ufls_gfas():
     # ==Parameters
@@ -1905,6 +2017,64 @@ def test_export_ieee_load_in_zip():
                               macro_flag=True)
 
 
+def test_add_dcfc():
+    # ==Parameters
+    """
+    """
+
+    """
+    SV DCFC
+    """
+    csv_fp = r"D:\PGE EV"
+    csv_fn = r"PGE_SV_DCFC_LOAD_DF.csv"
+    evse_type = 'DCFC'
+    evse_name_pref_str = 'load_evse_pge_sv_2050_DCFC'
+    evse_player_list = ['pge_sv_p_sf_2050_DCFC_M1']
+
+    glm_fp = csv_fp
+    glm_fn = r"PGE_SV_2050_DCFC.glm"
+
+    # ==Test & Demo
+    p = GlmParser()
+
+    p.add_dcfc(csv_fp, csv_fn, glm_fp, glm_fn,
+               evse_type=evse_type, evse_name_pref_str=evse_name_pref_str, evse_player_list=evse_player_list)
+
+def test_add_evld():
+    # ==Parameters
+    """
+    """
+
+    """
+    SV L1
+    """
+    # csv_fp = r"D:\PGE EV"
+    # csv_fn = r"PGE_SV_2050_L1_df.csv"
+    # evse_type = 'L1'
+    # evse_name_pref_str = 'load_evse_pge_sv_2050_L1'
+    # evse_player_list = ['pge_sv_p_sf_2050_L1_M1']
+    #
+    # glm_fp = csv_fp
+    # glm_fn = r"PGE_SV_2050_L1.glm"
+
+    """
+    SV L2
+    """
+    csv_fp = r"D:\PGE EV"
+    csv_fn = r"PGE_SV_2050_L2_df.csv"
+    evse_type = 'L2'
+    evse_name_pref_str = 'load_evse_pge_sv_2050_L2'
+    evse_player_list = ['pge_sv_p_sf_2050_L2_M1']
+
+    glm_fp = csv_fp
+    glm_fn = r"PGE_SV_2050_L2.glm"
+
+    # ==Test & Demo
+    p = GlmParser()
+
+    p.add_evld(csv_fp, csv_fn, glm_fp, glm_fn,
+               evse_type=evse_type, evse_name_pref_str=evse_name_pref_str, evse_player_list=evse_player_list)
+
 if __name__ == "__main__":
     # test_add_ufls_gfas()
     # test_separate_load_objs()
@@ -1933,6 +2103,10 @@ if __name__ == "__main__":
 
     # test_add_inverter_dyn()
 
-    test_conv_load_to_zip()
+    # test_conv_load_to_zip()
 
     # test_export_ieee_load_in_zip()
+
+    # test_add_evld()
+
+    test_add_dcfc()
