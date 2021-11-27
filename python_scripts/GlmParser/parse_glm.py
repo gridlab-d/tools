@@ -22,6 +22,10 @@ DELTA_STR_LIST = ['B', 'C', 'A']
 PHASE_US_STR_LIST = ['_A', '_B', '_C']
 JSON_IND_LIST = [2, 4, 6]
 
+"""
+GlmParser
+"""
+
 
 class GlmParser:
     """Parse the .glm file(s) and analysis/export"""
@@ -1331,11 +1335,15 @@ class GlmParser:
         self.export_glm(zip_glm_fpn, output_adj_ziploads_str)
 
     def add_dcfc(self, csv_fp, csv_fn, glm_fp, glm_fn,
+                 evse_profiles_json_fp, evse_profiles_json_fn,
                  evse_type='L1', evse_name_pref_str='', evse_player_list=[],
                  random_seed=22):
 
         random.seed(random_seed)
 
+        """
+        Part I: Generate Load Objects that Represent the EVSEs
+        """
         # == Step 00: Check EVSE Type
         if evse_type == "DCFC":
             pass
@@ -1345,7 +1353,7 @@ class GlmParser:
         # == Step 01: Import Data CSV File
         csv_fpn = pathlib.Path(csv_fp) / pathlib.Path(csv_fn)
 
-        # == Step 02: Generate Load Object for Each EVSE (Electric Vehicle Supply Equipment)
+        # == Step 02: Generate a Load Object for Each DCFC
         with open(csv_fpn) as csv_fh:
             csv_reader = csv.reader(csv_fh)
             next(csv_reader, None)  # skip the headers
@@ -1354,9 +1362,10 @@ class GlmParser:
             ev_load_obj_str = ''
             cur_evse_id = 0
             total_abc_kw_dict = {'A': 0, 'B': 0, 'C': 0}
+            cur_player_ite = 0
+            player_kw_dict = {}
             for cur_row in csv_reader:
-                print(cur_row)
-
+                # print(cur_row)
                 cur_evse_id += 1
 
                 cur_dcfc_num = int(cur_row[-1])
@@ -1368,9 +1377,19 @@ class GlmParser:
 
                     total_kw += evse_kw
 
-                    cur_node_name_str = cur_row[2].replace(':', '-').replace(' ', '-').replace('|', '-').replace('.',
-                                                                                                                 '-')
-                    cur_player_str = random.choice(evse_player_list)
+                    cur_node_name_str = cur_row[2].replace(':', '-').replace(' ', '-'). \
+                        replace('|', '-').replace('.', '-')
+
+                    if isinstance(evse_player_list, str):
+                        cur_player_ite += 1
+                        cur_player_str = f"{evse_player_list}{cur_player_ite}"
+                    elif isinstance(evse_player_list, list):
+                        cur_player_str = random.choice(evse_player_list)
+                    else:
+                        raise ("Error! Note that evse_player_list must be a list or string!")
+
+                    player_kw_dict[cur_player_str] = evse_kw
+
                     cur_phase_str = cur_row[2].split(':')[0]
                     cur_pw_str = ''
                     cur_num_ph = len(cur_phase_str)
@@ -1387,14 +1406,58 @@ class GlmParser:
                                        f"phases {cur_phase_str};\n" \
                                        f"{cur_pw_str}"
 
-        glm_fpn = pathlib.Path(glm_fp) / pathlib.Path(glm_fn)
-        self.export_glm(glm_fpn, ev_load_obj_str)
-        print(f"Total kW of all DCFCs: {total_kw} kW")
-        print(f"Total kW of DCFCs on each phase: {total_abc_kw_dict} kW")
+        # == Step 03: Export .glm File
+        load_glm_fp = glm_fp
+        load_glm_fn = glm_fn.split('.')[0] + '_Load.glm'
+
+        dcfc_load_obj_str = f"//==Load Objects that Represents the {evse_type} Chargers\n" \
+                            f"//--  Generated from {csv_fn}\n" \
+                            f"//--  Total kW of all DCFCs: {total_kw} kW\n" \
+                            f"//--  Total kW of DCFCs on each phase: {total_abc_kw_dict} kW\n\n" \
+                            + ev_load_obj_str
+
+        load_glm_fpn = pathlib.Path(load_glm_fp) / pathlib.Path(load_glm_fn)
+        self.export_glm(load_glm_fpn, dcfc_load_obj_str)
+
+        """
+        Part II: Generate Player Objects that Represent the Charging Profiles (DCFC)
+        """
+        fld_fn = glm_fn.split('.')[0] + '_Players'
+
+        # == Step 00: Prep
+        player_glm_fp = glm_fp
+        player_glm_fn = glm_fn.split('.')[0] + '_Player.glm'
+
+        evse_player_obj_str = f"//==Players for P & Q Scale Factors of {evse_type} Chargers\n" \
+                              f"//--  Generated for {evse_player_list}\n" \
+                              f"//--  kW INFO: {json.dumps(player_kw_dict)}\n\n"
+
+        evse_player_obj_str += 'class player {\n' \
+                               '\tdouble value;\n' \
+                               '}\n'
+
+        # == Step 01: Add Players
+        cur_M_idx = 0
+        for cur_player_str in evse_player_list:
+            cur_M_idx += 1
+            # cur_player_file_fpn = pathlib.Path(fld_fn) / pathlib.Path(f"{cur_player_str}.player")
+            evse_player_obj_str += f'//--Charging Profile #M{cur_M_idx}\n' \
+                                   f'object player {{\n' \
+                                   f'\tname "{cur_player_str}";\n' \
+                                   f'\tfile "{fld_fn}/{cur_player_str}.player";\n' \
+                                   f'\tloop 1;\n' \
+                                   f'}}\n\n'
+
+        # == Step 02: Export .glm File
+        player_glm_fpn = pathlib.Path(player_glm_fp) / pathlib.Path(player_glm_fn)
+        self.export_glm(player_glm_fpn, evse_player_obj_str)
 
     def add_evld(self, csv_fp, csv_fn, glm_fp, glm_fn,
                  evse_profiles_json_fp, evse_profiles_json_fn,
                  evse_type='L1', evse_name_pref_str='', evse_player_list=[],
+                 evse_player_start_date_str="2020-07-25", evse_player_end_date_str="2020-07-31",
+                 evse_player_first_row_str="2019-12-31 23:00:00 EST, 0.0",  # "2020-07-24 23:00:00 EST, 0.0"
+                 evse_player_tz_str="EST", evse_player_timestep_hour=1,
                  random_seed=22):
 
         random.seed(random_seed)
@@ -1408,6 +1471,9 @@ class GlmParser:
             evse_kw = 1.5
         elif evse_type == "L2":
             evse_kw_rd_flag = True
+            evse_L2_kw_list = [7.0, 19.0]
+            evse_L2_7_player_list = evse_player_list[:len(evse_L2_kw_list) // 2]
+            evse_L2_19_player_list = evse_player_list[len(evse_L2_kw_list) // 2:]
         else:
             raise ("Incorrect EVSE Type!!")
 
@@ -1422,14 +1488,22 @@ class GlmParser:
             evse_load_obj_str = ''
             cur_evse_id = 0
             accounting_dict = {}
+            player_kw_dict = {}
             for cur_row in csv_reader:
-                print(cur_row)
-
+                # print(cur_row)
                 cur_evse_id += 1
+
                 if evse_kw_rd_flag:
-                    evse_kw = random.choice([7.0, 19.0])
+                    evse_kw = random.choice(evse_L2_kw_list)
+                    if evse_kw == evse_L2_kw_list[0]:
+                        cur_player_str = random.choice(evse_L2_7_player_list)
+                    else:
+                        cur_player_str = random.choice(evse_L2_19_player_list)
+                    player_kw_dict[cur_player_str] = evse_kw
+                else:
+                    cur_player_str = random.choice(evse_player_list)
+                    player_kw_dict[cur_player_str] = evse_kw
                 cur_node_name_str = cur_row[1].replace(':', '-').replace(' ', '-').replace('|', '-').replace('.', '-')
-                cur_player_str = random.choice(evse_player_list)
                 if cur_player_str not in accounting_dict.keys():
                     accounting_dict[cur_player_str] = 1
                 else:
@@ -1463,12 +1537,15 @@ class GlmParser:
         """
         Part II: Generate Player Objects that Represent the Charging Profiles
         """
+        fld_fn = glm_fn.split('.')[0] + '_Players'
+
         # == Step 00: Prep
         player_glm_fp = glm_fp
         player_glm_fn = glm_fn.split('.')[0] + '_Player.glm'
 
         evse_player_obj_str = f"//==Players for P & Q Scale Factors of {evse_type} Chargers\n" \
-                              f"//--  Generated for {evse_player_list}\n"
+                              f"//--  Generated for {evse_player_list}\n" \
+                              f"//--  kW INFO: {json.dumps(player_kw_dict)}\n\n"
 
         evse_player_obj_str += 'class player {\n' \
                                '\tdouble value;\n' \
@@ -1478,10 +1555,11 @@ class GlmParser:
         cur_M_idx = 0
         for cur_player_str in evse_player_list:
             cur_M_idx += 1
+            # cur_player_file_fpn = pathlib.Path(fld_fn) / pathlib.Path(f"{cur_player_str}.player")
             evse_player_obj_str += f'//--Charging Profile #M{cur_M_idx}\n' \
                                    f'object player {{\n' \
                                    f'\tname "{cur_player_str}";\n' \
-                                   f'\tfile "{cur_player_str}.player";\n' \
+                                   f'\tfile "{fld_fn}/{cur_player_str}.player";\n' \
                                    f'\tloop 1;\n' \
                                    f'}}\n\n'
 
@@ -1500,23 +1578,122 @@ class GlmParser:
         evse_profiles_dict = json.load(open(evse_profiles_json_fpn, "r"))
         if not evse_profiles_dict:
             return
+        evse_profiles_dict_list = list(evse_profiles_dict.items())
 
         # == Step 01: Check the Folder
         fld_fp = glm_fp
-        fld_fn = glm_fn.split('.')[0] + '_Players'
+        # fld_fn = glm_fn.split('.')[0] + '_Players'
         fld_fpn = self.create_folder(fld_fp, fld_fn)
 
         # == Step 02: Export .player File
-        for cur_player_str in evse_player_list:
+        evse_profiles_dict_list = random.sample(evse_profiles_dict_list, len(evse_player_list))
+        log_player_info_str = ''
+        for cur_player_str, cur_evse_profile_tuple in zip(evse_player_list, evse_profiles_dict_list):
             cur_player_fn = f"{cur_player_str}.player"
             cur_player_fpn = fld_fpn / cur_player_fn
 
             cur_player_glm_str = ''
+            log_player_info_str += f"//=={cur_player_fn}: {cur_evse_profile_tuple}\n"
 
-            cur_evse_profile_list = random.choice(list(evse_profiles_dict.items()))
-            print(cur_evse_profile_list)
+            cur_evse_profile_tuple = cur_evse_profile_tuple[1:]
+            cur_evse_kw = player_kw_dict[cur_player_str]
+            cur_player_glm_str += self.gen_evse_profile_player_str(cur_evse_profile_tuple, cur_evse_kw,
+                                                                   evse_player_start_date_str, evse_player_end_date_str,
+                                                                   evse_player_first_row_str, evse_player_tz_str,
+                                                                   evse_player_timestep_hour)
 
             self.export_glm(cur_player_fpn, cur_player_glm_str)
+
+        # == Step 03: Record a log File
+        log_str = log_player_info_str
+        log_fp = fld_fpn
+        log_fn = glm_fn.split('.')[0] + '_Players_Log.txt'
+        log_fpn = pathlib.Path(log_fp) / pathlib.Path(log_fn)
+        self.export_glm(log_fpn, log_str)
+
+    def gen_evse_profile_player_str(self, cur_evse_profile_tuple, cur_evse_kw,
+                                    evse_player_start_date_str, evse_player_end_date_str,
+                                    evse_player_first_row_str, evse_player_tz_str,
+                                    evse_player_timestep_hour,
+                                    date_format_str="%Y-%m-%d",
+                                    timezone_str="EST",
+                                    num_hours_per_day=24):
+
+        evse_profile_player_str = ''
+        evse_profile_player_str += evse_player_first_row_str + '\n'
+
+        if len(cur_evse_profile_tuple) > 1:
+            raise ("Problematic EVSE Profile Tuple!")
+        else:
+            cur_evse_profile_dict = cur_evse_profile_tuple[0]
+
+        # cur_evse_profile_dict = {"0.0": 36.915, "21.5": 16.05} # For Testing
+        # cur_evse_profile_dict = {"0.0": 6.915, "21.5": 16.05}  # For Testing
+
+        day_on_off_list = [0] * num_hours_per_day
+        for cur_time, cur_kwh in cur_evse_profile_dict.items():
+            cur_hours_ceil = math.ceil(cur_kwh / cur_evse_kw)
+            cur_time_floor = math.floor(float(cur_time))
+
+            # print(cur_evse_profile_dict) # @ For Validation
+            for cur_ite in range(cur_time_floor, cur_time_floor + cur_hours_ceil):
+                # print(cur_ite) # @ For Validation
+                day_on_off_list[cur_ite % num_hours_per_day] += 1
+            # print(day_on_off_list)
+
+        day_on_off_list = self.smooth_day_on_off_list(day_on_off_list, num_hours_per_day=num_hours_per_day)
+        # print(day_on_off_list)
+
+        # == Player File String
+        sd_dt = datetime.datetime.strptime(evse_player_start_date_str, date_format_str)
+        ed_dt = datetime.datetime.strptime(evse_player_end_date_str, date_format_str) + datetime.timedelta(days=1)
+
+        cd_dt = sd_dt
+        cur_clock = 0
+        evse_profile_player_str += f"{cd_dt - datetime.timedelta(hours=1)} {timezone_str}, 0.0\n"
+        while cd_dt < ed_dt:
+            plug_in_int = day_on_off_list[cur_clock % num_hours_per_day]
+
+            cur_str = f"{cd_dt} {timezone_str}, {plug_in_int}\n"
+            evse_profile_player_str += cur_str
+
+            cd_dt += datetime.timedelta(hours=1)
+            cur_clock += 1
+
+        return evse_profile_player_str
+
+    def smooth_day_on_off_list(self, day_on_off_list, num_hours_per_day=24):
+        if sum(day_on_off_list) >= num_hours_per_day:
+            day_on_off_list = [1] * num_hours_per_day
+        elif max(day_on_off_list) == 1:
+            pass
+        else:
+            extra = 0
+            while True:
+                for idx, val in enumerate(day_on_off_list):
+                    if val > 1:
+                        day_on_off_list[idx] = 1
+                        extra += (val - 1)
+                    elif val == 1:
+                        pass
+                    elif (val == 0) and (extra > 0):
+                        day_on_off_list[idx] = 1
+                        extra -= 1
+                    else:
+                        pass
+
+                if extra == 0:
+                    break
+
+        if max(day_on_off_list) > 1:
+            raise ('Function error on "smooth_day_on_off_list()"!')
+
+        return day_on_off_list
+
+
+"""
+Tests
+"""
 
 
 def test_add_ufls_gfas():
@@ -2116,7 +2293,10 @@ def test_add_dcfc():
     csv_fn = r"PGE_SV_DCFC_LOAD_DF.csv"
     evse_type = 'DCFC'
     evse_name_pref_str = 'load_evse_pge_sv_2050_DCFC'
-    evse_player_list = ['pge_sv_p_sf_2050_DCFC_M1']
+    evse_player_list = 'pge_sv_p_sf_2050_DCFC_M'
+
+    evse_profiles_json_fp = csv_fp
+    evse_profiles_json_fn = 'ev_dict.json'
 
     glm_fp = csv_fp
     glm_fn = r"PGE_SV_2050_DCFC.glm"
@@ -2125,6 +2305,7 @@ def test_add_dcfc():
     p = GlmParser()
 
     p.add_dcfc(csv_fp, csv_fn, glm_fp, glm_fn,
+               evse_profiles_json_fp, evse_profiles_json_fn,
                evse_type=evse_type, evse_name_pref_str=evse_name_pref_str, evse_player_list=evse_player_list)
 
 
@@ -2136,29 +2317,40 @@ def test_add_evld():
     """
     SV L1
     """
+    # csv_fp = r"D:\PGE EV"
+    # csv_fn = r"PGE_SV_2050_L1_df.csv"
+    # evse_type = 'L1'
+    # evse_name_pref_str = 'load_evse_pge_sv_2050_L1'
+    # evse_player_list = [f'pge_sv_p_sf_2050_L1_M{x + 1}' for x in range(4)]
+    #
+    # evse_profiles_json_fp = csv_fp
+    # evse_profiles_json_fn = 'ev_dict.json'
+    #
+    # glm_fp = csv_fp
+    # glm_fn = r"PGE_SV_2050_L1.glm"
+
+    """
+    evse_player_start_date_str = "2020-07-25"
+    evse_player_end_date_str = "2020-07-31"
+    evse_player_tz_str = "EST"
+    evse_player_timestep_hour = 1
+    evse_player_first_row_str = "2019-12-31 23:00:00 EST, 1.0"  # "2020-07-24 23:00:00 EST, 0.0"
+    """
+
+    """
+    SV L2
+    """
     csv_fp = r"D:\PGE EV"
-    csv_fn = r"PGE_SV_2050_L1_df.csv"
-    evse_type = 'L1'
-    evse_name_pref_str = 'load_evse_pge_sv_2050_L1'
-    evse_player_list = [f'pge_sv_p_sf_2050_L1_M{x + 1}' for x in range(4)]
+    csv_fn = r"PGE_SV_2050_L2_df.csv"
+    evse_type = 'L2'
+    evse_name_pref_str = 'load_evse_pge_sv_2050_L2'
+    evse_player_list = [f'pge_sv_p_sf_2050_L2_M{x + 1}' for x in range(100)]
 
     evse_profiles_json_fp = csv_fp
     evse_profiles_json_fn = 'ev_dict.json'
 
     glm_fp = csv_fp
-    glm_fn = r"PGE_SV_2050_L1.glm"
-
-    """
-    SV L2
-    """
-    # csv_fp = r"D:\PGE EV"
-    # csv_fn = r"PGE_SV_2050_L2_df.csv"
-    # evse_type = 'L2'
-    # evse_name_pref_str = 'load_evse_pge_sv_2050_L2'
-    # evse_player_list = ['pge_sv_p_sf_2050_L2_M1']
-    #
-    # glm_fp = csv_fp
-    # glm_fn = r"PGE_SV_2050_L2.glm"
+    glm_fn = r"PGE_SV_2050_L2.glm"
 
     # ==Test & Demo
     p = GlmParser()
@@ -2200,6 +2392,6 @@ if __name__ == "__main__":
 
     # test_export_ieee_load_in_zip()
 
-    test_add_evld()
+    # test_add_evld()
 
-    # test_add_dcfc()
+    test_add_dcfc()
