@@ -1640,6 +1640,9 @@ class GlmParser:
         evse_profiles_dict_list = random.sample(evse_profiles_dict_list, len(evse_player_list))
         log_player_info_str = ''
         for cur_player_str, cur_evse_profile_tuple in zip(evse_player_list, evse_profiles_dict_list):
+            if cur_player_str not in player_kw_dict:
+                continue
+
             cur_player_fn = f"{cur_player_str}.player"
             cur_player_fpn = fld_fpn / cur_player_fn
 
@@ -1648,6 +1651,7 @@ class GlmParser:
                                    f"//=={cur_player_fn}: {cur_evse_profile_tuple}\n"
 
             cur_evse_profile_tuple = cur_evse_profile_tuple[1:]
+
             cur_evse_kw = player_kw_dict[cur_player_str]
             cur_player_glm_str += self.gen_evse_profile_player_str(cur_evse_profile_tuple, cur_evse_kw,
                                                                    evse_player_start_date_str, evse_player_end_date_str,
@@ -2400,6 +2404,8 @@ def test_add_evld():
     #
     # glm_fp = csv_fp
     # glm_fn = r"PGE_SV_2050_L1.glm"
+    #
+    # tou_flag = False
 
     """
     evse_player_start_date_str = "2020-07-25"
@@ -2412,19 +2418,53 @@ def test_add_evld():
     """
     SV L2
     """
+    # csv_fp = r"D:\PGE EV"
+    # csv_fn = r"PGE_SV_2050_L2_df.csv"
+    # evse_type = 'L2'
+    # evse_name_pref_str = 'load_evse_pge_sv_2050_L2'
+    # evse_player_list = [f'pge_sv_p_sf_2050_L2_M{x + 1}' for x in range(100)]
+    #
+    # evse_profiles_json_fp = csv_fp
+    # evse_profiles_json_fn = 'ev_dict.json'
+    #
+    # glm_fp = csv_fp
+    # glm_fn = r"PGE_SV_2050_L2.glm"
+    #
+    # tou_flag = False
+
+    """
+    SC L1
+    """
+    # csv_fp = r"D:\PGE EV"
+    # csv_fn = r"PGE_SC_2050_L1_df.csv"
+    # evse_type = 'L1'
+    # evse_name_pref_str = 'load_evse_pge_sc_2050_L1'
+    # evse_player_list = [f'pge_sc_p_sf_2050_L1_M{x + 1}' for x in range(4)]
+    #
+    # evse_profiles_json_fp = csv_fp
+    # evse_profiles_json_fn = 'ev_dict.json'
+    #
+    # glm_fp = csv_fp
+    # glm_fn = r"PGE_SC_2050_L1.glm"
+    #
+    # tou_flag = False
+
+    """
+    SC L2
+    """
     csv_fp = r"D:\PGE EV"
-    csv_fn = r"PGE_SV_2050_L2_df.csv"
+    csv_fn = r"PGE_SC_2050_L2_df.csv"
     evse_type = 'L2'
-    evse_name_pref_str = 'load_evse_pge_sv_2050_L2'
-    evse_player_list = [f'pge_sv_p_sf_2050_L2_M{x + 1}' for x in range(100)]
+    evse_name_pref_str = 'load_evse_pge_sc_2050_L2'
+    evse_player_list = [f'pge_sc_p_sf_2050_L2_M{x + 1}' for x in range(100)]
 
     evse_profiles_json_fp = csv_fp
     evse_profiles_json_fn = 'ev_dict.json'
 
     glm_fp = csv_fp
-    glm_fn = r"PGE_SV_2050_L2.glm"
+    glm_fn = r"PGE_SC_2050_L2.glm"
 
-    tou_flag = True  # default value of the tou_time is 21, i.e., 9 pm
+    tou_flag = False
 
     # ==Test & Demo
     p = GlmParser()
