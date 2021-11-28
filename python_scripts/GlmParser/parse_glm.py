@@ -1337,12 +1337,15 @@ class GlmParser:
     def add_dcfc(self, csv_fp, csv_fn, glm_fp, glm_fn,
                  evse_profiles_json_fp, evse_profiles_json_fn,
                  evse_type='L1', evse_name_pref_str='', evse_player_list=[],
+                 evse_player_start_date_str="2020-07-25", evse_player_end_date_str="2020-07-31",
+                 evse_player_first_row_str="2019-12-31 23:00:00 EST, 0.0",  # "2020-07-24 23:00:00 EST, 0.0"
+                 evse_player_tz_str="EST", evse_player_timestep_hour=1,
                  random_seed=22):
 
         random.seed(random_seed)
 
         """
-        Part I: Generate Load Objects that Represent the EVSEs
+        Part I: Generate Load Objects that Represent the DCFCs
         """
         # == Step 00: Check EVSE Type
         if evse_type == "DCFC":
@@ -1420,7 +1423,7 @@ class GlmParser:
         self.export_glm(load_glm_fpn, dcfc_load_obj_str)
 
         """
-        Part II: Generate Player Objects that Represent the Charging Profiles (DCFC)
+        Part II: Generate Player Objects that Represent the Charging Profiles (DCFCs)
         """
         fld_fn = glm_fn.split('.')[0] + '_Players'
 
@@ -1429,8 +1432,9 @@ class GlmParser:
         player_glm_fn = glm_fn.split('.')[0] + '_Player.glm'
 
         evse_player_obj_str = f"//==Players for P & Q Scale Factors of {evse_type} Chargers\n" \
-                              f"//--  Generated for {evse_player_list}\n" \
-                              f"//--  kW INFO: {json.dumps(player_kw_dict)}\n\n"
+                              f"//--  Generated for {evse_player_list}\n\n"
+        # f"//--  Generated for {evse_player_list}\n" \
+        # f"//--  kW INFO: {json.dumps(player_kw_dict)}\n\n"
 
         evse_player_obj_str += 'class player {\n' \
                                '\tdouble value;\n' \
@@ -1438,7 +1442,7 @@ class GlmParser:
 
         # == Step 01: Add Players
         cur_M_idx = 0
-        for cur_player_str in evse_player_list:
+        for cur_player_str in player_kw_dict.keys():
             cur_M_idx += 1
             # cur_player_file_fpn = pathlib.Path(fld_fn) / pathlib.Path(f"{cur_player_str}.player")
             evse_player_obj_str += f'//--Charging Profile #M{cur_M_idx}\n' \
@@ -1452,12 +1456,59 @@ class GlmParser:
         player_glm_fpn = pathlib.Path(player_glm_fp) / pathlib.Path(player_glm_fn)
         self.export_glm(player_glm_fpn, evse_player_obj_str)
 
+        """
+        Part III: Generate Player Files of All Charging Profiles (DCFCs)
+        """
+        # == Step 00: Prep
+        evse_profiles_json_fpn = pathlib.Path(evse_profiles_json_fp) / pathlib.Path(evse_profiles_json_fn)
+        if not evse_profiles_json_fpn.exists():
+            return
+
+        evse_profiles_dict = json.load(open(evse_profiles_json_fpn, "r"))
+        if not evse_profiles_dict:
+            return
+        evse_profiles_dict_list = list(evse_profiles_dict.items())
+
+        # == Step 01: Check the Folder
+        fld_fp = glm_fp
+        # fld_fn = glm_fn.split('.')[0] + '_Players'
+        fld_fpn = self.create_folder(fld_fp, fld_fn)
+
+        # == Step 02: Export .player File
+        evse_profiles_dict_list = random.sample(evse_profiles_dict_list, len(player_kw_dict.keys()))
+        log_player_info_str = ''
+        for cur_player_str, cur_evse_profile_tuple in zip(player_kw_dict.keys(), evse_profiles_dict_list):
+            cur_player_fn = f"{cur_player_str}.player"
+            cur_player_fpn = fld_fpn / cur_player_fn
+
+            cur_player_glm_str = ''
+            log_player_info_str += f"//=={cur_player_fn}: {cur_evse_profile_tuple}\n"
+
+            cur_evse_profile_tuple = cur_evse_profile_tuple[1:]
+            cur_evse_kw = player_kw_dict[cur_player_str]
+            cur_player_glm_str += self.gen_evse_profile_player_str(cur_evse_profile_tuple, cur_evse_kw,
+                                                                   evse_player_start_date_str, evse_player_end_date_str,
+                                                                   evse_player_first_row_str, evse_player_tz_str,
+                                                                   evse_player_timestep_hour)
+
+            self.export_glm(cur_player_fpn, cur_player_glm_str)
+
+        # == Step 03: Record a log File
+        log_str = log_player_info_str
+        log_fp = fld_fpn
+        log_fn = glm_fn.split('.')[0] + '_Players_Log.txt'
+        log_fpn = pathlib.Path(log_fp) / pathlib.Path(log_fn)
+        self.export_glm(log_fpn, log_str)
+
     def add_evld(self, csv_fp, csv_fn, glm_fp, glm_fn,
                  evse_profiles_json_fp, evse_profiles_json_fn,
                  evse_type='L1', evse_name_pref_str='', evse_player_list=[],
                  evse_player_start_date_str="2020-07-25", evse_player_end_date_str="2020-07-31",
                  evse_player_first_row_str="2019-12-31 23:00:00 EST, 0.0",  # "2020-07-24 23:00:00 EST, 0.0"
                  evse_player_tz_str="EST", evse_player_timestep_hour=1,
+                 tou_flag=False,
+                 tou_time=list(range(4)) + list(range(4, 7)) + list(range(8, 14)) + list(range(22, 24)),
+                 tou_prob=[2.5] * 4 + [0.7] * 3 + [0.3] * 6 + [0.5] * 2,
                  random_seed=22):
 
         random.seed(random_seed)
@@ -1593,14 +1644,17 @@ class GlmParser:
             cur_player_fpn = fld_fpn / cur_player_fn
 
             cur_player_glm_str = ''
-            log_player_info_str += f"//=={cur_player_fn}: {cur_evse_profile_tuple}\n"
+            log_player_info_str += f"//==TOU INFO: tou_flag = {tou_flag}, tou_time = {tou_time}, tou_prob = {tou_prob}\n" \
+                                   f"//=={cur_player_fn}: {cur_evse_profile_tuple}\n"
 
             cur_evse_profile_tuple = cur_evse_profile_tuple[1:]
             cur_evse_kw = player_kw_dict[cur_player_str]
             cur_player_glm_str += self.gen_evse_profile_player_str(cur_evse_profile_tuple, cur_evse_kw,
                                                                    evse_player_start_date_str, evse_player_end_date_str,
                                                                    evse_player_first_row_str, evse_player_tz_str,
-                                                                   evse_player_timestep_hour)
+                                                                   evse_player_timestep_hour,
+                                                                   tou_flag=tou_flag, tou_time=tou_time,
+                                                                   tou_prob=tou_prob)
 
             self.export_glm(cur_player_fpn, cur_player_glm_str)
 
@@ -1617,10 +1671,12 @@ class GlmParser:
                                     evse_player_timestep_hour,
                                     date_format_str="%Y-%m-%d",
                                     timezone_str="EST",
-                                    num_hours_per_day=24):
+                                    num_hours_per_day=24,
+                                    tou_flag=False, tou_time=[22, 0, 2], tou_prob=[0.4, 0.9, 0.9]):
 
         evse_profile_player_str = ''
         evse_profile_player_str += evse_player_first_row_str + '\n'
+        log_str = ''
 
         if len(cur_evse_profile_tuple) > 1:
             raise ("Problematic EVSE Profile Tuple!")
@@ -1631,9 +1687,24 @@ class GlmParser:
         # cur_evse_profile_dict = {"0.0": 6.915, "21.5": 16.05}  # For Testing
 
         day_on_off_list = [0] * num_hours_per_day
+        # tou_time_prob_zip_list = list(zip(tou_time, tou_prob))
         for cur_time, cur_kwh in cur_evse_profile_dict.items():
             cur_hours_ceil = math.ceil(cur_kwh / cur_evse_kw)
             cur_time_floor = math.floor(float(cur_time))
+
+            log_str += f'//== {cur_evse_profile_tuple}\n'
+            log_str += f'//-- cur_time_floor = {cur_time_floor}, cur_hours_ceil = {cur_hours_ceil}\n'
+
+            if tou_flag:  # Move the plug-in time to be after a given hour/clock
+                # cur_tou_time, cur_tou_prob = random.choice(tou_time_prob_zip_list)
+                # if random.random() < cur_tou_prob:
+                #     cur_time_floor = cur_tou_time
+
+                cur_tou_time = random.choices(tou_time, weights=tou_prob)[0]
+                if cur_tou_time >= 0:
+                    cur_time_floor = cur_tou_time
+
+                log_str += f'//-- cur_tou_time = {cur_tou_time}\n'
 
             # print(cur_evse_profile_dict) # @ For Validation
             for cur_ite in range(cur_time_floor, cur_time_floor + cur_hours_ceil):
@@ -1660,6 +1731,7 @@ class GlmParser:
             cd_dt += datetime.timedelta(hours=1)
             cur_clock += 1
 
+        print(log_str)
         return evse_profile_player_str
 
     def smooth_day_on_off_list(self, day_on_off_list, num_hours_per_day=24):
@@ -2352,12 +2424,15 @@ def test_add_evld():
     glm_fp = csv_fp
     glm_fn = r"PGE_SV_2050_L2.glm"
 
+    tou_flag = True  # default value of the tou_time is 21, i.e., 9 pm
+
     # ==Test & Demo
     p = GlmParser()
 
     p.add_evld(csv_fp, csv_fn, glm_fp, glm_fn,
                evse_profiles_json_fp, evse_profiles_json_fn,
-               evse_type=evse_type, evse_name_pref_str=evse_name_pref_str, evse_player_list=evse_player_list)
+               evse_type=evse_type, evse_name_pref_str=evse_name_pref_str, evse_player_list=evse_player_list,
+               tou_flag=tou_flag)
 
 
 if __name__ == "__main__":
@@ -2392,6 +2467,6 @@ if __name__ == "__main__":
 
     # test_export_ieee_load_in_zip()
 
-    # test_add_evld()
+    test_add_evld()
 
-    test_add_dcfc()
+    # test_add_dcfc()
