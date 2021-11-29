@@ -1607,6 +1607,10 @@ class GlmParser:
         for cur_player_str in evse_player_list:
             cur_M_idx += 1
             # cur_player_file_fpn = pathlib.Path(fld_fn) / pathlib.Path(f"{cur_player_str}.player")
+
+            if cur_player_str not in player_kw_dict:
+                continue
+
             evse_player_obj_str += f'//--Charging Profile #M{cur_M_idx}\n' \
                                    f'object player {{\n' \
                                    f'\tname "{cur_player_str}";\n' \
@@ -2365,17 +2369,32 @@ def test_add_dcfc():
     """
     SV DCFC
     """
+    # csv_fp = r"D:\PGE EV"
+    # csv_fn = r"PGE_SV_DCFC_LOAD_DF.csv"
+    # evse_type = 'DCFC'
+    # evse_name_pref_str = 'load_evse_pge_sv_2050_DCFC'
+    # evse_player_list = 'pge_sv_p_sf_2050_DCFC_M'
+    #
+    # evse_profiles_json_fp = csv_fp
+    # evse_profiles_json_fn = 'ev_dict.json'
+    #
+    # glm_fp = csv_fp
+    # glm_fn = r"PGE_SV_2050_DCFC.glm"
+
+    """
+    SC DCFC
+    """
     csv_fp = r"D:\PGE EV"
-    csv_fn = r"PGE_SV_DCFC_LOAD_DF.csv"
+    csv_fn = r"PGE_SC_DCFC_LOAD_DF.csv"
     evse_type = 'DCFC'
-    evse_name_pref_str = 'load_evse_pge_sv_2050_DCFC'
-    evse_player_list = 'pge_sv_p_sf_2050_DCFC_M'
+    evse_name_pref_str = 'load_evse_pge_sc_2050_DCFC'
+    evse_player_list = 'pge_sc_p_sf_2050_DCFC_M'
 
     evse_profiles_json_fp = csv_fp
     evse_profiles_json_fn = 'ev_dict.json'
 
     glm_fp = csv_fp
-    glm_fn = r"PGE_SV_2050_DCFC.glm"
+    glm_fn = r"PGE_SC_2050_DCFC.glm"
 
     # ==Test & Demo
     p = GlmParser()
@@ -2464,7 +2483,9 @@ def test_add_evld():
     glm_fp = csv_fp
     glm_fn = r"PGE_SC_2050_L2.glm"
 
-    tou_flag = False
+    tou_flag = True
+    tou_time = list(range(4)) + list(range(4, 7)) + list(range(8, 14)) + list(range(22, 24))
+    tou_prob = [1.2] * 4 + [0.7] * 3 + [0.3] * 6 + [0.5] * 2
 
     # ==Test & Demo
     p = GlmParser()
@@ -2472,7 +2493,7 @@ def test_add_evld():
     p.add_evld(csv_fp, csv_fn, glm_fp, glm_fn,
                evse_profiles_json_fp, evse_profiles_json_fn,
                evse_type=evse_type, evse_name_pref_str=evse_name_pref_str, evse_player_list=evse_player_list,
-               tou_flag=tou_flag)
+               tou_flag=tou_flag, tou_time=tou_time, tou_prob=tou_prob)
 
 
 if __name__ == "__main__":
@@ -2507,6 +2528,6 @@ if __name__ == "__main__":
 
     # test_export_ieee_load_in_zip()
 
-    test_add_evld()
+    # test_add_evld()
 
-    # test_add_dcfc()
+    test_add_dcfc()
