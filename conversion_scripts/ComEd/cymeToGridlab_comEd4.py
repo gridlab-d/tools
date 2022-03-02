@@ -1174,12 +1174,12 @@ def _readCymOverheadLine(networkDatabase, feederId):
     CYMOVERHEADLINE = { 'name' : None,       # Information structure for each object found in CYMOVERHEADLINE
                           'length' : None,
                           'configuration' : None}
-    overheadbyphase_db = networkDatabase.execute("SELECT DeviceNumber, LineId, Length FROM CYMOVERHEADLINE WHERE NetworkId = '{:s}'".format(feederId)).fetchall()
-    if len(overheadbyphase_db) == 0:
+    overheadline_db = networkDatabase.execute("SELECT DeviceNumber, LineId, Length FROM CYMOVERHEADLINE WHERE NetworkId = '{:s}'".format(feederId)).fetchall()
+    if len(overheadline_db) == 0:
         warnings.warn("No information on LineId and lengths were found in CYMOVERHEADLINE for feeder_id: {:s}.".format(feederId), RuntimeWarning)
     else:
         # Add all phase conductors to the line configuration dictionary.
-        for row in overheadbyphase_db:
+        for row in overheadline_db:
             overheadLineConfiguration = {}
             row.DeviceNumber = _fixName(row.DeviceNumber)
             if row.DeviceNumber not in cymoverheadLine.keys():
