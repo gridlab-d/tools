@@ -1,0 +1,115 @@
+//Simple file to show time-varying voltage and frequency changes
+//generated from the Gen_Phasor_Freq_Mag_Voltages.m MATLAB script.
+
+clock {
+	timezone EST+5EDT;
+	starttime '2000-01-01 0:00:00';
+	stoptime '2000-01-01 0:00:25';
+}
+
+#set profiler=1
+#set double_format=%+.6lg
+#set complex_format=%+.6lg%+.6lg%c
+#set complex_output_format=RECT
+
+//Deltamode declarations - global values
+#set deltamode_timestep=100000000		//100 ms
+#set deltamode_maximumtime=60000000000	//1 minute
+#set deltamode_iteration_limit=10		//Iteration limit
+
+module tape;
+module powerflow {
+	enable_subsecond_models true;
+	deltamode_timestep 10 ms;
+	solver_method NR;
+	all_powerflow_delta true;
+	enable_frequency_dependence true;
+	all_frequency_measure_default SIMPLE;
+}
+
+// Phase Conductor for 601: 556,500 26/7 ACSR
+object overhead_line_conductor {
+	name olc6010;
+	geometric_mean_radius 0.031300;
+	diameter 0.927 in;
+	resistance 0.185900;
+}
+
+// Phase Conductor for 602: 4/0 6/1 ACSR
+object overhead_line_conductor {
+	name olc6020;
+	geometric_mean_radius 0.00814;
+	diameter 0.56 in;
+	resistance 0.592000;
+}
+
+// Overhead line configurations
+object line_spacing {
+	name ls500601;
+	distance_AB 2.5;
+	distance_AC 4.5;
+	distance_BC 7.0;
+	distance_BN 5.656854;
+	distance_AN 4.272002;
+	distance_CN 5.0;
+	distance_AE 28.0;
+	distance_BE 28.0;
+	distance_CE 28.0;
+	distance_NE 24.0;
+}
+
+object line_configuration {
+	name lc601;
+	conductor_A olc6010;
+	conductor_B olc6010;
+	conductor_C olc6010;
+	conductor_N olc6020;
+	spacing ls500601;
+}
+
+
+//File
+object meter {
+	phases ABCN;
+	name source_node;
+	nominal_voltage 7200.0;
+	bustype SWING;
+	object recorder {
+		flags DELTAMODE;
+		property "measured_frequency,measured_frequency_A,measured_frequency_B,measured_frequency_C";
+		interval 1;
+		file GFA_Frequencies.csv;
+	};
+	object player {
+		flags DELTAMODE;
+		property voltage_A;
+		file "data_volt_freq_player_A.csv";
+	};
+	object player {
+		flags DELTAMODE;
+		property voltage_B;
+		file "data_volt_freq_player_B.csv";
+	};
+	object player {
+		flags DELTAMODE;
+		property voltage_C;
+		file "data_volt_freq_player_C.csv";
+	};
+}
+
+//lines
+object overhead_line {
+	phases ABCN;
+	name ohl_1;
+	from source_node;
+	to secondary_node;
+	length 100.0 ft;
+	configuration lc601;
+}
+
+//Extra meter, just because
+object meter {
+	phases ABCN;
+	name secondary_node;
+	nominal_voltage 7200.0;
+}
